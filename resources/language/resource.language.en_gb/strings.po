@@ -22,7 +22,7 @@ msgid "You do not have Widevine DRM installed. This is required for playback of 
 msgstr ""
 
 msgctxt "#30003"
-msgid "Widevine DRM was successfully installed!"
+msgid "[B]Widevine DRM[/B] was successfully installed!"
 msgstr ""
 
 msgctxt "#30004"
@@ -30,7 +30,7 @@ msgid "Error"
 msgstr ""
 
 msgctxt "#30005"
-msgid "An error occurred while installing Widevine DRM. Please enable debug logging and file a bug report on [B]github.com/emilsvennesson/script.module.inputstreamhelper[/B]."
+msgid "An error occurred while installing Widevine DRM. Please enable debug logging and file a bug report at:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 msgstr ""
 
 msgctxt "#30006"
@@ -59,4 +59,20 @@ msgstr ""
 
 msgctxt "#30012"
 msgid "The Windows Store version of Kodi does not support Widevine DRM. Please use the installer from kodi.tv instead."
+msgstr ""
+
+msgctxt "#30013"
+msgid "Failed to retrieve [B]{0}[/B]."
+msgstr ""
+
+msgctxt "#30014"
+msgid "Download in progress..."
+msgstr ""
+
+msgctxt "#30015"
+msgid "Downloading [B]{0}[/B]..."
+msgstr ""
+
+msgctxt "#30016"
+msgid "Failed to extract Widevine CDM from zip file."
 msgstr ""

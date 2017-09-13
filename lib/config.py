@@ -32,7 +32,7 @@ WIDEVINE_DOWNLOAD_MAP = {
     }
 }
 
-WIDEVINE_CDM_EXTENSIONS = ['.so', '.dll', '.dylib']
+WIDEVINE_CDM_EXTENSIONS = ('.so', '.dll', '.dylib')
 
 WIDEVINE_SUPPORTED_ARCHS = ['x86_64', 'x86', 'aarch64', 'aarch64_be', 'armv7', 'armv8', 'arm64']
 

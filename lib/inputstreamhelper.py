@@ -4,6 +4,8 @@ import zipfile
 import json
 from distutils.version import LooseVersion
 
+import requests
+
 import config
 import xbmc
 import xbmcaddon
@@ -63,7 +65,7 @@ class InputStreamHelper(object):
                     self._log('Found Widevine binary at {0}'.format(os.path.join(self._cdm_path(), filename)))
                     return True
 
-            self.log('Widevine is not installed.')
+            self._log('Widevine is not installed.')
             return False
 
     def _json_rpc_request(self, payload):
@@ -72,6 +74,46 @@ class InputStreamHelper(object):
         self._log('jsonrpc response: {0}'.format(response))
 
         return json.loads(response)
+
+    def _http_request(self, url, download=False, download_path=None):
+        busy_dialog = xbmcgui.DialogBusy()
+        dialog = xbmcgui.Dialog()
+        filename = url.split('/')[-1]
+        self._log('Request URL: {0}'.format(url))
+        try:
+            busy_dialog.create()
+            req = requests.get(url, stream=download, verify=False)
+            self._log('Response code: {0}'.format(req.status_code))
+            if not download:
+                self._log('Response: {0}'.format(req.content))
+            req.raise_for_status()
+        except requests.exceptions.HTTPError:
+            busy_dialog.close()
+            dialog.ok(self._language(30004), self._language(30013).format(filename))
+            return False
+
+        busy_dialog.close()
+        if download:
+            total_length = float(req.headers.get('content-length'))
+            progress_dialog = xbmcgui.DialogProgress()
+            progress_dialog.create(self._language(30014), self._language(30015).format(filename))
+
+            with open(download_path, 'wb') as f:
+                dl = 0
+                for chunk in req.iter_content(chunk_size=1024):
+                    f.write(chunk)
+                    dl += len(chunk)
+                    percent = int(dl * 100/ total_length)
+                    if progress_dialog.iscanceled():
+                        progress_dialog.close()
+                        req.close()
+                        return False
+                    progress_dialog.update(percent)
+                progress_dialog.close()
+                return True
+        else:
+            return req.content
+
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -144,6 +186,50 @@ class InputStreamHelper(object):
             return False
 
         return True
+
+    def _install_widevine_cdm(self):
+        dialog = xbmcgui.Dialog()
+        download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
+        cdm_platform = config.WIDEVINE_DOWNLOAD_MAP[self._arch][self._os]
+        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm']['platforms']
+        cdm_zip_url = cdm_source[cdm_platform]['fileUrl']
+
+        downloaded = self._http_request(cdm_zip_url, download=True, download_path=download_path)
+        if downloaded:
+            if self._unzip_widevine_cdm(download_path):
+                dialog.ok(self._language(30001), self._language(30003))
+            else:
+                return False
+        else:
+            return False
+
+    def _unzip_widevine_cdm(self, zip_path):
+        busy_dialog = xbmcgui.DialogBusy()
+        zip_obj = zipfile.ZipFile(zip_path)
+        busy_dialog.create()
+        for filename in zip_obj.namelist():
+            if filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
+                zip_obj.extract(filename, self._cdm_path())
+                busy_dialog.close()
+                return True
+
+        busy_dialog.close()
+        dialog = xbmcgui.Dialog()
+        dialog.ok(self._language(30004), self._language(30016))
+        return False
+
+    def check_for_widevine(self):
+        if not self._supports_widevine():
+            return False
+        if not self._has_widevine_cdm():
+            dialog = xbmcgui.Dialog()
+            ok = dialog.yesno(self._language(30001), self._language(30002))
+            if ok:
+                return self._install_widevine_cdm()
+            else:
+                return False
+        else:
+            return True
 
     def check_for_inputstream(self):
         """Ensures that selected InputStream add-on is installed and enabled.

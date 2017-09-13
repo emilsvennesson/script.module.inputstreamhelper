@@ -5,6 +5,7 @@
        provider-name="emilsvennesson">
   <requires>
     <import addon="xbmc.python" version="2.25.0"/>
+    <import addon="script.module.requests" version="2.9.1"/>
   </requires>
   <extension library="lib" point="xbmc.python.module"/>
   <extension point="xbmc.addon.metadata">

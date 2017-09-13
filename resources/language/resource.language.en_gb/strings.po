@@ -1,4 +1,4 @@
-# script.widevine language file
+# script.module.inputstreamhelper language file
 msgid ""
 msgstr ""
 "Project-Id-Version: script.module.inputstreamhelper\n"

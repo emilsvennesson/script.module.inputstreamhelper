@@ -13,7 +13,7 @@ import xbmcgui
 import xbmcvfs
 
 
-class InputStreamHelper(object):
+class Helper(object):
     def __init__(self, protocol, drm=None):
         self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
         self._logging_prefix = '[%s-%s]' % (self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))

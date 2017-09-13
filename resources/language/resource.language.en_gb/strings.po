@@ -34,7 +34,7 @@ msgid "An error occurred while installing Widevine DRM. Please enable debug logg
 msgstr ""
 
 msgctxt "#30006"
-msgid "Widevine DRM is supported on this system architecture but is not possible to automatically install due to legal distributing issues. Hint: Google might be able to help you out! :-)"
+msgid "Widevine DRM is supported on this system architecture but is not possible to automatically install due to legal distributing issues.[CR][CR]Hint: Google might be able to help you out! :-)"
 msgstr ""
 
 msgctxt "#30007"

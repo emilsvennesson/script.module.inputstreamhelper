@@ -199,6 +199,9 @@ class Helper(object):
 
     def _install_widevine_cdm(self):
         dialog = xbmcgui.Dialog()
+        if self._arch in config.WIDEVINE_DOWNLOAD_UNAVAILABLE:
+            dialog.ok(self._language(30001), self._language(30006))
+            return False
         download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
         cdm_platform = config.WIDEVINE_DOWNLOAD_MAP[self._arch][self._os]
         cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm']['platforms']

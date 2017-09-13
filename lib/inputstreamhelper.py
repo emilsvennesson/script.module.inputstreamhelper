@@ -219,7 +219,7 @@ class InputStreamHelper(object):
         busy_dialog.create()
         for filename in zip_obj.namelist():
             if filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
-                self._log('Widevine CDM found at: {0}'.format(os.path.join(zip_path, filename)))
+                self._log('Widevine CDM found in zip: {0}'.format(os.path.join(zip_path, filename)))
                 zip_obj.extract(filename, self._cdm_path())
                 busy_dialog.close()
                 return True

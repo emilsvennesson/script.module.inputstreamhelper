@@ -149,10 +149,7 @@ class Helper(object):
             }
         }
         data = self._json_rpc_request(payload)
-        if data['result']['addon']['enabled']:
-            return True
-        else:
-            return False
+        return data['result']['addon']['enabled']
 
     def _enable_inputstream(self):
         """Enable selected InputStream add-on."""

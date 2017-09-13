@@ -60,6 +60,81 @@ class InputStreamHelper(object):
             self.log('Widevine is not installed.')
             return False
 
+    def _json_rpc_request(self, payload):
+        self._log('jsonrpc payload: {0}'.format(payload))
+        response = xbmc.executeJSONRPC(json.dumps(payload))
+        self._log('jsonrpc response: {0}'.format(response))
+
+        return json.loads(response)
+
+    def _has_inputstream(self):
+        """Checks if selected InputStream add-on is installed."""
+        payload = {
+            'jsonrpc': '2.0',
+            'id': 1,
+            'method': 'Addons.GetAddonDetails',
+            'params': {
+                'addonid': self._inputstream_addon
+            }
+        }
+        data = self._json_rpc_request(payload)
+        if 'error' in data:
+            return False
+        else:
+            return True
+
+    def _inputstream_enabled(self):
+        """Returns whether selected InputStream add-on is enabled.."""
+        payload = {
+            'jsonrpc': '2.0',
+            'id': 1,
+            'method': 'Addons.GetAddonDetails',
+            'params': {
+                'addonid': self._inputstream_addon,
+                'properties': ['enabled']
+            }
+        }
+        data = self._json_rpc_request(payload)
+        if data['result']['addon']['enabled']:
+            return True
+        else:
+            return False
+
+    def _enable_inputstream(self):
+        """Enable selected InputStream add-on."""
+        payload = {
+            'jsonrpc': '2.0',
+            'id': 1,
+            'method': 'Addons.SetAddonEnabled',
+            'params': {
+                'addonid': self._inputstream_addon,
+                'enabled': True
+            }
+        }
+        data = self._json_rpc_request(payload)
+        if 'error' in data:
+            return False
+        else:
+            return True
+
+    def check_for_inputstream(self):
+        """Ensures that selected InputStream add-on is installed and enabled.
+        Displays a select dialog if add-on is installed but not enabled."""
+        dialog = xbmcgui.Dialog()
+        if not self._has_inputstream():
+            self._log('{0} is not installed.'.format(self._inputstream_addon))
+            dialog.ok(self._language(30004), self._language(30008).format(self._inputstream_addon))
+        elif not self._inputstream_enabled():
+            self._log('{0} is not enabled.'.format(self._inputstream_addon))
+            ok = dialog.yesno(self._language(30001), self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
+            if ok:
+                return self._enable_inputstream()
+            else:
+                return False
+        else:
+            self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
+            return True
+
     def supports_hls(self):
         if self.protocol == 'hls' and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True

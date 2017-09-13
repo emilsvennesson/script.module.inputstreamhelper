@@ -40,3 +40,11 @@ msgstr ""
 msgctxt "#30007"
 msgid "Widevine DRM is unfortunately not available on this system architecture."
 msgstr ""
+
+msgctxt "#30008"
+msgid "[B]{0}[/B] is missing on your Kodi install. This add-on is required to play this content."
+msgstr ""
+
+msgctxt "#30009"
+msgid "[B]{0}[/B] is not enabled. This add-on is required to play this content.[CR][CR]Would you like to enable [B]{1}[/B]?"
+msgstr ""

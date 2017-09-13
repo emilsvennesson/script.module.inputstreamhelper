@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.module.inputstreamhelper"
+       name="InputStream Helper"
+       version="0.1.0"
+       provider-name="emilsvennesson">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+  </requires>
+  <extension library="lib" point="xbmc.python.module"/>
+  <extension point="xbmc.addon.metadata">
+    <description lang="en_GB">A Kodi module that makes life easier for add-on developers who are relying on InputStream based add-ons and DRM playback.</summary>
+    <platform>all</platform>
+    <license>The MIT License (MIT)</license>
+	<source>https://github.com/emilsvennesson/script.module.inputstreamhelper</source>
+    <assets>
+      <icon>resources/art/icon.png</icon>
+    </assets>
+  </extension>
+</addon>

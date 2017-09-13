@@ -1,0 +1,42 @@
+# script.widevine language file
+msgid ""
+msgstr ""
+"Project-Id-Version: script.widevine\n"
+"Report-Msgid-Bugs-To: https://github.com/emilsvennesson/script.module.inputstreamhelper\n"
+"POT-Creation-Date: 2013-11-18 16:15+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "#30001"
+msgid "Information"
+msgstr ""
+
+msgctxt "#30002"
+msgid "You do not have Widevine DRM installed. This is required for playback of this content.[CR][CR]Would you like to install Widevine DRM?"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Widevine DRM was successfully installed!"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Error"
+msgstr ""
+
+msgctxt "#30005"
+msgid "An error occurred while installing Widevine DRM. Please enable debug logging and file a bug report on [B]github.com/emilsvennesson/script.module.inputstreamhelper[/B]."
+msgstr ""
+
+msgctxt "#30006"
+msgid "Widevine DRM is supported on this system architecture but is not possible to automatically install due to legal distributing issues. Hint: Google might be able to help you out! :-)"
+msgstr ""
+
+msgctxt "#30007"
+msgid "Widevine DRM is unfortunately not available on this system architecture."
+msgstr ""

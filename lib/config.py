@@ -20,25 +20,49 @@ ARCHS = {
 
 WIDEVINE_DOWNLOAD_MAP = {
     'x86_64':
-    {
-        'Linux': 'Linux_x86_64-gcc3',
-        'Windows': 'WINNT_x86-msvc',
-        'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'},
+        {
+            'Linux': 'Linux_x86_64-gcc3',
+            'Windows': 'WINNT_x86-msvc',
+            'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'},
     'x86':
-    {
-        'Linux': 'Linux_x86-gcc3',
-        'Windows': 'WINNT_x86-msvc',
-        'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'
-    }
+        {
+            'Linux': 'Linux_x86-gcc3',
+            'Windows': 'WINNT_x86-msvc',
+            'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'
+        }
 }
 
-WIDEVINE_CDM_EXTENSIONS = ('.so', '.dll', '.dylib')
+WIDEVINE_CDM_EXTENSIONS = (
+    '.so',
+    '.dll',
+    '.dylib'
+)
 
-WIDEVINE_SUPPORTED_ARCHS = ['x86_64', 'x86', 'aarch64', 'aarch64_be', 'armv7', 'armv8', 'arm64']
+WIDEVINE_SUPPORTED_ARCHS = [
+    'x86_64',
+    'x86',
+    'aarch64',
+    'aarch64_be',
+    'armv7',
+    'armv7l'
+    'armv8',
+    'arm64'
+]
 
-WIDEVINE_SUPPORTED_OS = ['Linux', 'Windows', 'Darwin']
+WIDEVINE_SUPPORTED_OS = [
+    'Linux',
+    'Windows',
+    'Darwin'
+]
 
-WIDEVINE_DOWNLOAD_UNAVAILABLE = ['aarch64', 'aarch64_be', 'armv7', 'armv8', 'arm64']
+WIDEVINE_DOWNLOAD_UNAVAILABLE = [
+    'aarch64',
+    'aarch64_be',
+    'armv7',
+    'armv7l'
+    'armv8',
+    'arm64'
+]
 
 WIDEVINE_ANDROID_MINIMUM_KODI_VERSION = '18.0'
 

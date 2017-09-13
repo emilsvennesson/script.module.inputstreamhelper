@@ -15,7 +15,7 @@ class InputStreamHelper(object):
         self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
         self._logging_prefix = '[%s-%s]' % (self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         self._language = self._addon.getLocalizedString
-        self._arch = platform.machine()
+        self._arch = self._get_arch(platform.machine())
         self._os = platform.system()
         self._log('Platform information: {0}'.format(platform.uname()))
 
@@ -31,6 +31,12 @@ class InputStreamHelper(object):
 
     class InputStreamException(Exception):
         pass
+
+    def _get_arch(self, arch):
+        if arch in config.ARCHS:
+            return config.ARCHS[arch]
+        else:
+            return arch
 
     def _log(self, string):
         msg = '{0}: {1}'.format(self._logging_prefix, string)
@@ -48,7 +54,7 @@ class InputStreamHelper(object):
         addon = xbmcaddon.Addon(self._inputstream_addon)
         return addon.getAddonInfo('version')
 
-    def has_widevine_cdm(self):
+    def _has_widevine_cdm(self):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
@@ -116,6 +122,28 @@ class InputStreamHelper(object):
             return False
         else:
             return True
+
+    def _supports_widevine(self):
+        dialog = xbmcgui.Dialog()
+        if xbmc.getCondVisibility('system.platform.android'):
+            min_version = config.WIDEVINE_ANDROID_MINIMUM_KODI_VERSION
+        else:
+            min_version = config.WIDEVINE_MINIMUM_KODI_VERSION
+
+        if self._arch not in config.WIDEVINE_SUPPORTED_ARCHS:
+            dialog.ok(self._language(30004), self._language(30007))
+            return False
+        if self._os not in config.WIDEVINE_SUPPORTED_OS:
+            dialog.ok(self._language(30004), self._language(30011).format(self._os))
+            return False
+        if LooseVersion(min_version) > LooseVersion(self._kodi_version()):
+            dialog.ok(self._language(30004), self._language(30010).format(min_version))
+            return False
+        if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
+            dialog.ok(self._language(30004), self._language(30012))
+            return False
+
+        return True
 
     def check_for_inputstream(self):
         """Ensures that selected InputStream add-on is installed and enabled.

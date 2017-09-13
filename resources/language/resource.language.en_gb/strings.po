@@ -48,3 +48,15 @@ msgstr ""
 msgctxt "#30009"
 msgid "[B]{0}[/B] is not enabled. This add-on is required to play this content.[CR][CR]Would you like to enable [B]{1}[/B]?"
 msgstr ""
+
+msgctxt "#30010"
+msgid "[B]Kodi {0}[/B] or higher is required for Widevine DRM content playback."
+msgstr ""
+
+msgctxt "#30011"
+msgid "This operating system ([B]{0}[/B]) is not supported by Widevine DRM."
+msgstr ""
+
+msgctxt "#30012"
+msgid "The Windows Store version of Kodi does not support Widevine DRM. Please use the installer from kodi.tv instead."
+msgstr ""

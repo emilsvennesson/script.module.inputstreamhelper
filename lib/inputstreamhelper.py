@@ -39,6 +39,14 @@ class InputStreamHelper(object):
         addon = xbmcaddon.Addon('inputstream.adaptive')
         return xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
 
+    def _kodi_version(self):
+        version = xbmc.getInfoLabel('System.BuildVersion')
+        return version.split(' ')[0]
+
+    def _inputstream_version(self):
+        addon = xbmcaddon.Addon(self._inputstream_addon)
+        return addon.getAddonInfo('version')
+
     def has_widevine_cdm(self):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True

@@ -62,11 +62,11 @@ class Helper(object):
         return addon.getAddonInfo('version')
 
     def _has_widevine_cdm(self):
-        if not xbmcvfs.exists(self._cdm_path()):
-            xbmcvfs.mkdir(self._cdm_path())
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
+            if not xbmcvfs.exists(self._cdm_path()):
+                xbmcvfs.mkdir(self._cdm_path())
             for filename in os.listdir(self._cdm_path()):
                 if 'widevine' in filename and filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
                     self._log('Found Widevine binary at {0}'.format(os.path.join(self._cdm_path(), filename)))

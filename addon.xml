@@ -9,7 +9,7 @@
   </requires>
   <extension library="lib" point="xbmc.python.module"/>
   <extension point="xbmc.addon.metadata">
-    <description lang="en_GB">A Kodi module that makes life easier for add-on developers who are relying on InputStream based add-ons and DRM playback.</description>
+    <description lang="en_GB">A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.</description>
     <platform>all</platform>
     <license>MIT License</license>
     <source>https://github.com/emilsvennesson/script.module.inputstreamhelper</source>

@@ -191,7 +191,7 @@ class Helper(object):
             dialog.ok(self._language(30004), self._language(30010).format(min_version))
             return False
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
-            self.log('Unsupported UWP Kodi version detected.')
+            self._log('Unsupported UWP Kodi version detected.')
             dialog.ok(self._language(30004), self._language(30012))
             return False
 
@@ -236,7 +236,7 @@ class Helper(object):
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
-            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon), self._inputstream_version())
+            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
             return False
 
     def _check_for_drm(self):

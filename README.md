@@ -1,6 +1,6 @@
 # script.module.inputstreamhelper #
 
-A simple Kodi module that makes life easier for add-on developers relying on InputStream based-addons and DRM playback.
+A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.
 
 ## Features ##
 * Displays informative dialogs if required InputStream components are unavailable

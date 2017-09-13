@@ -234,6 +234,8 @@ class Helper(object):
             return True
         else:
             self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
+            dialog = xbmcgui.Dialog()
+            dialog.ok(self._language(30004), self._language(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
             return False
 
     def _check_drm(self):

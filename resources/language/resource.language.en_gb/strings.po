@@ -76,3 +76,7 @@ msgstr ""
 msgctxt "#30016"
 msgid "Failed to extract [B]Widevine CDM[/B] from zip file."
 msgstr ""
+
+msgctxt "#30017"
+msgid "[B]{0}[/B] {1} or later is required to play this content."
+msgstr ""

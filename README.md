@@ -5,7 +5,7 @@ A simple Kodi module that makes life easier for add-on developers relying on Inp
 ## Features ##
 * Displays informative dialogs if required InputStream components are unavailable
 * Checks if HLS is supported in inputstream.adaptive
-* Automatically installs Widevine DRM on supported architectures (optional)
+* Automatically installs Widevine DRM on supported platforms (optional)
 
 ## Example ##
 

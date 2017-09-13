@@ -236,9 +236,9 @@ class Helper(object):
             self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
             return False
 
-    def _check_for_drm(self):
+    def _check_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
-        if self.drm:
+        if self.drm and self._inputstream_addon == 'inputstream.adaptive':
             if self.drm == 'widevine':
                 if not self._supports_widevine():
                     return False
@@ -271,4 +271,4 @@ class Helper(object):
             return False
 
         self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
-        return self._check_for_drm()
+        return self._check_drm()

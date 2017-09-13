@@ -61,7 +61,7 @@ class InputStreamHelper(object):
             return False
 
     def supports_hls(self):
-        if self.protocol in config.HLS_PROTOCOLS and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
+        if self.protocol == 'hls' and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
             return False

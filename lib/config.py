@@ -3,8 +3,11 @@ INPUTSTREAM_PROTOCOLS = {
     'dash': 'inputstream.adaptive',
     'ism': 'inputstream.adaptive',
     'hls': 'inputstream.adaptive',
+    'm3u8': 'inputstream.adaptive',
     'rtmp': 'inputstream.rtmp'
 }
+
+HLS_PROTOCOLS = ['hls', 'm3u8']
 
 DRM_SCHEMES = {
     'widevine': 'widevine',

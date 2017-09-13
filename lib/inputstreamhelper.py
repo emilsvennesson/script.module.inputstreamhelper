@@ -2,6 +2,7 @@ import os
 import platform
 import zipfile
 import json
+from distutils.version import LooseVersion
 
 import config
 import xbmc
@@ -57,4 +58,10 @@ class InputStreamHelper(object):
                     return True
 
             self.log('Widevine is not installed.')
+            return False
+
+    def supports_hls(self):
+        if self.protocol in config.HLS_PROTOCOLS and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
+            return True
+        else:
             return False

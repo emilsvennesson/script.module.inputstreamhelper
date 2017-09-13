@@ -22,14 +22,16 @@ class InputStreamHelper(object):
         self._log('Platform information: {0}'.format(platform.uname()))
 
         self.protocol = protocol
+        self.drm = drm
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
         else:
             self._inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
-        if not drm or drm not in config.DRM_SCHEMES:
-            raise self.InputStreamException('UnsupportedDRMScheme')
-        else:
-            self.drm = config.DRM_SCHEMES[drm]
+        if self.drm:
+            if self.drm not in config.DRM_SCHEMES:
+                raise self.InputStreamException('UnsupportedDRMScheme')
+            else:
+                self.drm = config.DRM_SCHEMES[drm]
 
     class InputStreamException(Exception):
         pass
@@ -103,7 +105,7 @@ class InputStreamHelper(object):
                 for chunk in req.iter_content(chunk_size=1024):
                     f.write(chunk)
                     dl += len(chunk)
-                    percent = int(dl * 100/ total_length)
+                    percent = int(dl * 100 / total_length)
                     if progress_dialog.iscanceled():
                         progress_dialog.close()
                         req.close()
@@ -113,7 +115,6 @@ class InputStreamHelper(object):
                 return True
         else:
             return req.content
-
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -191,7 +192,8 @@ class InputStreamHelper(object):
         dialog = xbmcgui.Dialog()
         download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
         cdm_platform = config.WIDEVINE_DOWNLOAD_MAP[self._arch][self._os]
-        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm']['platforms']
+        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm'][
+            'platforms']
         cdm_zip_url = cdm_source[cdm_platform]['fileUrl']
 
         downloaded = self._http_request(cdm_zip_url, download=True, download_path=download_path)
@@ -218,36 +220,46 @@ class InputStreamHelper(object):
         dialog.ok(self._language(30004), self._language(30016))
         return False
 
-    def check_for_widevine(self):
-        if not self._supports_widevine():
-            return False
-        if not self._has_widevine_cdm():
-            dialog = xbmcgui.Dialog()
-            ok = dialog.yesno(self._language(30001), self._language(30002))
-            if ok:
-                return self._install_widevine_cdm()
-            else:
-                return False
+    def check_for_drm(self):
+        if self.drm:
+            if self.drm == 'widevine':
+                if not self._supports_widevine():
+                    return False
+                if not self._has_widevine_cdm():
+                    dialog = xbmcgui.Dialog()
+                    ok = dialog.yesno(self._language(30001), self._language(30002))
+                    if ok:
+                        return self._install_widevine_cdm()
+                    else:
+                        return False
+                else:
+                    return True
         else:
+            self._log('No DRM has been specified.')
             return True
 
     def check_for_inputstream(self):
-        """Ensures that selected InputStream add-on is installed and enabled.
-        Displays a select dialog if add-on is installed but not enabled."""
+        """Ensures that selected InputStream add-on is installed, enabled and
+        that specified DRM system is installed."""
         dialog = xbmcgui.Dialog()
         if not self._has_inputstream():
             self._log('{0} is not installed.'.format(self._inputstream_addon))
             dialog.ok(self._language(30004), self._language(30008).format(self._inputstream_addon))
+            return False
         elif not self._inputstream_enabled():
             self._log('{0} is not enabled.'.format(self._inputstream_addon))
-            ok = dialog.yesno(self._language(30001), self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
+            ok = dialog.yesno(self._language(30001),
+                              self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
             if ok:
-                return self._enable_inputstream()
+                if not self._enable_inputstream():
+                    return False
             else:
                 return False
+        elif self.protocol == 'hls':
+            return self.supports_hls()
         else:
             self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
-            return True
+            return self.check_for_drm()
 
     def supports_hls(self):
         if self.protocol == 'hls' and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):

@@ -232,11 +232,8 @@ class InputStreamHelper(object):
                         return self._install_widevine_cdm()
                     else:
                         return False
-                else:
-                    return True
-        else:
-            self._log('No DRM has been specified.')
-            return True
+
+        return True
 
     def check_for_inputstream(self):
         """Ensures that selected InputStream add-on is installed, enabled and

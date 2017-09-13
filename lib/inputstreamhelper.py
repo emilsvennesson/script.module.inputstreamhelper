@@ -19,15 +19,14 @@ class InputStreamHelper(object):
         self._log('Platform information: {0}'.format(platform.uname()))
 
         self.protocol = protocol
-        self.drm = drm
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
         else:
             self._inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
-        if self.drm and self.drm not in config.DRM_SCHEMES:
+        if not drm or drm not in config.DRM_SCHEMES:
             raise self.InputStreamException('UnsupportedDRMScheme')
         else:
-            self.drm = config.DRM_SCHEMES[self.drm]
+            self.drm = config.DRM_SCHEMES[drm]
 
     class InputStreamException(Exception):
         pass

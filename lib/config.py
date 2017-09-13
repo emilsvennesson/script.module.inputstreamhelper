@@ -42,4 +42,4 @@ WIDEVINE_MINIMUM_KODI_VERSION = '17.4'
 
 WIDEVINE_CDM_SOURCE = 'https://hg.mozilla.org/mozilla-central/raw-file/31465a03c03d1eec31cd4dd5d6b803724dcb29cd/toolkit/content/gmp-sources/widevinecdm.json'
 
-HLS_MINIMUM_IA_VERSION = '2.0.11'
+HLS_MINIMUM_IA_VERSION = '2.0.10'

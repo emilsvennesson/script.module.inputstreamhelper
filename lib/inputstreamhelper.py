@@ -10,6 +10,7 @@ import config
 import xbmc
 import xbmcaddon
 import xbmcgui
+import xbmcvfs
 
 
 class InputStreamHelper(object):
@@ -23,11 +24,15 @@ class InputStreamHelper(object):
 
         self.protocol = protocol
         self.drm = drm
+
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
         else:
             self._inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
+
         if self.drm:
+            if not xbmcvfs.exists(self._cdm_path()):
+                xbmcvfs.mkdir(self._cdm_path())
             if self.drm not in config.DRM_SCHEMES:
                 raise self.InputStreamException('UnsupportedDRMScheme')
             else:

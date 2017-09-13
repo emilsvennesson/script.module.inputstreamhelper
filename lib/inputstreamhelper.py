@@ -174,15 +174,19 @@ class InputStreamHelper(object):
             min_version = config.WIDEVINE_MINIMUM_KODI_VERSION
 
         if self._arch not in config.WIDEVINE_SUPPORTED_ARCHS:
+            self._log('Unsupported Widevine architecture found: {0}'.format(self._arch))
             dialog.ok(self._language(30004), self._language(30007))
             return False
         if self._os not in config.WIDEVINE_SUPPORTED_OS:
+            self._log('Unsupported Widevine OS found: {0}'.format(self._os))
             dialog.ok(self._language(30004), self._language(30011).format(self._os))
             return False
         if LooseVersion(min_version) > LooseVersion(self._kodi_version()):
+            self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
             dialog.ok(self._language(30004), self._language(30010).format(min_version))
             return False
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
+            self.log('Unsupported UWP Kodi version detected.')
             dialog.ok(self._language(30004), self._language(30012))
             return False
 
@@ -192,8 +196,7 @@ class InputStreamHelper(object):
         dialog = xbmcgui.Dialog()
         download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
         cdm_platform = config.WIDEVINE_DOWNLOAD_MAP[self._arch][self._os]
-        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm'][
-            'platforms']
+        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm']['platforms']
         cdm_zip_url = cdm_source[cdm_platform]['fileUrl']
 
         downloaded = self._http_request(cdm_zip_url, download=True, download_path=download_path)
@@ -211,6 +214,7 @@ class InputStreamHelper(object):
         busy_dialog.create()
         for filename in zip_obj.namelist():
             if filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
+                self._log('Widevine CDM found at: {0}'.format(os.path.join(zip_path, filename)))
                 zip_obj.extract(filename, self._cdm_path())
                 busy_dialog.close()
                 return True
@@ -218,9 +222,11 @@ class InputStreamHelper(object):
         busy_dialog.close()
         dialog = xbmcgui.Dialog()
         dialog.ok(self._language(30004), self._language(30016))
+        self._log('Failed to find Widevine CDM file in {0}'.format(zip_path))
         return False
 
     def check_for_drm(self):
+        """Main function for ensuring that specified DRM system is installed and available."""
         if self.drm:
             if self.drm == 'widevine':
                 if not self._supports_widevine():
@@ -235,9 +241,8 @@ class InputStreamHelper(object):
 
         return True
 
-    def check_for_inputstream(self):
-        """Ensures that selected InputStream add-on is installed, enabled and
-        that specified DRM system is installed."""
+    def check_inputstream(self):
+        """Main function. Ensures that all components are available for InputStream add-on playback."""
         dialog = xbmcgui.Dialog()
         if not self._has_inputstream():
             self._log('{0} is not installed.'.format(self._inputstream_addon))
@@ -262,4 +267,5 @@ class InputStreamHelper(object):
         if self.protocol == 'hls' and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
+            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon), self._inputstream_version())
             return False

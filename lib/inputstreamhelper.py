@@ -230,6 +230,13 @@ class Helper(object):
         self._log('Failed to find Widevine CDM file in {0}'.format(zip_path))
         return False
 
+    def _supports_hls(self):
+        if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
+            return True
+        else:
+            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon), self._inputstream_version())
+            return False
+
     def check_for_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
         if self.drm:
@@ -263,14 +270,7 @@ class Helper(object):
             else:
                 return False
         elif self.protocol == 'hls':
-            return self.supports_hls()
+            return self._supports_hls()
         else:
             self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
             return self.check_for_drm()
-
-    def supports_hls(self):
-        if self.protocol == 'hls' and LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
-            return True
-        else:
-            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon), self._inputstream_version())
-            return False

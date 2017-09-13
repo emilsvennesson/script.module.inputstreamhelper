@@ -31,8 +31,6 @@ class Helper(object):
             self._inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
 
         if self.drm:
-            if not xbmcvfs.exists(self._cdm_path()):
-                xbmcvfs.mkdir(self._cdm_path())
             if self.drm not in config.DRM_SCHEMES:
                 raise self.InputStreamException('UnsupportedDRMScheme')
             else:
@@ -64,6 +62,8 @@ class Helper(object):
         return addon.getAddonInfo('version')
 
     def _has_widevine_cdm(self):
+        if not xbmcvfs.exists(self._cdm_path()):
+            xbmcvfs.mkdir(self._cdm_path())
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:

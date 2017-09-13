@@ -211,10 +211,9 @@ class Helper(object):
         if downloaded:
             if self._unzip_widevine_cdm(download_path):
                 dialog.ok(self._language(30001), self._language(30003))
-            else:
-                return False
-        else:
-            return False
+                return True
+
+        return False
 
     def _unzip_widevine_cdm(self, zip_path):
         busy_dialog = xbmcgui.DialogBusy()
@@ -268,12 +267,11 @@ class Helper(object):
             ok = dialog.yesno(self._language(30001),
                               self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
             if ok:
-                if not self._enable_inputstream():
-                    return False
+                self._enable_inputstream()
             else:
                 return False
-        elif self.protocol == 'hls':
-            return self._supports_hls()
-        else:
-            self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
-            return self._check_for_drm()
+        if self.protocol == 'hls' and not self._supports_hls():
+            return False
+
+        self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
+        return self._check_for_drm()

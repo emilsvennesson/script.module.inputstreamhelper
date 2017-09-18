@@ -194,17 +194,22 @@ class Helper(object):
 
         return True
 
+    def _current_widevine_cdm_version(self):
+        return self._http_request(config.WIDEVINE_CURRENT_VERSION_URL)
+
     def _install_widevine_cdm(self):
         dialog = xbmcgui.Dialog()
         if self._arch in config.WIDEVINE_DOWNLOAD_UNAVAILABLE:
             dialog.ok(self._language(30001), self._language(30006))
             return False
-        download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
-        cdm_platform = config.WIDEVINE_DOWNLOAD_MAP[self._arch][self._os]
-        cdm_source = json.loads(self._http_request(config.WIDEVINE_CDM_SOURCE))['vendors']['gmp-widevinecdm']['platforms']
-        cdm_zip_url = cdm_source[cdm_platform]['fileUrl']
 
-        downloaded = self._http_request(cdm_zip_url, download=True, download_path=download_path)
+        download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
+        cdm_version = self._current_widevine_cdm_version()
+        cdm_os = config.WIDEVINE_OS_MAP[self._os]
+        cdm_arch = config.WIDEVINE_ARCH_MAP[self._arch][self._os]
+        cdm_url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
+
+        downloaded = self._http_request(cdm_url, download=True, download_path=download_path)
         if downloaded:
             if self._unzip_widevine_cdm(download_path):
                 dialog.ok(self._language(30001), self._language(30003))

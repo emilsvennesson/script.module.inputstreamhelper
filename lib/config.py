@@ -18,18 +18,25 @@ ARCHS = {
     'i686': 'x86'
 }
 
-WIDEVINE_DOWNLOAD_MAP = {
+WIDEVINE_ARCH_MAP = {
     'x86_64':
         {
-            'Linux': 'Linux_x86_64-gcc3',
-            'Windows': 'WINNT_x86-msvc',
-            'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'},
+            'Linux': 'x64',
+            'Windows': 'ia32',
+            'Darwin': 'x64'
+        },
     'x86':
         {
-            'Linux': 'Linux_x86-gcc3',
-            'Windows': 'WINNT_x86-msvc',
-            'Darwin': 'Darwin_x86_64-gcc3-u-i386-x86_64'
+            'Linux': 'ia32',
+            'Windows': 'ia32',
+            'Darwin': 'ia32'
         }
+}
+
+WIDEVINE_OS_MAP = {
+    'Linux': 'linux',
+    'Windows': 'win',
+    'Darwin': 'mac'
 }
 
 WIDEVINE_CDM_EXTENSIONS = (
@@ -68,6 +75,8 @@ WIDEVINE_ANDROID_MINIMUM_KODI_VERSION = '18.0'
 
 WIDEVINE_MINIMUM_KODI_VERSION = '17.4'
 
-WIDEVINE_CDM_SOURCE = 'https://hg.mozilla.org/mozilla-central/raw-file/31465a03c03d1eec31cd4dd5d6b803724dcb29cd/toolkit/content/gmp-sources/widevinecdm.json'
+WIDEVINE_CURRENT_VERSION_URL = 'https://dl.google.com/widevine-cdm/current.txt'
+
+WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{0}-{1}-{2}.zip'
 
 HLS_MINIMUM_IA_VERSION = '2.0.10'

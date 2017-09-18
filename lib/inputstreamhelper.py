@@ -2,6 +2,8 @@ import os
 import platform
 import zipfile
 import json
+import subprocess
+import shutil
 from distutils.version import LooseVersion
 
 import requests
@@ -16,11 +18,19 @@ import xbmcvfs
 class Helper(object):
     def __init__(self, protocol, drm=None):
         self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
+        self._addon_profile = xbmc.translatePath(self._addon.getAddonInfo('profile'))
         self._logging_prefix = '[%s-%s]' % (self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         self._language = self._addon.getLocalizedString
         self._arch = self._get_arch(platform.machine())
         self._os = platform.system()
         self._log('Platform information: {0}'.format(platform.uname()))
+
+        self._url = None
+        self._download_path = None
+        self._bin_path = None
+
+        self.mounted = False
+        self.losetup = False
 
         self.protocol = protocol
         self.drm = drm
@@ -39,19 +49,65 @@ class Helper(object):
     class InputStreamException(Exception):
         pass
 
+    @staticmethod
+    def sizeof_fmt(num, suffix='B'):
+        # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+        for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
+
+    @staticmethod
+    def _cmd_exists(cmd):
+        # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+        return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
     def _get_arch(self, arch):
-        if arch in config.ARCHS:
-            return config.ARCHS[arch]
-        else:
-            return arch
+        if arch in config.X86_MAP:
+            return config.X86_MAP[arch]
+        elif 'armv' in arch:
+            arm_arch = 'armv' + arch.split('v')[1][:-1]
+            return arm_arch
+
+        return arch
 
     def _log(self, string):
         msg = '{0}: {1}'.format(self._logging_prefix, string)
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
+    def _diskspace(self):
+        statvfs = os.statvfs(self._cdm_path())
+        return statvfs.f_frsize * statvfs.f_bavail
+
+    def _temp_path(self):
+        temp_path = os.path.join(self._addon_profile, 'tmp')
+        if not xbmcvfs.exists(temp_path):
+            xbmcvfs.mkdir(temp_path)
+
+        return temp_path
+
+    def _mnt_path(self):
+        mnt_path = os.path.join(self._temp_path(), 'mnt')
+        if not xbmcvfs.exists(mnt_path):
+            xbmcvfs.mkdir(mnt_path)
+
+        return mnt_path
+
     def _cdm_path(self):
+        cdm_path = os.path.join(self._addon_profile, 'cdm')
+        if not xbmcvfs.exists(cdm_path):
+            xbmcvfs.mkdir(cdm_path)
+
+        return cdm_path
+
+    def _inputstream_cdm_path(self):
         addon = xbmcaddon.Addon('inputstream.adaptive')
-        return xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
+        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
+        if not xbmcvfs.exists(cdm_path):
+            xbmcvfs.mkdir(cdm_path)
+
+        return cdm_path
 
     def _kodi_version(self):
         version = xbmc.getInfoLabel('System.BuildVersion')
@@ -61,15 +117,47 @@ class Helper(object):
         addon = xbmcaddon.Addon(self._inputstream_addon)
         return addon.getAddonInfo('version')
 
+    def _parse_chromeos_offset(self):
+        """Calculate the Chrome OS losetup start offset using fdisk/parted."""
+        if self._cmd_exists('fdisk'):
+            cmd = ['fdisk', self._bin_path, '-l']
+        else:  # parted
+            cmd = ['parted', '-s', self._bin_path, 'unit s print']
+        self._log('losetup calculation cmd: {0}'.format(cmd))
+
+        output = subprocess.check_output(cmd)
+        self._log('losetup calculation output: {0}'.format(output))
+        for line in output.splitlines():
+            partition_data = line.split()
+            if partition_data:
+                if partition_data[0] == '3' or '.bin3' in partition_data[0]:
+                    offset = int(partition_data[1].replace('s', ''))
+                    return str(offset * config.CHROMEOS_BLOCK_SIZE)
+
+        self._log('Failed to calculate losetup offset.')
+        return False
+
+    def _losetup(self):
+        """Setup Chrome OS loop device."""
+        cmd = ['losetup', config.LOOP_DEV, self._bin_path, '-o', self._parse_chromeos_offset()]
+        subprocess.check_output(cmd)
+        self.losetup = True
+        return True
+
+    def _mnt_loop_dev(self):
+        """Mount loop device to self._mnt_path()"""
+        cmd = ['mount', '-t', 'ext2', config.LOOP_DEV, '-o', 'ro', self._mnt_path()]
+        subprocess.check_output(cmd)
+        self.mounted = True
+        return True
+
     def _has_widevine_cdm(self):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
-            if not xbmcvfs.exists(self._cdm_path()):
-                xbmcvfs.mkdir(self._cdm_path())
-            for filename in os.listdir(self._cdm_path()):
-                if 'widevine' in filename and filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
-                    self._log('Found Widevine binary at {0}'.format(os.path.join(self._cdm_path(), filename)))
+            for filename in os.listdir(self._inputstream_cdm_path()):
+                if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
+                    self._log('Found Widevine binary at {0}'.format(os.path.join(self._inputstream_cdm_path(), filename)))
                     return True
 
             self._log('Widevine is not installed.')
@@ -82,14 +170,16 @@ class Helper(object):
 
         return json.loads(response)
 
-    def _http_request(self, url, download=False, download_path=None):
+    def _http_request(self, download=False):
+        """Makes HTTP request and displays a progress dialog on download."""
+        self._log('Request URL: {0}'.format(self._url))
+        filename = self._url.split('/')[-1]
         busy_dialog = xbmcgui.DialogBusy()
         dialog = xbmcgui.Dialog()
-        filename = url.split('/')[-1]
-        self._log('Request URL: {0}'.format(url))
+
         try:
             busy_dialog.create()
-            req = requests.get(url, stream=download, verify=False)
+            req = requests.get(self._url, stream=download, verify=False)
             self._log('Response code: {0}'.format(req.status_code))
             if not download:
                 self._log('Response: {0}'.format(req.content))
@@ -101,11 +191,12 @@ class Helper(object):
 
         busy_dialog.close()
         if download:
+            self._download_path = os.path.join(self._temp_path(), filename)
             total_length = float(req.headers.get('content-length'))
             progress_dialog = xbmcgui.DialogProgress()
             progress_dialog.create(self._language(30014), self._language(30015).format(filename))
 
-            with open(download_path, 'wb') as f:
+            with open(self._download_path, 'wb') as f:
                 dl = 0
                 for chunk in req.iter_content(chunk_size=1024):
                     f.write(chunk)
@@ -195,44 +286,155 @@ class Helper(object):
         return True
 
     def _current_widevine_cdm_version(self):
-        return self._http_request(config.WIDEVINE_CURRENT_VERSION_URL)
+        """Return the latest available version of Widevine CDM."""
+        self._url = config.WIDEVINE_CURRENT_VERSION_URL
+        return self._http_request()
 
-    def _install_widevine_cdm(self):
+    def _parse_chromeos_recovery_conf(self):
+        """Parse the download URL and required disk space from the Chrome OS recovery configuration."""
+        download_dict = {}
+        self._url = config.CHROMEOS_RECOVERY_CONF
+        conf = self._http_request().split('\n\n')
+        for device in conf:
+            if config.CHROMEOS_ARM_HWID in device:
+                for line in device.splitlines():
+                    if 'url' in line:
+                        download_dict['url'] = line.split('url=')[1]
+                    if 'zipfilesize' in line:
+                        zip_filesize = int(line.split('filesize=')[1])
+                    if 'zip' not in line and 'filesize' in line:
+                        bin_filesize = int(line.split('filesize=')[1])
+
+                download_dict['required_diskspace'] = zip_filesize + bin_filesize
+                return download_dict
+
+        self._log('Failed to parse Chrome OS recovery.conf')
+        return False
+
+    def _install_widevine_cdm_x86(self):
         dialog = xbmcgui.Dialog()
-        if self._arch in config.WIDEVINE_DOWNLOAD_UNAVAILABLE:
-            dialog.ok(self._language(30001), self._language(30006))
-            return False
+        if dialog.yesno(self._language(30001), self._language(30002)):
+            cdm_version = self._current_widevine_cdm_version()
+            cdm_os = config.WIDEVINE_OS_MAP[self._os]
+            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch][self._os]
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
-        download_path = os.path.join(xbmc.translatePath('special://temp'), 'widevine_cdm.zip')
-        cdm_version = self._current_widevine_cdm_version()
-        cdm_os = config.WIDEVINE_OS_MAP[self._os]
-        cdm_arch = config.WIDEVINE_ARCH_MAP[self._arch][self._os]
-        cdm_url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
-
-        downloaded = self._http_request(cdm_url, download=True, download_path=download_path)
-        if downloaded:
-            if self._unzip_widevine_cdm(download_path):
-                dialog.ok(self._language(30001), self._language(30003))
-                return True
+            downloaded = self._http_request(download=True)
+            if downloaded:
+                self._unzip_cdm()
+                self._install_cdm()
+                self._cleanup()
+                if self._has_widevine_cdm():
+                    dialog.ok(self._language(30001), self._language(30003))
+                    return True
+                else:
+                    dialog.ok(self._language(30004), self._language(30005))
 
         return False
 
-    def _unzip_widevine_cdm(self, zip_path):
+    def _install_widevine_cdm_arm(self):
+        dialog = xbmcgui.Dialog()
+        download_dict = self._parse_chromeos_recovery_conf()
+        self._url = download_dict['url']
+
+        if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(download_dict['required_diskspace']))):
+            if self._os != 'Linux':
+                dialog.ok(self._language(30004), self._language(30019).format(self._os))
+                return False
+            if download_dict['required_diskspace'] >= self._diskspace():
+                dialog.ok(self._language(30004), self._language(30018).format(self.sizeof_fmt(download_dict['diskspace'])))
+                return False
+            if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
+                dialog.ok(self._language(30004), self._language(30020).format('fdisk', 'parted'))
+                return False
+            if not self._cmd_exists('mount'):
+                dialog.ok(self._language(30004), self._language(30021).format('mount'))
+                return False
+            if not self._cmd_exists('losetup'):
+                dialog.ok(self._language(30004), self._language(30021).format('losetup'))
+                return False
+
+            downloaded = self._http_request(download=True)
+            if downloaded:
+                if not self._unzip_bin() or not self._losetup() or not self._mnt_loop_dev():
+                    self._cleanup()
+                    return False
+                else:
+                    self._extract_cdm_from_img()
+                    self._install_cdm()
+                    self._cleanup()
+                    if self._has_widevine_cdm():
+                        dialog.ok(self._language(30001), self._language(30003))
+                        return True
+                    else:
+                        dialog.ok(self._language(30004), self._language(30005))
+
+        return False
+
+    def _extract_cdm_from_img(self):
         busy_dialog = xbmcgui.DialogBusy()
-        zip_obj = zipfile.ZipFile(zip_path)
         busy_dialog.create()
-        for filename in zip_obj.namelist():
-            if filename.endswith(config.WIDEVINE_CDM_EXTENSIONS):
-                self._log('Widevine CDM found in zip: {0}'.format(os.path.join(zip_path, filename)))
-                zip_obj.extract(filename, self._cdm_path())
-                busy_dialog.close()
-                return True
+        """Extract the Widevine CDM binary from the mounted Chrome OS image."""
+        for root, dirs, files in os.walk(self._mnt_path()):
+            for filename in files:
+                if 'widevinecdm' in filename and filename.endswith(config.CDM_EXTENSIONS):
+                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
+                    break
 
         busy_dialog.close()
-        dialog = xbmcgui.Dialog()
-        dialog.ok(self._language(30004), self._language(30016))
-        self._log('Failed to find Widevine CDM file in {0}'.format(zip_path))
-        return False
+        return True
+
+    def _install_cdm(self):
+        """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
+        busy_dialog = xbmcgui.DialogBusy()
+        busy_dialog.create()
+        for cdm_file in os.listdir(self._cdm_path()):
+            if cdm_file.endswith(config.CDM_EXTENSIONS):
+                cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
+                cdm_path_inputstream = os.path.join(self._inputstream_cdm_path(), cdm_file)
+                if self._os == 'Windows':  # don't symlink on Windows
+                    shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
+                else:
+                    os.symlink(cdm_path_addon, cdm_path_inputstream)
+
+        busy_dialog.close()
+        return True
+
+    def _unzip_bin(self):
+        busy_dialog = xbmcgui.DialogBusy()
+        zip_obj = zipfile.ZipFile(self._download_path)
+        busy_dialog.create()
+        for filename in zip_obj.namelist():
+            if filename.endswith('.bin'):
+                zip_obj.extract(filename, self._temp_path())
+                busy_dialog.close()
+                self._bin_path = os.path.join(self._temp_path(), filename)
+                return True
+
+    def _unzip_cdm(self):
+        busy_dialog = xbmcgui.DialogBusy()
+        busy_dialog.create()
+        zip_obj = zipfile.ZipFile(self._download_path)
+        zip_obj.extractall(self._cdm_path())
+        busy_dialog.close()
+        return True
+
+    def _cleanup(self):
+        """Clean up after Widevine DRM installation."""
+        busy_dialog = xbmcgui.DialogBusy()
+        busy_dialog.create()
+        if self.mounted:
+            cmd = ['umount', self._mnt_path()]
+            subprocess.check_call(cmd)
+            self.mounted = False
+        if self.losetup:
+            cmd = ['losetup', '-d', config.LOOP_DEV]
+            subprocess.check_call(cmd)
+            self.losetup = False
+
+        shutil.rmtree(self._temp_path())
+        busy_dialog.close()
+        return True
 
     def _supports_hls(self):
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
@@ -250,12 +452,10 @@ class Helper(object):
                 if not self._supports_widevine():
                     return False
                 if not self._has_widevine_cdm():
-                    dialog = xbmcgui.Dialog()
-                    ok = dialog.yesno(self._language(30001), self._language(30002))
-                    if ok:
-                        return self._install_widevine_cdm()
+                    if 'x86' in self._arch:
+                        return self._install_widevine_cdm_x86()
                     else:
-                        return False
+                        return self._install_widevine_cdm_arm()
 
         return True
 

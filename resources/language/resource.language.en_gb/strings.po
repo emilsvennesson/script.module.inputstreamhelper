@@ -18,7 +18,7 @@ msgid "Information"
 msgstr ""
 
 msgctxt "#30002"
-msgid "You do not have [B]Widevine DRM[/B] installed. This is required to play this content.[CR][CR]Would you like to install [B]Widevine DRM[/B]?"
+msgid "You do not have [B]Widevine DRM[/B] installed. This is required to play this content.[CR][CR]Do you want to install [B]Widevine DRM[/B]?"
 msgstr ""
 
 msgctxt "#30003"
@@ -34,7 +34,7 @@ msgid "An error occurred while installing [B]Widevine DRM[/B]. Please enable deb
 msgstr ""
 
 msgctxt "#30006"
-msgid "[B]Widevine DRM[/B] is supported on this system architecture but is not possible to automatically install due to legal distributing issues.[CR][CR][B]Hint:[/B] Google might be able to help you out! :-)"
+msgid "Due to distributing issues, [B]Widevine DRM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{0}[/B] of free disk space. Do you wish to continue?"
 msgstr ""
 
 msgctxt "#30007"
@@ -80,3 +80,20 @@ msgstr ""
 msgctxt "#30017"
 msgid "[B]{0}[/B] {1} or later is required to play this content."
 msgstr ""
+
+msgctxt "#30018"
+msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{0}[/B] and try again."
+msgstr ""
+
+msgctxt "#30019"
+msgid "This operating system ([B]{0}[/B]) is not supported by [B]Widevine DRM[/B] for ARM devices."
+msgstr ""
+
+msgctxt "#30020"
+msgid "[B]'{0}'[/B] or [B]'{1}'[/B] command needs to exist on system to extract the [B]Widevine DRM[/B]."
+msgstr ""
+
+msgctxt "#30021"
+msgid "[B]'{0}'[/B] command needs to exist on system to extract the [B]Widevine DRM[/B]."
+msgstr ""
+

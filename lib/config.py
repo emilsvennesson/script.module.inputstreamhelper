@@ -10,7 +10,13 @@ DRM_SCHEMES = {
     'com.widevine.alpha': 'widevine'
 }
 
-ARCHS = {
+CDM_EXTENSIONS = (
+    '.so',
+    '.dll',
+    '.dylib'
+)
+
+X86_MAP = {
     'x86_64': 'x86_64',
     'AMD64': 'x86_64',
     'x86': 'x86',
@@ -18,7 +24,16 @@ ARCHS = {
     'i686': 'x86'
 }
 
-WIDEVINE_ARCH_MAP = {
+WIDEVINE_SUPPORTED_ARCHS = [
+    'x86_64',
+    'x86',
+    'armv7',
+    'armv8',
+    'aarch64',
+    'aarch64_be'
+]
+
+WIDEVINE_ARCH_MAP_X86 = {
     'x86_64':
         {
             'Linux': 'x64',
@@ -39,36 +54,10 @@ WIDEVINE_OS_MAP = {
     'Darwin': 'mac'
 }
 
-WIDEVINE_CDM_EXTENSIONS = (
-    '.so',
-    '.dll',
-    '.dylib'
-)
-
-WIDEVINE_SUPPORTED_ARCHS = [
-    'x86_64',
-    'x86',
-    'aarch64',
-    'aarch64_be',
-    'armv7',
-    'armv7l'
-    'armv8',
-    'arm64'
-]
-
 WIDEVINE_SUPPORTED_OS = [
     'Linux',
     'Windows',
     'Darwin'
-]
-
-WIDEVINE_DOWNLOAD_UNAVAILABLE = [
-    'aarch64',
-    'aarch64_be',
-    'armv7',
-    'armv7l'
-    'armv8',
-    'arm64'
 ]
 
 WIDEVINE_ANDROID_MINIMUM_KODI_VERSION = '18.0'
@@ -78,5 +67,13 @@ WIDEVINE_MINIMUM_KODI_VERSION = '17.4'
 WIDEVINE_CURRENT_VERSION_URL = 'https://dl.google.com/widevine-cdm/current.txt'
 
 WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{0}-{1}-{2}.zip'
+
+CHROMEOS_RECOVERY_CONF = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
+
+CHROMEOS_ARM_HWID = 'SPRING'
+
+CHROMEOS_BLOCK_SIZE = 512
+
+LOOP_DEV = '/dev/loop1'
 
 HLS_MINIMUM_IA_VERSION = '2.0.10'

@@ -29,7 +29,7 @@ class Helper(object):
         self._download_path = None
         self._bin_path = None
         self._mounted = False
-        self._losetup = False
+        self._loop_dev = False
 
         self.protocol = protocol
         self.drm = drm
@@ -140,7 +140,7 @@ class Helper(object):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', config.LOOP_DEV, self._bin_path, '-o', self._parse_chromeos_offset()]
         subprocess.check_output(cmd)
-        self._losetup = True
+        self._loop_dev = True
         return True
 
     def _mnt_loop_dev(self):
@@ -433,7 +433,7 @@ class Helper(object):
         if self._losetup:
             cmd = ['losetup', '-d', config.LOOP_DEV]
             subprocess.check_call(cmd)
-            self._losetup = False
+            self._loop_dev = False
 
         shutil.rmtree(self._temp_path())
         busy_dialog.close()

@@ -97,3 +97,6 @@ msgctxt "#30021"
 msgid "[B]'{0}'[/B] command needs to exist on system to extract the [B]Widevine DRM[/B]."
 msgstr ""
 
+msgctxt "#30022"
+msgid "Downloading Chrome OS recovery image."
+msgstr ""

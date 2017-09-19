@@ -169,7 +169,7 @@ class Helper(object):
 
         return json.loads(response)
 
-    def _http_request(self, download=False):
+    def _http_request(self, download=False, message=None):
         """Makes HTTP request and displays a progress dialog on download."""
         self._log('Request URL: {0}'.format(self._url))
         filename = self._url.split('/')[-1]
@@ -190,10 +190,12 @@ class Helper(object):
 
         busy_dialog.close()
         if download:
+            if not message:  # display "downloading [filename]"
+                message = self._language(30015).format(filename)
             self._download_path = os.path.join(self._temp_path(), filename)
             total_length = float(req.headers.get('content-length'))
             progress_dialog = xbmcgui.DialogProgress()
-            progress_dialog.create(self._language(30014), self._language(30015).format(filename))
+            progress_dialog.create(self._language(30014), message)
 
             with open(self._download_path, 'wb') as f:
                 dl = 0
@@ -353,7 +355,7 @@ class Helper(object):
                 dialog.ok(self._language(30004), self._language(30021).format('losetup'))
                 return False
 
-            downloaded = self._http_request(download=True)
+            downloaded = self._http_request(download=True, message=self._language(30022))
             if downloaded:
                 if not self._unzip_bin() or not self._losetup() or not self._mnt_loop_dev():
                     self._cleanup()

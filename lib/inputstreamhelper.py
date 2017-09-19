@@ -357,6 +357,7 @@ class Helper(object):
 
             downloaded = self._http_request(download=True, message=self._language(30022))
             if downloaded:
+                dialog.ok(self._language(30023), self._language(30024))
                 if not self._unzip_bin() or not self._losetup() or not self._mnt_loop_dev():
                     self._cleanup()
                     return False

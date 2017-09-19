@@ -173,22 +173,18 @@ class Helper(object):
         """Makes HTTP request and displays a progress dialog on download."""
         self._log('Request URL: {0}'.format(self._url))
         filename = self._url.split('/')[-1]
-        busy_dialog = xbmcgui.DialogBusy()
         dialog = xbmcgui.Dialog()
 
         try:
-            busy_dialog.create()
             req = requests.get(self._url, stream=download, verify=False)
             self._log('Response code: {0}'.format(req.status_code))
             if not download:
                 self._log('Response: {0}'.format(req.content))
             req.raise_for_status()
         except requests.exceptions.HTTPError:
-            busy_dialog.close()
             dialog.ok(self._language(30004), self._language(30013).format(filename))
             return False
 
-        busy_dialog.close()
         if download:
             if not message:  # display "downloading [filename]"
                 message = self._language(30015).format(filename)
@@ -322,13 +318,17 @@ class Helper(object):
 
             downloaded = self._http_request(download=True)
             if downloaded:
+                busy_dialog = xbmcgui.DialogBusy()
+                busy_dialog.create()
                 self._unzip_cdm()
                 self._install_cdm()
                 self._cleanup()
                 if self._has_widevine_cdm():
                     dialog.ok(self._language(30001), self._language(30003))
+                    busy_dialog.close()
                     return True
                 else:
+                    busy_dialog.close()
                     dialog.ok(self._language(30004), self._language(30005))
 
         return False
@@ -358,8 +358,11 @@ class Helper(object):
             downloaded = self._http_request(download=True, message=self._language(30022))
             if downloaded:
                 dialog.ok(self._language(30023), self._language(30024))
+                busy_dialog = xbmcgui.DialogBusy()
+                busy_dialog.create()
                 if not self._unzip_bin() or not self._losetup() or not self._mnt_loop_dev():
                     self._cleanup()
+                    busy_dialog.close()
                     return False
                 else:
                     self._extract_cdm_from_img()
@@ -367,31 +370,27 @@ class Helper(object):
                     self._cleanup()
                     if self._has_widevine_cdm():
                         dialog.ok(self._language(30001), self._language(30003))
+                        busy_dialog.close()
                         return True
                     else:
+                        busy_dialog.close()
                         dialog.ok(self._language(30004), self._language(30005))
 
         return False
 
     def _extract_cdm_from_img(self):
-        busy_dialog = xbmcgui.DialogBusy()
-        busy_dialog.create()
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
                 if 'widevinecdm' in filename and filename.endswith(config.CDM_EXTENSIONS):
                     shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
-                    busy_dialog.close()
                     return True
 
-        busy_dialog.close()
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
         return False
 
     def _install_cdm(self):
         """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
-        busy_dialog = xbmcgui.DialogBusy()
-        busy_dialog.create()
         for cdm_file in os.listdir(self._cdm_path()):
             if cdm_file.endswith(config.CDM_EXTENSIONS):
                 cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
@@ -401,32 +400,23 @@ class Helper(object):
                 else:
                     os.symlink(cdm_path_addon, cdm_path_inputstream)
 
-        busy_dialog.close()
         return True
 
     def _unzip_bin(self):
-        busy_dialog = xbmcgui.DialogBusy()
         zip_obj = zipfile.ZipFile(self._download_path)
-        busy_dialog.create()
         for filename in zip_obj.namelist():
             if filename.endswith('.bin'):
                 zip_obj.extract(filename, self._temp_path())
-                busy_dialog.close()
                 self._bin_path = os.path.join(self._temp_path(), filename)
                 return True
 
     def _unzip_cdm(self):
-        busy_dialog = xbmcgui.DialogBusy()
-        busy_dialog.create()
         zip_obj = zipfile.ZipFile(self._download_path)
         zip_obj.extractall(self._cdm_path())
-        busy_dialog.close()
         return True
 
     def _cleanup(self):
         """Clean up after Widevine DRM installation."""
-        busy_dialog = xbmcgui.DialogBusy()
-        busy_dialog.create()
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
             subprocess.check_call(cmd)
@@ -437,7 +427,6 @@ class Helper(object):
             self._loop_dev = False
 
         shutil.rmtree(self._temp_path())
-        busy_dialog.close()
         return True
 
     def _supports_hls(self):

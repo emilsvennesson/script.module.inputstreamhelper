@@ -108,3 +108,19 @@ msgstr ""
 msgctxt "#30024"
 msgid "The installation now needs to unzip, mount and extract [B]Widevine DRM[/B] from the recovery image.[CR][CR]This process may take up to five minutes to complete."
 msgstr ""
+
+msgctxt "#30025"
+msgid "Acquiring EULA."
+msgstr ""
+
+msgctxt "#30026"
+msgid "Widevine DRM EULA"
+msgstr ""
+
+msgctxt "#30027"
+msgid "I accept"
+msgstr ""
+
+msgctxt "#30028"
+msgid "Cancel"
+msgstr ""

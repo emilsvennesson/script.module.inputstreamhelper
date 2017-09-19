@@ -68,6 +68,8 @@ WIDEVINE_CURRENT_VERSION_URL = 'https://dl.google.com/widevine-cdm/current.txt'
 
 WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{0}-{1}-{2}.zip'
 
+WIDEVINE_LICENSE_FILE = 'LICENSE.txt'
+
 CHROMEOS_RECOVERY_CONF = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 
 CHROMEOS_ARM_HWID = 'SPRING'

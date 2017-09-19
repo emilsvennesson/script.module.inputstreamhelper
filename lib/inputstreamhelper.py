@@ -321,8 +321,13 @@ class Helper(object):
                 busy_dialog = xbmcgui.DialogBusy()
                 busy_dialog.create()
                 self._unzip_cdm()
-                self._install_cdm()
+                if self._widevine_eula():
+                    self._install_cdm()
+                else:
+                    self._cleanup()
+                    return False
                 self._cleanup()
+
                 if self._has_widevine_cdm():
                     dialog.ok(self._language(30001), self._language(30003))
                     busy_dialog.close()
@@ -338,7 +343,7 @@ class Helper(object):
         download_dict = self._parse_chromeos_recovery_conf()
         self._url = download_dict['url']
 
-        if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(download_dict['required_diskspace']))):
+        if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(download_dict['required_diskspace']))) and self._widevine_eula():
             if self._os != 'Linux':
                 dialog.ok(self._language(30004), self._language(30019).format(self._os))
                 return False
@@ -377,6 +382,22 @@ class Helper(object):
                         dialog.ok(self._language(30004), self._language(30005))
 
         return False
+
+    def _widevine_eula(self):
+        """Displays the Widevine EULA."""
+        if os.path.exists(os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)):
+            license_file = os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)
+            with open(license_file, 'r') as f:
+                eula = f.read().strip().replace('\n', ' ')
+        else:  # grab the license from the x86 files
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._current_widevine_cdm_version(), 'linux', 'x64')
+            self._http_request(download=True, message=self._language(30025))
+            with zipfile.ZipFile(self._download_path) as z:
+                with z.open(config.WIDEVINE_LICENSE_FILE) as f:
+                    eula = f.read().strip().replace('\n', ' ')
+
+        dialog = xbmcgui.Dialog()
+        return dialog.yesno(self._language(30026), eula, yeslabel=self._language(30027), nolabel=self._language(30028))
 
     def _extract_cdm_from_img(self):
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""

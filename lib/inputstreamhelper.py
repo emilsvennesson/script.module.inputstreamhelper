@@ -19,7 +19,7 @@ class Helper(object):
     def __init__(self, protocol, drm=None):
         self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
         self._addon_profile = xbmc.translatePath(self._addon.getAddonInfo('profile'))
-        self._logging_prefix = '[%s-%s]' % (self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
+        self._logging_prefix = '[{0}-{1}]'.format(self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         self._language = self._addon.getLocalizedString
         self._arch = self._get_arch(platform.machine())
         self._os = platform.system()
@@ -51,7 +51,7 @@ class Helper(object):
     @staticmethod
     def sizeof_fmt(num, suffix='B'):
         # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
-        for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
             if abs(num) < 1024.0:
                 return "%3.1f%s%s" % (num, unit, suffix)
             num /= 1024.0
@@ -467,8 +467,7 @@ class Helper(object):
             return False
         elif not self._inputstream_enabled():
             self._log('{0} is not enabled.'.format(self._inputstream_addon))
-            ok = dialog.yesno(self._language(30001),
-                              self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
+            ok = dialog.yesno(self._language(30001), self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
             if ok:
                 self._enable_inputstream()
             else:

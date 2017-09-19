@@ -378,10 +378,12 @@ class Helper(object):
             for filename in files:
                 if 'widevinecdm' in filename and filename.endswith(config.CDM_EXTENSIONS):
                     shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
-                    break
+                    busy_dialog.close()
+                    return True
 
         busy_dialog.close()
-        return True
+        self._log('Failed to find Widevine CDM binary in Chrome OS image.')
+        return False
 
     def _install_cdm(self):
         """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""

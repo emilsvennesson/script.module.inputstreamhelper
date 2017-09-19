@@ -421,7 +421,7 @@ class Helper(object):
             cmd = ['umount', self._mnt_path()]
             subprocess.check_call(cmd)
             self._mounted = False
-        if self._losetup:
+        if self._loop_dev:
             cmd = ['losetup', '-d', config.LOOP_DEV]
             subprocess.check_call(cmd)
             self._loop_dev = False

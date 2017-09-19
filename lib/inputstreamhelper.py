@@ -28,9 +28,8 @@ class Helper(object):
         self._url = None
         self._download_path = None
         self._bin_path = None
-
-        self.mounted = False
-        self.losetup = False
+        self._mounted = False
+        self._losetup = False
 
         self.protocol = protocol
         self.drm = drm
@@ -141,14 +140,14 @@ class Helper(object):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', config.LOOP_DEV, self._bin_path, '-o', self._parse_chromeos_offset()]
         subprocess.check_output(cmd)
-        self.losetup = True
+        self._losetup = True
         return True
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
         cmd = ['mount', '-t', 'ext2', config.LOOP_DEV, '-o', 'ro', self._mnt_path()]
         subprocess.check_output(cmd)
-        self.mounted = True
+        self._mounted = True
         return True
 
     def _has_widevine_cdm(self):
@@ -423,14 +422,14 @@ class Helper(object):
         """Clean up after Widevine DRM installation."""
         busy_dialog = xbmcgui.DialogBusy()
         busy_dialog.create()
-        if self.mounted:
+        if self._mounted:
             cmd = ['umount', self._mnt_path()]
             subprocess.check_call(cmd)
-            self.mounted = False
-        if self.losetup:
+            self._mounted = False
+        if self._losetup:
             cmd = ['losetup', '-d', config.LOOP_DEV]
             subprocess.check_call(cmd)
-            self.losetup = False
+            self._losetup = False
 
         shutil.rmtree(self._temp_path())
         busy_dialog.close()

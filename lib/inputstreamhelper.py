@@ -341,8 +341,6 @@ class Helper(object):
     def _install_widevine_cdm_arm(self):
         dialog = xbmcgui.Dialog()
         download_dict = self._parse_chromeos_recovery_conf()
-        self._url = download_dict['url']
-
         if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(download_dict['required_diskspace']))) and self._widevine_eula():
             if self._os != 'Linux':
                 dialog.ok(self._language(30004), self._language(30019).format(self._os))
@@ -360,6 +358,7 @@ class Helper(object):
                 dialog.ok(self._language(30004), self._language(30021).format('losetup'))
                 return False
 
+            self._url = download_dict['url']
             downloaded = self._http_request(download=True, message=self._language(30022))
             if downloaded:
                 dialog.ok(self._language(30023), self._language(30024))

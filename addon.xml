@@ -14,7 +14,7 @@
     <license>MIT License</license>
     <source>https://github.com/emilsvennesson/script.module.inputstreamhelper</source>
     <assets>
-      <icon>resources/art/icon.png</icon>
+      <icon>resources/icon.png</icon>
     </assets>
   </extension>
 </addon>

@@ -156,7 +156,8 @@ class Helper(object):
         else:
             for filename in os.listdir(self._inputstream_cdm_path()):
                 if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
-                    self._log('Found Widevine binary at {0}'.format(os.path.join(self._inputstream_cdm_path(), filename)))
+                    self._log(
+                        'Found Widevine binary at {0}'.format(os.path.join(self._inputstream_cdm_path(), filename)))
                     return True
 
             self._log('Widevine is not installed.')
@@ -347,7 +348,8 @@ class Helper(object):
                 dialog.ok(self._language(30004), self._language(30019).format(self._os))
                 return False
             if download_dict['required_diskspace'] >= self._diskspace():
-                dialog.ok(self._language(30004), self._language(30018).format(self.sizeof_fmt(download_dict['diskspace'])))
+                dialog.ok(self._language(30004),
+                          self._language(30018).format(self.sizeof_fmt(download_dict['diskspace'])))
                 return False
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
                 dialog.ok(self._language(30004), self._language(30020).format('fdisk', 'parted'))
@@ -403,9 +405,9 @@ class Helper(object):
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
-				if filename == 'libwidevinecdm.so':
-					shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
-					return True
+                if filename == 'libwidevinecdm.so':
+                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
+                    return True
 
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
         return False
@@ -454,9 +456,11 @@ class Helper(object):
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
-            self._log('HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
+            self._log(
+                'HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
             dialog = xbmcgui.Dialog()
-            dialog.ok(self._language(30004), self._language(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
+            dialog.ok(self._language(30004),
+                      self._language(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
             return False
 
     def _check_drm(self):
@@ -482,7 +486,8 @@ class Helper(object):
             return False
         elif not self._inputstream_enabled():
             self._log('{0} is not enabled.'.format(self._inputstream_addon))
-            ok = dialog.yesno(self._language(30001), self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
+            ok = dialog.yesno(self._language(30001),
+                              self._language(30009).format(self._inputstream_addon, self._inputstream_addon))
             if ok:
                 self._enable_inputstream()
             else:

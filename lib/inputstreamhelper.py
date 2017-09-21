@@ -19,9 +19,7 @@ class Helper(object):
     def __init__(self, protocol, drm=None):
         self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
         self._addon_profile = xbmc.translatePath(self._addon.getAddonInfo('profile'))
-        self._logging_prefix = '[{0}-{1}]'.format(self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         self._language = self._addon.getLocalizedString
-        self._arch = self._get_arch(platform.machine())
         self._os = platform.system()
         self._log('Platform information: {0}'.format(platform.uname()))
 
@@ -62,7 +60,8 @@ class Helper(object):
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
-    def _get_arch(self, arch):
+    def _arch(self):
+        arch = platform.machine()
         if arch in config.X86_MAP:
             return config.X86_MAP[arch]
         elif 'armv' in arch:
@@ -72,7 +71,8 @@ class Helper(object):
         return arch
 
     def _log(self, string):
-        msg = '{0}: {1}'.format(self._logging_prefix, string)
+        logging_prefix = '[{0}-{1}]'.format(self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
+        msg = '{0}: {1}'.format(logging_prefix, string)
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
     def _diskspace(self):
@@ -264,8 +264,8 @@ class Helper(object):
         else:
             min_version = config.WIDEVINE_MINIMUM_KODI_VERSION
 
-        if self._arch not in config.WIDEVINE_SUPPORTED_ARCHS:
-            self._log('Unsupported Widevine architecture found: {0}'.format(self._arch))
+        if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
+            self._log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
             dialog.ok(self._language(30004), self._language(30007))
             return False
         if self._os not in config.WIDEVINE_SUPPORTED_OS:
@@ -315,7 +315,7 @@ class Helper(object):
         if dialog.yesno(self._language(30001), self._language(30002)):
             cdm_version = self._current_widevine_cdm_version()
             cdm_os = config.WIDEVINE_OS_MAP[self._os]
-            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch][self._os]
+            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()][self._os]
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
             downloaded = self._http_request(download=True)
@@ -470,7 +470,7 @@ class Helper(object):
                 if not self._supports_widevine():
                     return False
                 if not self._has_widevine_cdm():
-                    if 'x86' in self._arch:
+                    if 'x86' in self._arch():
                         return self._install_widevine_cdm_x86()
                     else:
                         return self._install_widevine_cdm_arm()

@@ -402,9 +402,9 @@ class Helper(object):
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
-                if 'widevinecdm' in filename and filename.endswith(config.CDM_EXTENSIONS):
-                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
-                    return True
+				if filename == 'libwidevinecdm.so'
+					shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
+					return True
 
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
         return False

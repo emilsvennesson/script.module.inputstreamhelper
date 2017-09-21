@@ -107,7 +107,7 @@ msgstr "Download erfolgreich abgeschlossen!"
 
 msgctxt "#30024"
 msgid "The installation now needs to unzip, mount and extract [B]Widevine DRM[/B] from the recovery image.[CR][CR]This process may take up to five minutes to complete."
-msgstr "Das Chrome OS recovery image wird nun extrahiert und gemounted um die [B]Widevine DRM[/B] zu extrahieren.[CR][CR]Dieser Prozess kann bis zu fünf Minuten dauern."
+msgstr "Das Chrome OS recovery image wird nun extrahiert und gemounted um die [B]Widevine DRM[/B] zu extrahieren.[CR][CR]Dieser Prozess kann bis zu zehn Minuten dauern."
 
 msgctxt "#30025"
 msgid "Acquiring EULA."

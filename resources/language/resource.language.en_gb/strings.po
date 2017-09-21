@@ -106,7 +106,7 @@ msgid "Download completed!"
 msgstr ""
 
 msgctxt "#30024"
-msgid "The installation now needs to unzip, mount and extract [B]Widevine DRM[/B] from the recovery image.[CR][CR]This process may take up to five minutes to complete."
+msgid "The installation now needs to unzip, mount and extract [B]Widevine DRM[/B] from the recovery image.[CR][CR]This process may take up to ten minutes to complete."
 msgstr ""
 
 msgctxt "#30025"

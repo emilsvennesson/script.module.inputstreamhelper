@@ -25,7 +25,6 @@ class Helper(object):
 
         self._url = None
         self._download_path = None
-        self._bin_path = None
         self._mounted = False
         self._loop_dev = False
 
@@ -116,12 +115,12 @@ class Helper(object):
         addon = xbmcaddon.Addon(self._inputstream_addon)
         return addon.getAddonInfo('version')
 
-    def _parse_chromeos_offset(self):
+    def _parse_chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""
         if self._cmd_exists('fdisk'):
-            cmd = ['fdisk', self._bin_path, '-l']
+            cmd = ['fdisk', bin_path, '-l']
         else:  # parted
-            cmd = ['parted', '-s', self._bin_path, 'unit s print']
+            cmd = ['parted', '-s', bin_path, 'unit s print']
         self._log('losetup calculation cmd: {0}'.format(cmd))
 
         output = subprocess.check_output(cmd)
@@ -136,9 +135,9 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
-    def _losetup(self):
+    def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', config.LOOP_DEV, self._bin_path, '-o', self._parse_chromeos_offset()]
+        cmd = ['losetup', config.LOOP_DEV, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
         subprocess.check_output(cmd)
         self._loop_dev = True
         return True
@@ -322,7 +321,7 @@ class Helper(object):
             if downloaded:
                 busy_dialog = xbmcgui.DialogBusy()
                 busy_dialog.create()
-                self._unzip_cdm()
+                self._unzip(self._cdm_path())
                 if self._widevine_eula():
                     self._install_cdm()
                 else:
@@ -367,7 +366,10 @@ class Helper(object):
                 dialog.ok(self._language(30023), self._language(30024))
                 busy_dialog = xbmcgui.DialogBusy()
                 busy_dialog.create()
-                if not self._unzip_bin() or not self._losetup() or not self._mnt_loop_dev():
+
+                bin_filename = self._url.split('/')[-1].replace('.zip', '')
+                bin_path = os.path.join(self._temp_path(), bin_filename)
+                if not self._unzip(self._temp_path(), bin_filename) or not self._losetup(bin_path) or not self._mnt_loop_dev():
                     self._cleanup()
                     busy_dialog.close()
                     return False
@@ -425,18 +427,18 @@ class Helper(object):
 
         return True
 
-    def _unzip_bin(self):
+    def _unzip(self, unzip_dir, file_to_unzip=None):
+        """Unzip files to specified path."""
         zip_obj = zipfile.ZipFile(self._download_path)
-        for filename in zip_obj.namelist():
-            if filename.endswith('.bin'):
-                zip_obj.extract(filename, self._temp_path())
-                self._bin_path = os.path.join(self._temp_path(), filename)
-                return True
-
-    def _unzip_cdm(self):
-        zip_obj = zipfile.ZipFile(self._download_path)
-        zip_obj.extractall(self._cdm_path())
-        return True
+        if file_to_unzip:
+            for filename in zip_obj.namelist():
+                if filename == file_to_unzip:
+                    zip_obj.extract(filename, unzip_dir)
+                    return True
+            return False
+        else:  # extract all files
+            zip_obj.extractall(unzip_dir)
+            return True
 
     def _cleanup(self):
         """Clean up after Widevine DRM installation."""

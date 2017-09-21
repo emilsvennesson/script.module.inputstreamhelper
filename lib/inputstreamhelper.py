@@ -292,8 +292,9 @@ class Helper(object):
         download_dict = {}
         self._url = config.CHROMEOS_RECOVERY_CONF
         conf = self._http_request().split('\n\n')
-        for device in conf:
-            if config.CHROMEOS_ARM_HWID in device:
+        devices = [x for x in conf if 'name=' in x]
+        for device in devices:
+            if config.CHROMEOS_ARM_HWID in device.split('\nhwidmatch=')[1].split('\n')[0]:
                 for line in device.splitlines():
                     if 'url' in line:
                         download_dict['url'] = line.split('url=')[1]

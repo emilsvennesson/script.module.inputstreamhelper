@@ -288,26 +288,22 @@ class Helper(object):
         return self._http_request()
 
     def _parse_chromeos_recovery_conf(self):
-        """Parse the download URL and required disk space from the Chrome OS recovery configuration."""
-        download_dict = {}
+        """Parse the Chrome OS recovery configuration and put it in a dictionary."""
+        devices = []
         self._url = config.CHROMEOS_RECOVERY_CONF
-        conf = self._http_request().split('\n\n')
-        devices = [x for x in conf if 'name=' in x]
-        for device in devices:
-            if config.CHROMEOS_ARM_HWID in device.split('\nhwidmatch=')[1].split('\n')[0]:
-                for line in device.splitlines():
-                    if 'url' in line:
-                        download_dict['url'] = line.split('url=')[1]
-                    if 'zipfilesize' in line:
-                        zip_filesize = int(line.split('filesize=')[1])
-                    if 'zip' not in line and 'filesize' in line:
-                        bin_filesize = int(line.split('filesize=')[1])
+        conf = [x for x in self._http_request().split('\n\n') if 'name=' in x]
+        for device in conf:
+            device_dict = {}
+            for device_info in device.splitlines():
+                key_value = device_info.split('=')
+                key = key_value[0]
+                if len(key_value) > 1:  # some keys have empty values
+                    value = key_value[1]
+                    device_dict[key] = value
+            devices.append(device_dict)
 
-                download_dict['required_diskspace'] = zip_filesize + bin_filesize
-                return download_dict
-
-        self._log('Failed to parse Chrome OS recovery.conf')
-        return False
+        self._log('chromeos devices: {0}'.format(devices))
+        return devices
 
     def _install_widevine_cdm_x86(self):
         dialog = xbmcgui.Dialog()
@@ -340,15 +336,16 @@ class Helper(object):
         return False
 
     def _install_widevine_cdm_arm(self):
+        arm_device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
+        required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
         dialog = xbmcgui.Dialog()
-        download_dict = self._parse_chromeos_recovery_conf()
-        if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(download_dict['required_diskspace']))) and self._widevine_eula():
+        if dialog.yesno(self._language(30001), self._language(30002)) and dialog.yesno(self._language(30001), self._language(30006).format(self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if self._os != 'Linux':
                 dialog.ok(self._language(30004), self._language(30019).format(self._os))
                 return False
-            if download_dict['required_diskspace'] >= self._diskspace():
+            if required_diskspace >= self._diskspace():
                 dialog.ok(self._language(30004),
-                          self._language(30018).format(self.sizeof_fmt(download_dict['diskspace'])))
+                          self._language(30018).format(self.sizeof_fmt(required_diskspace)))
                 return False
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
                 dialog.ok(self._language(30004), self._language(30020).format('fdisk', 'parted'))
@@ -360,7 +357,7 @@ class Helper(object):
                 dialog.ok(self._language(30004), self._language(30021).format('losetup'))
                 return False
 
-            self._url = download_dict['url']
+            self._url = arm_device['url']
             downloaded = self._http_request(download=True, message=self._language(30022))
             if downloaded:
                 dialog.ok(self._language(30023), self._language(30024))

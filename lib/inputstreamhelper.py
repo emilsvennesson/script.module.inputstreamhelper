@@ -392,10 +392,13 @@ class Helper(object):
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._current_widevine_cdm_version(), 'linux', 'x64')
-            self._http_request(download=True, message=self._language(30025))
-            with zipfile.ZipFile(self._download_path) as z:
-                with z.open(config.WIDEVINE_LICENSE_FILE) as f:
-                    eula = f.read().strip().replace('\n', ' ')
+            downloaded = self._http_request(download=True, message=self._language(30025))
+            if downloaded:
+                with zipfile.ZipFile(self._download_path) as z:
+                    with z.open(config.WIDEVINE_LICENSE_FILE) as f:
+                        eula = f.read().strip().replace('\n', ' ')
+            else:
+                return False
 
         dialog = xbmcgui.Dialog()
         return dialog.yesno(self._language(30026), eula, yeslabel=self._language(30027), nolabel=self._language(30028))

@@ -99,7 +99,8 @@ class Helper(object):
 
         return cdm_path
 
-    def _inputstream_cdm_path(self):
+    def _ia_cdm_path(self):
+        """Return the specified CDM path for inputstream.adaptive."""
         addon = xbmcaddon.Addon('inputstream.adaptive')
         cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
         if not xbmcvfs.exists(cdm_path):
@@ -153,10 +154,10 @@ class Helper(object):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
-            for filename in os.listdir(self._inputstream_cdm_path()):
+            for filename in os.listdir(self._ia_cdm_path()):
                 if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
                     self._log(
-                        'Found Widevine binary at {0}'.format(os.path.join(self._inputstream_cdm_path(), filename)))
+                        'Found Widevine binary at {0}'.format(os.path.join(self._ia_cdm_path(), filename)))
                     return True
 
             self._log('Widevine is not installed.')
@@ -419,7 +420,7 @@ class Helper(object):
         for cdm_file in os.listdir(self._cdm_path()):
             if cdm_file.endswith(config.CDM_EXTENSIONS):
                 cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
-                cdm_path_inputstream = os.path.join(self._inputstream_cdm_path(), cdm_file)
+                cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
                 if self._os == 'Windows':  # don't symlink on Windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:

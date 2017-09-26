@@ -176,7 +176,7 @@ class Helper(object):
         dialog = xbmcgui.Dialog()
 
         try:
-            req = requests.get(self._url, stream=download, verify=False)
+            req = requests.get(self._url, stream=download)
             self._log('Response code: {0}'.format(req.status_code))
             if not download:
                 self._log('Response: {0}'.format(req.content))

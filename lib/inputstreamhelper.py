@@ -182,7 +182,7 @@ class Helper(object):
         """Mount loop device to self._mnt_path()"""
         dialog = xbmcgui.Dialog()
         cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
-        if not os.getuid() == 0 and self._cmd_exists('sudo'):  # ask for permission to wrap cmd in sudo
+        if os.getuid() != 0 and self._cmd_exists('sudo'):  # ask for permission to wrap cmd in sudo
             if dialog.yesno(self._language(30001), self._language(30030), yeslabel=self._language(30029), nolabel=self._language(30028)):
                 cmd.insert(0, 'sudo')
             else:
@@ -495,7 +495,7 @@ class Helper(object):
         """Clean up after Widevine DRM installation."""
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
-            if not os.getuid() == 0 and self._cmd_exists('sudo'):  # no need to ask for permission again
+            if os.getuid() != 0 and self._cmd_exists('sudo'):  # no need to ask for permission again
                 cmd.insert(0, 'sudo')
             unmount_success = self._run_cmd(cmd)
             if unmount_success:

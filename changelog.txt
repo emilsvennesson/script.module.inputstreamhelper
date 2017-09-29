@@ -1,2 +1,10 @@
+2017.09.29 v0.2.0
++ Automatic Widevine CDM download on ARM devices
++ Display Widevine EULA during installation procedure
++ German translation (thanks to asciidisco)
++ New, smaller and less ugly generic icon
++ Better exception handling
++ Code cleanup
+
 2017.09.13 v0.1.0
 + Initial release

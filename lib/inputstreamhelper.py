@@ -16,10 +16,11 @@ import xbmcvfs
 
 
 class Helper(object):
+    _addon = xbmcaddon.Addon('script.module.inputstreamhelper')
+    _addon_profile = xbmc.translatePath(_addon.getAddonInfo('profile'))
+    _language = _addon.getLocalizedString
+
     def __init__(self, protocol, drm=None):
-        self._addon = xbmcaddon.Addon('script.module.inputstreamhelper')
-        self._addon_profile = xbmc.translatePath(self._addon.getAddonInfo('profile'))
-        self._language = self._addon.getLocalizedString
         self._os = platform.system()
         self._log('Platform information: {0}'.format(platform.uname()))
 
@@ -43,6 +44,7 @@ class Helper(object):
             else:
                 self.drm = config.DRM_SCHEMES[drm]
 
+
     class InputStreamException(Exception):
         pass
 
@@ -62,6 +64,55 @@ class Helper(object):
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
+    @classmethod
+    def _diskspace(cls):
+        """Return the free disk space available (in bytes) in cdm_path."""
+        statvfs = os.statvfs(cls._cdm_path())
+        return statvfs.f_frsize * statvfs.f_bavail
+
+    @classmethod
+    def _temp_path(cls):
+        temp_path = os.path.join(cls._addon_profile, 'tmp')
+        if not xbmcvfs.exists(temp_path):
+            xbmcvfs.mkdir(temp_path)
+
+        return temp_path
+
+    @classmethod
+    def _mnt_path(cls):
+        mnt_path = os.path.join(cls._temp_path(), 'mnt')
+        if not xbmcvfs.exists(mnt_path):
+            xbmcvfs.mkdir(mnt_path)
+
+        return mnt_path
+
+    @classmethod
+    def _cdm_path(cls):
+        cdm_path = os.path.join(cls._addon_profile, 'cdm')
+        if not xbmcvfs.exists(cdm_path):
+            xbmcvfs.mkdir(cdm_path)
+
+        return cdm_path
+
+    @classmethod
+    def _ia_cdm_path(cls):
+        """Return the specified CDM path for inputstream.adaptive."""
+        addon = xbmcaddon.Addon('inputstream.adaptive')
+        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
+        if not xbmcvfs.exists(cdm_path):
+            xbmcvfs.mkdir(cdm_path)
+
+        return cdm_path
+
+    @classmethod
+    def _kodi_version(cls):
+        version = xbmc.getInfoLabel('System.BuildVersion')
+        return version.split(' ')[0]
+
+    def _inputstream_version(self):
+        addon = xbmcaddon.Addon(self._inputstream_addon)
+        return addon.getAddonInfo('version')
+
     def _arch(self):
         """Map together and return the system architecture."""
         arch = platform.machine()
@@ -78,49 +129,6 @@ class Helper(object):
         logging_prefix = '[{0}-{1}]'.format(self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         msg = '{0}: {1}'.format(logging_prefix, string)
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
-
-    def _diskspace(self):
-        """Return the free disk space available (in bytes) in cdm_path."""
-        statvfs = os.statvfs(self._cdm_path())
-        return statvfs.f_frsize * statvfs.f_bavail
-
-    def _temp_path(self):
-        temp_path = os.path.join(self._addon_profile, 'tmp')
-        if not xbmcvfs.exists(temp_path):
-            xbmcvfs.mkdir(temp_path)
-
-        return temp_path
-
-    def _mnt_path(self):
-        mnt_path = os.path.join(self._temp_path(), 'mnt')
-        if not xbmcvfs.exists(mnt_path):
-            xbmcvfs.mkdir(mnt_path)
-
-        return mnt_path
-
-    def _cdm_path(self):
-        cdm_path = os.path.join(self._addon_profile, 'cdm')
-        if not xbmcvfs.exists(cdm_path):
-            xbmcvfs.mkdir(cdm_path)
-
-        return cdm_path
-
-    def _ia_cdm_path(self):
-        """Return the specified CDM path for inputstream.adaptive."""
-        addon = xbmcaddon.Addon('inputstream.adaptive')
-        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
-        if not xbmcvfs.exists(cdm_path):
-            xbmcvfs.mkdir(cdm_path)
-
-        return cdm_path
-
-    def _kodi_version(self):
-        version = xbmc.getInfoLabel('System.BuildVersion')
-        return version.split(' ')[0]
-
-    def _inputstream_version(self):
-        addon = xbmcaddon.Addon(self._inputstream_addon)
-        return addon.getAddonInfo('version')
 
     def _parse_chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""

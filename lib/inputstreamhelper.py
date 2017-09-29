@@ -44,6 +44,8 @@ class Helper(object):
             else:
                 self.drm = config.DRM_SCHEMES[drm]
 
+    def __repr__(self):
+        return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
 
     class InputStreamException(Exception):
         pass

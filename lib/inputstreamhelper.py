@@ -48,6 +48,7 @@ class Helper(object):
 
     @staticmethod
     def sizeof_fmt(num, suffix='B'):
+        """Return size of file in a human readable string."""
         # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
         for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
             if abs(num) < 1024.0:
@@ -57,10 +58,12 @@ class Helper(object):
 
     @staticmethod
     def _cmd_exists(cmd):
+        """Check whether cmd exists on system."""
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
     def _arch(self):
+        """Map together and return the system architecture."""
         arch = platform.machine()
         if arch in config.X86_MAP:
             return config.X86_MAP[arch]
@@ -71,11 +74,13 @@ class Helper(object):
         return arch
 
     def _log(self, string):
+        """InputStream Helper log method."""
         logging_prefix = '[{0}-{1}]'.format(self._addon.getAddonInfo('id'), self._addon.getAddonInfo('version'))
         msg = '{0}: {1}'.format(logging_prefix, string)
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
     def _diskspace(self):
+        """Return the free disk space available (in bytes) in cdm_path."""
         statvfs = os.statvfs(self._cdm_path())
         return statvfs.f_frsize * statvfs.f_bavail
 
@@ -139,7 +144,7 @@ class Helper(object):
 
     def _run_cmd(self, cmd):
         try:
-            output = subprocess.check_output(cmd)
+            subprocess.check_output(cmd)
             self._log('{0} cmd executed successfully.'.format(cmd))
             return True
         except subprocess.CalledProcessError, error:
@@ -172,8 +177,6 @@ class Helper(object):
                 cmd.insert(0, 'sudo')
             else:
                 self._log('User refused to give sudo permission.')
-        else:
-            self._log('User do not have root permissions and/or sudo installed.')
 
         success = self._run_cmd(cmd)
         if success:
@@ -183,19 +186,20 @@ class Helper(object):
             return False
 
     def _has_widevine_cdm(self):
+        """Checks if Widevine CDM is installed on system."""
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
             for filename in os.listdir(self._ia_cdm_path()):
                 if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
-                    self._log(
-                        'Found Widevine binary at {0}'.format(os.path.join(self._ia_cdm_path(), filename)))
+                    self._log('Found Widevine binary at {0}'.format(os.path.join(self._ia_cdm_path(), filename)))
                     return True
 
             self._log('Widevine is not installed.')
             return False
 
     def _json_rpc_request(self, payload):
+        """Kodi JSON-RPC request. Return the response in a dictionary."""
         self._log('jsonrpc payload: {0}'.format(payload))
         response = xbmc.executeJSONRPC(json.dumps(payload))
         self._log('jsonrpc response: {0}'.format(response))
@@ -290,6 +294,7 @@ class Helper(object):
             return True
 
     def _supports_widevine(self):
+        """Check if Widevine is supported on the architecture/operating system/Kodi version."""
         dialog = xbmcgui.Dialog()
         if xbmc.getCondVisibility('system.platform.android'):
             min_version = config.WIDEVINE_ANDROID_MINIMUM_KODI_VERSION
@@ -339,6 +344,7 @@ class Helper(object):
         return devices
 
     def _install_widevine_cdm_x86(self):
+        """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
         if dialog.yesno(self._language(30001), self._language(30002)):
             cdm_version = self._current_widevine_cdm_version()
@@ -369,6 +375,7 @@ class Helper(object):
         return False
 
     def _install_widevine_cdm_arm(self):
+        """Install Widevine CDM on ARM-based architectures."""
         arm_device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
         dialog = xbmcgui.Dialog()
@@ -403,7 +410,7 @@ class Helper(object):
                     self._cleanup()
                     busy_dialog.close()
                 else:
-                    self._extract_cdm_from_img()
+                    self._extract_widevine_cdm_from_img()
                     self._install_cdm()
                     self._cleanup()
                     if self._has_widevine_cdm():
@@ -417,7 +424,7 @@ class Helper(object):
         return False
 
     def _widevine_eula(self):
-        """Displays the Widevine EULA."""
+        """Display the Widevine EULA and prompt user to accept it."""
         if os.path.exists(os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)):
             license_file = os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)
             with open(license_file, 'r') as f:
@@ -435,7 +442,7 @@ class Helper(object):
         dialog = xbmcgui.Dialog()
         return dialog.yesno(self._language(30026), eula, yeslabel=self._language(30027), nolabel=self._language(30028))
 
-    def _extract_cdm_from_img(self):
+    def _extract_widevine_cdm_from_img(self):
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
@@ -450,9 +457,10 @@ class Helper(object):
         """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
         for cdm_file in os.listdir(self._cdm_path()):
             if cdm_file.endswith(config.CDM_EXTENSIONS):
+                self._log('[install_cdm] found file: {0}'.format(cdm_file))
                 cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
-                if self._os == 'Windows':  # don't symlink on Windows
+                if self._os == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:
                     os.symlink(cdm_path_addon, cdm_path_inputstream)
@@ -491,11 +499,11 @@ class Helper(object):
         return True
 
     def _supports_hls(self):
+        """Return if HLS support is available in inputstream.adaptive."""
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
-            self._log(
-                'HLS is not supported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
+            self._log('HLS is unsupported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
             dialog = xbmcgui.Dialog()
             dialog.ok(self._language(30004),
                       self._language(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))

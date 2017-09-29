@@ -409,6 +409,7 @@ class Helper(object):
                 if not self._unzip(self._temp_path(), bin_filename) or not self._set_loop_dev() or not self._losetup(bin_path) or not self._mnt_loop_dev():
                     self._cleanup()
                     busy_dialog.close()
+                    dialog.ok(self._language(30004), self._language(30005))
                 else:
                     self._extract_widevine_cdm_from_img()
                     self._install_cdm()

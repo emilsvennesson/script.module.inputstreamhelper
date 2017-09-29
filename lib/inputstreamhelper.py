@@ -137,6 +137,15 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
+    def _run_cmd(self, cmd):
+        try:
+            output = subprocess.check_output(cmd)
+            self._log('{0} cmd executed successfully.'.format(cmd))
+            return True
+        except subprocess.CalledProcessError, error:
+            self._log('cmd failed with output: {0}'.format(error.output))
+            return False
+
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
         cmd = ['losetup', '-f']
@@ -147,9 +156,12 @@ class Helper(object):
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
-        subprocess.check_output(cmd)
-        self._attached_loop_dev = True
-        return True
+        success = self._run_cmd(cmd)
+        if success:
+            self._attached_loop_dev = True
+            return True
+        else:
+            return False
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
@@ -163,9 +175,12 @@ class Helper(object):
         else:
             self._log('User do not have root permissions and/or sudo installed.')
 
-        subprocess.check_output(cmd)
-        self._mounted = True
-        return True
+        success = self._run_cmd(cmd)
+        if success:
+            self._mounted = True
+            return True
+        else:
+            return False
 
     def _has_widevine_cdm(self):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
@@ -463,12 +478,14 @@ class Helper(object):
             cmd = ['umount', self._mnt_path()]
             if not os.getuid() == 0 and self._cmd_exists('sudo'):  # no need to ask for permission again
                 cmd.insert(0, 'sudo')
-            subprocess.check_call(cmd)
-            self._mounted = False
+            unmount_success = self._run_cmd(cmd)
+            if unmount_success:
+                self._mounted = False
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
-            subprocess.check_call(cmd)
-            self._loop_dev = False
+            unattach_success = self._run_cmd(cmd)
+            if unattach_success:
+                self._loop_dev = False
 
         shutil.rmtree(self._temp_path())
         return True

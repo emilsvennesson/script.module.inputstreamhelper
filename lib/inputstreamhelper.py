@@ -25,8 +25,9 @@ class Helper(object):
 
         self._url = None
         self._download_path = None
+        self._loop_dev = None
+        self._attached_loop_dev = False
         self._mounted = False
-        self._loop_dev = False
 
         self.protocol = protocol
         self.drm = drm
@@ -136,16 +137,23 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
+    def _set_loop_dev(self):
+        """Set an unused loop device that's available for use."""
+        cmd = ['losetup', '-f']
+        self._loop_dev = subprocess.check_output(cmd).strip()
+        self._log('Found free loop device: {0}'.format(self._loop_dev))
+        return True
+
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', config.LOOP_DEV, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
+        cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
         subprocess.check_output(cmd)
-        self._loop_dev = True
+        self._attached_loop_dev = True
         return True
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
-        cmd = ['mount', '-t', 'ext2', config.LOOP_DEV, '-o', 'ro', self._mnt_path()]
+        cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
         subprocess.check_output(cmd)
         self._mounted = True
         return True
@@ -321,10 +329,10 @@ class Helper(object):
                 self._unzip(self._cdm_path())
                 if self._widevine_eula():
                     self._install_cdm()
+                    self._cleanup()
                 else:
                     self._cleanup()
                     return False
-                self._cleanup()
 
                 if self._has_widevine_cdm():
                     dialog.ok(self._language(30001), self._language(30003))
@@ -367,10 +375,9 @@ class Helper(object):
 
                 bin_filename = self._url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
-                if not self._unzip(self._temp_path(), bin_filename) or not self._losetup(bin_path) or not self._mnt_loop_dev():
+                if not self._unzip(self._temp_path(), bin_filename) or not self._set_loop_dev() or not self._losetup(bin_path) or not self._mnt_loop_dev():
                     self._cleanup()
                     busy_dialog.close()
-                    return False
                 else:
                     self._extract_cdm_from_img()
                     self._install_cdm()
@@ -447,8 +454,8 @@ class Helper(object):
             cmd = ['umount', self._mnt_path()]
             subprocess.check_call(cmd)
             self._mounted = False
-        if self._loop_dev:
-            cmd = ['losetup', '-d', config.LOOP_DEV]
+        if self._attached_loop_dev:
+            cmd = ['losetup', '-d', self._loop_dev]
             subprocess.check_call(cmd)
             self._loop_dev = False
 

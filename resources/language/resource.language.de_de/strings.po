@@ -131,4 +131,4 @@ msgstr ""
 
 msgctxt "#30030"
 msgid "Administrative rights ([B]sudo[/B]) is required to mount the Chrome OS image. Press OK to grant the installation permission to run the mount command as [B]sudo[/B]."
-msgstr ""
+msgstr "Administratiren Rechte ([B]sudo[/B]) sind erforderlich um das Chrome OS Image zu mounten. Mit OK bestätigen sie, dass der mount befehl via [B]sudo[/B] ausgeführt werden darf."

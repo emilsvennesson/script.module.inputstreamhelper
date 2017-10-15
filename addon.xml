@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="script.module.inputstreamhelper"
-       version="0.2.0"
+       version="0.2.1"
        name="InputStream Helper"
        provider-name="emilsvennesson">
   <requires>
@@ -10,13 +10,9 @@
   <extension library="lib" point="xbmc.python.module"/>
   <extension point="xbmc.addon.metadata">
     <description lang="en_GB">A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.</description>
-    <news>2017.09.29 v0.2.0
-    + Automatic Widevine CDM download on ARM devices
-    + Display Widevine EULA during installation procedure
-    + German translation (thanks to asciidisco)
-    + New, smaller and less ugly generic icon
-    + Better exception handling
-    + Code cleanup
+    <news>2017.10.15 v0.2.1
+    + Update German translation (thanks to asciidisco)
+    + Improve root permissions acquisition
     </news>
     <platform>all</platform>
     <license>MIT License</license>

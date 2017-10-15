@@ -524,15 +524,16 @@ class Helper(object):
 
     def _check_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
-        if self.drm and self._inputstream_addon == 'inputstream.adaptive':
-            if self.drm == 'widevine':
-                if not self._supports_widevine():
-                    return False
-                if not self._has_widevine_cdm():
-                    if 'x86' in self._arch():
-                        return self._install_widevine_cdm_x86()
-                    else:
-                        return self._install_widevine_cdm_arm()
+        if not self.drm or not self._inputstream_addon == 'inputstream.adaptive':
+            return True
+        if self.drm == 'widevine':
+            if not self._supports_widevine():
+                return False
+            if not self._has_widevine_cdm():
+                if 'x86' in self._arch():
+                    return self._install_widevine_cdm_x86()
+                else:
+                    return self._install_widevine_cdm_arm()
 
         return True
 

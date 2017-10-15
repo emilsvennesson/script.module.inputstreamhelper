@@ -154,7 +154,7 @@ class Helper(object):
 
     def _run_cmd(self, cmd, sudo=False, ask=True):
         dialog = xbmcgui.Dialog()
-        if ask and not dialog.yesno(self._language(30001), self._language(30030), yeslabel=self._language(30029), nolabel=self._language(30028)):
+        if ask and os.getuid() != 0 and not dialog.yesno(self._language(30001), self._language(30030), yeslabel=self._language(30029), nolabel=self._language(30028)):
             self._log('User refused to give sudo permissions.')
             return cmd
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):

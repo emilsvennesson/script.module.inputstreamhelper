@@ -152,14 +152,25 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
-    def _run_cmd(self, cmd):
+    def _run_cmd(self, cmd, sudo=False, ask=True):
+        dialog = xbmcgui.Dialog()
+        if ask and not dialog.yesno(self._language(30001), self._language(30030), yeslabel=self._language(30029), nolabel=self._language(30028)):
+            self._log('User refused to give sudo permissions.')
+            return cmd
+        if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
+            cmd.insert(0, 'sudo')
+
         try:
             subprocess.check_output(cmd)
             self._log('{0} cmd executed successfully.'.format(cmd))
-            return True
+            success = True
         except subprocess.CalledProcessError, error:
             self._log('cmd failed with output: {0}'.format(error.output))
-            return False
+            success = False
+        if 'sudo' in cmd:
+            subprocess.check_output(['sudo -k'])  # reset timestamp
+
+        return success
 
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
@@ -171,7 +182,7 @@ class Helper(object):
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
-        success = self._run_cmd(cmd)
+        success = self._run_cmd(cmd, sudo=True, ask=True)
         if success:
             self._attached_loop_dev = True
             return True
@@ -180,15 +191,8 @@ class Helper(object):
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
-        dialog = xbmcgui.Dialog()
         cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
-        if os.getuid() != 0 and self._cmd_exists('sudo'):  # ask for permission to wrap cmd in sudo
-            if dialog.yesno(self._language(30001), self._language(30030), yeslabel=self._language(30029), nolabel=self._language(30028)):
-                cmd.insert(0, 'sudo')
-            else:
-                self._log('User refused to give sudo permission.')
-
-        success = self._run_cmd(cmd)
+        success = self._run_cmd(cmd, sudo=True, ask=False)
         if success:
             self._mounted = True
             return True
@@ -495,14 +499,12 @@ class Helper(object):
         """Clean up after Widevine DRM installation."""
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
-            if os.getuid() != 0 and self._cmd_exists('sudo'):  # no need to ask for permission again
-                cmd.insert(0, 'sudo')
-            unmount_success = self._run_cmd(cmd)
+            unmount_success = self._run_cmd(cmd, sudo=True, ask=False)
             if unmount_success:
                 self._mounted = False
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
-            unattach_success = self._run_cmd(cmd)
+            unattach_success = self._run_cmd(cmd, sudo=True, ask=False)
             if unattach_success:
                 self._loop_dev = False
 

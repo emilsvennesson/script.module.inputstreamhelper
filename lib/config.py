@@ -34,18 +34,8 @@ WIDEVINE_SUPPORTED_ARCHS = [
 ]
 
 WIDEVINE_ARCH_MAP_X86 = {
-    'x86_64':
-        {
-            'Linux': 'x64',
-            'Windows': 'x64',
-            'Darwin': 'x64'
-        },
-    'x86':
-        {
-            'Linux': 'ia32',
-            'Windows': 'ia32',
-            'Darwin': 'ia32'
-        }
+    'x86_64': 'x64',
+    'x86': 'ia32'
 }
 
 WIDEVINE_OS_MAP = {

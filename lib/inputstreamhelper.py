@@ -369,7 +369,7 @@ class Helper(object):
         if dialog.yesno(self._language(30001), self._language(30002)):
             cdm_version = self._current_widevine_cdm_version()
             cdm_os = config.WIDEVINE_OS_MAP[self._os]
-            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()][self._os]
+            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
             downloaded = self._http_request(download=True)

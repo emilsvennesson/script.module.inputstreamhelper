@@ -134,5 +134,5 @@ msgid "Administrative rights ([B]sudo[/B]) is required to mount the Chrome OS im
 msgstr ""
 
 msgctxt "#30031"
-msgid "An update of [B]Widevine DRM[/] is required to play this content."
+msgid "An update of [B]Widevine DRM[/B] is required to play this content."
 msgstr ""

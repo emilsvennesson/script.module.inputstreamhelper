@@ -74,7 +74,7 @@ msgid "Downloading [B]{0}[/B]..."
 msgstr ""
 
 msgctxt "#30016"
-msgid "Failed to extract [B]Widevine CDM[/B] from zip file."
+msgid "Failed to extract [B]Widevine DRM[/B] from zip file."
 msgstr ""
 
 msgctxt "#30017"
@@ -82,7 +82,7 @@ msgid "[B]{0}[/B] {1} or later is required to play this content."
 msgstr ""
 
 msgctxt "#30018"
-msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{0}[/B] and try again."
+msgid "You do not have enough free disk space to install [B]Widevine DRM[/B]. Free up at least [B]{0}[/B] and try again."
 msgstr ""
 
 msgctxt "#30019"

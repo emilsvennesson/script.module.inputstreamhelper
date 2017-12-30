@@ -489,6 +489,8 @@ class Helper(object):
                 if self._os == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:
+                    if os.path.lexists(cdm_path_inputstream):
+                        os.remove(cdm_path_inputstream)  # it's ok to overwrite
                     os.symlink(cdm_path_addon, cdm_path_inputstream)
 
         return True

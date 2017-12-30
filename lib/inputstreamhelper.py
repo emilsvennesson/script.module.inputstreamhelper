@@ -115,11 +115,8 @@ class Helper(object):
         version = xbmc.getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
 
-    def _inputstream_version(self):
-        addon = xbmcaddon.Addon(self._inputstream_addon)
-        return addon.getAddonInfo('version')
-
-    def _arch(self):
+    @classmethod
+    def _arch(cls):
         """Map together and return the system architecture."""
         arch = platform.machine()
         if arch == 'AMD64':
@@ -135,6 +132,10 @@ class Helper(object):
             return arm_arch
 
         return arch
+
+    def _inputstream_version(self):
+        addon = xbmcaddon.Addon(self._inputstream_addon)
+        return addon.getAddonInfo('version')
 
     def _log(self, string):
         """InputStream Helper log method."""

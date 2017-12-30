@@ -107,6 +107,10 @@ class Helper(object):
         return cdm_path
 
     @classmethod
+    def _widevine_manifest_path(cls):
+        return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE)
+
+    @classmethod
     def _kodi_version(cls):
         version = xbmc.getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
@@ -540,6 +544,17 @@ class Helper(object):
                     return self._install_widevine_cdm_x86()
                 else:
                     return self._install_widevine_cdm_arm()
+            if 'x86' in self._arch():
+                dialog = xbmcgui.Dialog()
+                if not os.path.exists(self._widevine_manifest_path()):  # needed to validate arch/version
+                    dialog.ok(self._language(30001), self._language(30031))
+                    return self._install_widevine_cdm_x86()
+
+                with open(self._widevine_manifest_path(), 'r') as f:
+                    widevine_manifest = json.loads(f.read())
+                if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
+                    dialog.ok(self._language(30001), self._language(30031))
+                    return self._install_widevine_cdm_x86()
 
         return True
 

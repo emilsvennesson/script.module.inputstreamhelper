@@ -18,7 +18,7 @@ msgid "Information"
 msgstr ""
 
 msgctxt "#30002"
-msgid "You do not have [B]Widevine DRM[/B] installed. This is required to play this content.[CR][CR]Do you want to install [B]Widevine DRM[/B]?"
+msgid "[B]Widevine CDM[/B] is required to play this content.[CR][CR]Do you want to install [B]Widevine DRM[/B]?"
 msgstr ""
 
 msgctxt "#30003"

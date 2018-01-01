@@ -179,7 +179,7 @@ class Helper(object):
             self._log('cmd failed with output: {0}'.format(error.output))
             success = False
         if 'sudo' in cmd:
-            subprocess.check_output(['sudo -k'])  # reset timestamp
+            subprocess.call(['sudo', '-k'])  # reset timestamp
 
         return success
 

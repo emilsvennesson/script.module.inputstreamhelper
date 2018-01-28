@@ -401,7 +401,7 @@ class Helper(object):
                 if self._has_widevine():
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                     busy_dialog.close()
-                    return True
+                    return self._check_widevine()
                 else:
                     busy_dialog.close()
                     dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
@@ -457,7 +457,7 @@ class Helper(object):
                     if self._has_widevine():
                         dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                         busy_dialog.close()
-                        return True
+                        return self._check_widevine()
                     else:
                         busy_dialog.close()
                         dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
@@ -493,6 +493,49 @@ class Helper(object):
 
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
         return False
+
+    def _missing_widevine_libs(self):
+        if not self._os == 'Linux':  # this should only be needed for linux
+            return None
+
+        missing_libs = []
+        cmd = ['ldd', self._widevine_path()]
+        output = subprocess.check_output(cmd)
+        self._log('ldd output: {0}'.format(output))
+
+        for line in output.splitlines():
+            if '=>' not in line:
+                continue
+            lib_path = line.strip().split('=>')
+            lib = lib_path[0].strip()
+            path = lib_path[1].strip()
+            if path == 'not found':
+                missing_libs.append(lib)
+
+        if not missing_libs:
+            self._log('There are no missing Widevine libraries! :-)')
+            return None
+        else:
+            self._log('Widevine is missing the following libraries: {0}'.format(missing_libs))
+            return missing_libs
+
+    def _check_widevine(self):
+        dialog = xbmcgui.Dialog()
+        if 'x86' in self._arch():  # check that widevine arch matches system arch
+            if not os.path.exists(self._widevine_manifest_path()):
+                dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
+                return self._install_widevine_x86()
+            with open(self._widevine_manifest_path(), 'r') as f:
+                widevine_manifest = json.loads(f.read())
+            if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
+                dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
+                return self._install_widevine_x86()
+
+        if self._missing_widevine_libs():
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30032).format(', '.join(self._missing_widevine_libs())))
+            return False
+
+        return True
 
     def _install_cdm(self):
         """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
@@ -555,6 +598,7 @@ class Helper(object):
         """Main function for ensuring that specified DRM system is installed and available."""
         if not self.drm or not self._inputstream_addon == 'inputstream.adaptive':
             return True
+
         if self.drm == 'widevine':
             if not self._supports_widevine():
                 return False
@@ -563,17 +607,8 @@ class Helper(object):
                     return self._install_widevine_x86()
                 else:
                     return self._install_widevine_arm()
-            if 'x86' in self._arch():
-                dialog = xbmcgui.Dialog()
-                if not os.path.exists(self._widevine_manifest_path()):  # needed to validate arch/version
-                    dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                    return self._install_widevine_x86()
 
-                with open(self._widevine_manifest_path(), 'r') as f:
-                    widevine_manifest = json.loads(f.read())
-                if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
-                    dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                    return self._install_widevine_x86()
+            return self._check_widevine()
 
         return True
 

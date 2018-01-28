@@ -111,6 +111,14 @@ class Helper(object):
         return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE)
 
     @classmethod
+    def _widevine_path(cls):
+        for filename in os.listdir(cls._ia_cdm_path()):
+            if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
+                return os.path.join(cls._ia_cdm_path(), filename)
+
+        return False
+
+    @classmethod
     def _kodi_version(cls):
         version = xbmc.getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
@@ -216,13 +224,13 @@ class Helper(object):
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
         else:
-            for filename in os.listdir(self._ia_cdm_path()):
-                if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
-                    self._log('Found Widevine binary at {0}'.format(os.path.join(self._ia_cdm_path(), filename)))
-                    return True
+            if self._widevine_path():
+                self._log('Found Widevine binary at {0}'.format(self._widevine_path()))
+                return True
+            else:
+                self._log('Widevine is not installed.')
+                return False
 
-            self._log('Widevine is not installed.')
-            return False
 
     def _json_rpc_request(self, payload):
         """Kodi JSON-RPC request. Return the response in a dictionary."""

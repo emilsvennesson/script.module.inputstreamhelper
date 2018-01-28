@@ -46,14 +46,18 @@ WIDEVINE_OS_MAP = {
 }
 
 WIDEVINE_SUPPORTED_OS = [
+    'Android',
     'Linux',
     'Windows',
     'Darwin'
 ]
 
-WIDEVINE_ANDROID_MINIMUM_KODI_VERSION = '18.0'
-
-WIDEVINE_MINIMUM_KODI_VERSION = '17.4'
+WIDEVINE_MINIMUM_KODI_VERSION = {
+    'Android': '18.0',
+    'Windows': '17.4',
+    'Linux': '17.4',
+    'Darwin': '17.4'
+}
 
 WIDEVINE_CURRENT_VERSION_URL = 'https://dl.google.com/widevine-cdm/current.txt'
 

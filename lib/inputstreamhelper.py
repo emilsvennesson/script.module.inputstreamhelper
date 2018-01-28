@@ -335,11 +335,6 @@ class Helper(object):
     def _supports_widevine(self):
         """Check if Widevine is supported on the architecture/operating system/Kodi version."""
         dialog = xbmcgui.Dialog()
-        if self._os() == 'Android':
-            min_version = config.WIDEVINE_ANDROID_MINIMUM_KODI_VERSION
-        else:
-            min_version = config.WIDEVINE_MINIMUM_KODI_VERSION
-
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
             self._log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
             dialog.ok(LANGUAGE(30004), LANGUAGE(30007))
@@ -348,9 +343,9 @@ class Helper(object):
             self._log('Unsupported Widevine OS found: {0}'.format(self._os()))
             dialog.ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os()))
             return False
-        if LooseVersion(min_version) > LooseVersion(self._kodi_version()):
+        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30010).format(min_version))
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]))
             return False
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
             self._log('Unsupported UWP Kodi version detected.')

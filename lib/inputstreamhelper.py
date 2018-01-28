@@ -21,7 +21,6 @@ LANGUAGE = ADDON.getLocalizedString
 
 class Helper(object):
     def __init__(self, protocol, drm=None):
-        self._os = platform.system()
         self._log('Platform information: {0}'.format(platform.uname()))
 
         self._url = None
@@ -141,6 +140,12 @@ class Helper(object):
 
         return arch
 
+    def _os(cls):
+        if xbmc.getCondVisibility('system.platform.android'):
+            return 'Android'
+
+        return platform.system()
+
     def _inputstream_version(self):
         addon = xbmcaddon.Addon(self._inputstream_addon)
         return addon.getAddonInfo('version')
@@ -221,7 +226,7 @@ class Helper(object):
 
     def _has_widevine(self):
         """Checks if Widevine CDM is installed on system."""
-        if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
+        if self._os() == 'Android':  # widevine is built in on android
             return True
         else:
             if self._widevine_path():
@@ -330,7 +335,7 @@ class Helper(object):
     def _supports_widevine(self):
         """Check if Widevine is supported on the architecture/operating system/Kodi version."""
         dialog = xbmcgui.Dialog()
-        if xbmc.getCondVisibility('system.platform.android'):
+        if self._os() == 'Android':
             min_version = config.WIDEVINE_ANDROID_MINIMUM_KODI_VERSION
         else:
             min_version = config.WIDEVINE_MINIMUM_KODI_VERSION
@@ -339,9 +344,9 @@ class Helper(object):
             self._log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
             dialog.ok(LANGUAGE(30004), LANGUAGE(30007))
             return False
-        if self._os not in config.WIDEVINE_SUPPORTED_OS:
-            self._log('Unsupported Widevine OS found: {0}'.format(self._os))
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os))
+        if self._os() not in config.WIDEVINE_SUPPORTED_OS:
+            self._log('Unsupported Widevine OS found: {0}'.format(self._os()))
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os()))
             return False
         if LooseVersion(min_version) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
@@ -382,7 +387,7 @@ class Helper(object):
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
             cdm_version = self._current_widevine_version()
-            cdm_os = config.WIDEVINE_OS_MAP[self._os]
+            cdm_os = config.WIDEVINE_OS_MAP[self._os()]
             cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
@@ -415,8 +420,8 @@ class Helper(object):
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)) and dialog.yesno(LANGUAGE(30001), LANGUAGE(30006).format(
                 self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
-            if self._os != 'Linux':
-                dialog.ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os))
+            if self._os() != 'Linux':
+                dialog.ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os()))
                 return False
             if required_diskspace >= self._diskspace():
                 dialog.ok(LANGUAGE(30004),
@@ -496,7 +501,7 @@ class Helper(object):
 
     def _missing_widevine_libs(self):
         # this should only be needed for linux
-        if not self._os == 'Linux' or xbmc.getCondVisibility('system.platform.android'):
+        if not self._os() == 'Linux':
             return None
 
         missing_libs = []
@@ -545,7 +550,7 @@ class Helper(object):
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
                 cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
-                if self._os == 'Windows':  # copy on windows
+                if self._os() == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:
                     if os.path.lexists(cdm_path_inputstream):

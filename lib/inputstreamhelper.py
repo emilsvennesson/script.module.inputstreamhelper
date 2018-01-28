@@ -447,11 +447,7 @@ class Helper(object):
                     self._set_loop_dev(), self._losetup(bin_path),
                     self._mnt_loop_dev()
                 ]
-                if not all(success):
-                    self._cleanup()
-                    busy_dialog.close()
-                    dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
-                else:
+                if all(success):
                     self._extract_widevine_from_img()
                     self._install_cdm()
                     self._cleanup()
@@ -462,6 +458,10 @@ class Helper(object):
                     else:
                         busy_dialog.close()
                         dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
+                else:
+                    self._cleanup()
+                    busy_dialog.close()
+                    dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
 
         return False
 

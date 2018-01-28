@@ -141,6 +141,7 @@ class Helper(object):
 
         return arch
 
+    @classmethod
     def _os(cls):
         if xbmc.getCondVisibility('system.platform.android'):
             return 'Android'

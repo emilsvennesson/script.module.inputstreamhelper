@@ -211,7 +211,7 @@ class Helper(object):
         else:
             return False
 
-    def _has_widevine_cdm(self):
+    def _has_widevine(self):
         """Checks if Widevine CDM is installed on system."""
         if xbmc.getCondVisibility('system.platform.android'):  # widevine is built in on android
             return True
@@ -346,7 +346,7 @@ class Helper(object):
 
         return True
 
-    def _current_widevine_cdm_version(self):
+    def _current_widevine_version(self):
         """Return the latest available version of Widevine CDM."""
         self._url = config.WIDEVINE_CURRENT_VERSION_URL
         return self._http_request()
@@ -369,11 +369,11 @@ class Helper(object):
         self._log('chromeos devices: {0}'.format(devices))
         return devices
 
-    def _install_widevine_cdm_x86(self):
+    def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
-            cdm_version = self._current_widevine_cdm_version()
+            cdm_version = self._current_widevine_version()
             cdm_os = config.WIDEVINE_OS_MAP[self._os]
             cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
@@ -390,7 +390,7 @@ class Helper(object):
                     self._cleanup()
                     return False
 
-                if self._has_widevine_cdm():
+                if self._has_widevine():
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                     busy_dialog.close()
                     return True
@@ -400,7 +400,7 @@ class Helper(object):
 
         return False
 
-    def _install_widevine_cdm_arm(self):
+    def _install_widevine_arm(self):
         """Install Widevine CDM on ARM-based architectures."""
         arm_device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
@@ -438,10 +438,10 @@ class Helper(object):
                     busy_dialog.close()
                     dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
                 else:
-                    self._extract_widevine_cdm_from_img()
+                    self._extract_widevine_from_img()
                     self._install_cdm()
                     self._cleanup()
-                    if self._has_widevine_cdm():
+                    if self._has_widevine():
                         dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                         busy_dialog.close()
                         return True
@@ -458,7 +458,7 @@ class Helper(object):
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._current_widevine_cdm_version(), 'mac', 'x64')
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._current_widevine_version(), 'mac', 'x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
                 with zipfile.ZipFile(self._download_path) as z:
@@ -470,7 +470,7 @@ class Helper(object):
         dialog = xbmcgui.Dialog()
         return dialog.yesno(LANGUAGE(30026), eula, yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028))
 
-    def _extract_widevine_cdm_from_img(self):
+    def _extract_widevine_from_img(self):
         """Extract the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
@@ -545,22 +545,22 @@ class Helper(object):
         if self.drm == 'widevine':
             if not self._supports_widevine():
                 return False
-            if not self._has_widevine_cdm():
+            if not self._has_widevine():
                 if 'x86' in self._arch():
-                    return self._install_widevine_cdm_x86()
+                    return self._install_widevine_x86()
                 else:
-                    return self._install_widevine_cdm_arm()
+                    return self._install_widevine_arm()
             if 'x86' in self._arch():
                 dialog = xbmcgui.Dialog()
                 if not os.path.exists(self._widevine_manifest_path()):  # needed to validate arch/version
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                    return self._install_widevine_cdm_x86()
+                    return self._install_widevine_x86()
 
                 with open(self._widevine_manifest_path(), 'r') as f:
                     widevine_manifest = json.loads(f.read())
                 if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                    return self._install_widevine_cdm_x86()
+                    return self._install_widevine_x86()
 
         return True
 

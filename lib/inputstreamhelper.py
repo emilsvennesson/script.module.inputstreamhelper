@@ -167,7 +167,7 @@ class Helper(object):
         self._log('losetup calculation cmd: {0}'.format(cmd))
 
         output = subprocess.check_output(cmd)
-        self._log('losetup calculation output: {0}'.format(output))
+        self._log('losetup calculation output: \n{0}'.format(output))
         for line in output.splitlines():
             partition_data = line.split()
             if partition_data:
@@ -503,7 +503,7 @@ class Helper(object):
             missing_libs = []
             cmd = ['ldd', self._widevine_path()]
             output = subprocess.check_output(cmd)
-            self._log('ldd output: {0}'.format(output))
+            self._log('ldd output: \n{0}'.format(output))
 
             for line in output.splitlines():
                 if '=>' not in line:

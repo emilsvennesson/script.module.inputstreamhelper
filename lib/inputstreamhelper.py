@@ -495,7 +495,8 @@ class Helper(object):
         return False
 
     def _missing_widevine_libs(self):
-        if not self._os == 'Linux':  # this should only be needed for linux
+        # this should only be needed for linux
+        if not self._os == 'Linux' or xbmc.getCondVisibility('system.platform.android'):
             return None
 
         missing_libs = []

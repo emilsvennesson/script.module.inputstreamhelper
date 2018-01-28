@@ -499,26 +499,30 @@ class Helper(object):
         if self._os() != 'Linux':  # this should only be needed for linux
             return None
 
-        missing_libs = []
-        cmd = ['ldd', self._widevine_path()]
-        output = subprocess.check_output(cmd)
-        self._log('ldd output: {0}'.format(output))
+        if self._cmd_exists('ldd'):
+            missing_libs = []
+            cmd = ['ldd', self._widevine_path()]
+            output = subprocess.check_output(cmd)
+            self._log('ldd output: {0}'.format(output))
 
-        for line in output.splitlines():
-            if '=>' not in line:
-                continue
-            lib_path = line.strip().split('=>')
-            lib = lib_path[0].strip()
-            path = lib_path[1].strip()
-            if path == 'not found':
-                missing_libs.append(lib)
+            for line in output.splitlines():
+                if '=>' not in line:
+                    continue
+                lib_path = line.strip().split('=>')
+                lib = lib_path[0].strip()
+                path = lib_path[1].strip()
+                if path == 'not found':
+                    missing_libs.append(lib)
 
-        if not missing_libs:
-            self._log('There are no missing Widevine libraries! :-)')
-            return None
+            if not missing_libs:
+                self._log('There are no missing Widevine libraries! :-)')
+                return None
+            else:
+                self._log('Widevine is missing the following libraries: {0}'.format(missing_libs))
+                return missing_libs
         else:
-            self._log('Widevine is missing the following libraries: {0}'.format(missing_libs))
-            return missing_libs
+            self._log('ldd is not available - unable to check for missing widevine libs')
+            return None
 
     def _check_widevine(self):
         dialog = xbmcgui.Dialog()

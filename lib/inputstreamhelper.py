@@ -402,8 +402,8 @@ class Helper(object):
 
     def _install_widevine_arm(self):
         """Install Widevine CDM on ARM-based architectures."""
-        arm_device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
-        required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
+        device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
+        required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)) and dialog.yesno(LANGUAGE(30001), LANGUAGE(30006).format(
                 self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
@@ -424,16 +424,21 @@ class Helper(object):
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30021).format('losetup'))
                 return False
 
-            self._url = arm_device['url']
+            self._url = device['url']
             downloaded = self._http_request(download=True, message=LANGUAGE(30022))
             if downloaded:
                 dialog.ok(LANGUAGE(30023), LANGUAGE(30024))
                 busy_dialog = xbmcgui.DialogBusy()
                 busy_dialog.create()
-
                 bin_filename = self._url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
-                if not self._unzip(self._temp_path(), bin_filename) or not self._set_loop_dev() or not self._losetup(bin_path) or not self._mnt_loop_dev():
+
+                success = [
+                    self._unzip(self._temp_path(), bin_filename),
+                    self._set_loop_dev(), self._losetup(bin_path),
+                    self._mnt_loop_dev()
+                ]
+                if not all(success):
                     self._cleanup()
                     busy_dialog.close()
                     dialog.ok(LANGUAGE(30004), LANGUAGE(30005))

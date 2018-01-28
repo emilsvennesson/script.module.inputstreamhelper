@@ -9,6 +9,7 @@ from distutils.version import LooseVersion
 import requests
 
 import config
+
 import xbmc
 import xbmcaddon
 import xbmcgui
@@ -235,7 +236,6 @@ class Helper(object):
             else:
                 self._log('Widevine is not installed.')
                 return False
-
 
     def _json_rpc_request(self, payload):
         """Kodi JSON-RPC request. Return the response in a dictionary."""

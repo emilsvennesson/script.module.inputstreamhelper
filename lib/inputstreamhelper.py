@@ -496,8 +496,7 @@ class Helper(object):
         return False
 
     def _missing_widevine_libs(self):
-        # this should only be needed for linux
-        if not self._os() == 'Linux':
+        if self._os() != 'Linux':  # this should only be needed for linux
             return None
 
         missing_libs = []

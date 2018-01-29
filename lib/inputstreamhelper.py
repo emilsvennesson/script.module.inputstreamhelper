@@ -356,9 +356,12 @@ class Helper(object):
         return True
 
     def _current_widevine_version(self):
-        """Return the latest available version of Widevine CDM."""
-        self._url = config.WIDEVINE_CURRENT_VERSION_URL
-        return self._http_request()
+        """Return the latest available version of Widevine CDM/Chrome OS."""
+        if 'x86' in self._arch():
+            self._url = config.WIDEVINE_CURRENT_VERSION_URL
+            return self._http_request()
+        else:
+            return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
 
     def _chromeos_config(self):
         """Parse the Chrome OS recovery configuration and put it in a dictionary."""

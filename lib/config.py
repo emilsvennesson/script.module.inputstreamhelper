@@ -68,6 +68,8 @@ WIDEVINE_MANIFEST_FILE = 'manifest.json'
 
 WIDEVINE_CONFIG_NAME = 'widevine_config.json'
 
+WIDEVINE_UPDATE_INTERVAL_DAYS = 1
+
 CHROMEOS_RECOVERY_CONF = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 
 CHROMEOS_ARM_HWID = 'SPRING'

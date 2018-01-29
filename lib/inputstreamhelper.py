@@ -2,9 +2,11 @@ import os
 import platform
 import zipfile
 import json
+import time
 import subprocess
 import shutil
 from distutils.version import LooseVersion
+from datetime import datetime, timedelta
 
 import requests
 
@@ -362,6 +364,8 @@ class Helper(object):
 
     def _latest_widevine_version(self, eula=False):
         """Return the latest available version of Widevine CDM/Chrome OS."""
+        datetime_obj = datetime.utcnow()
+        ADDON.setSetting('last_update', str(time.mktime(datetime_obj.timetuple())))
         if 'x86' in self._arch() or eula:
             self._url = config.WIDEVINE_CURRENT_VERSION_URL
             return self._http_request()
@@ -486,6 +490,14 @@ class Helper(object):
             return self._install_widevine_arm()
 
     def _update_widevine(self):
+        utcnow = datetime.utcnow()
+        last_update = ADDON.getSetting('last_update')
+        if last_update:
+            last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
+            if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= utcnow:
+                self._log('Widevine update check was made on {0}'.format(last_update_dt.isoformat()))
+                return
+
         wv_config = self._load_widevine_config()
         latest_version = self._latest_widevine_version()
         if 'x86' in self._arch():
@@ -496,6 +508,7 @@ class Helper(object):
             current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
         self._log('Latest {0} version is {1}'.format(component, latest_version))
         self._log('Current {0} version installed is {1}'.format(component, current_version))
+        ADDON.setSetting('last_update', str(time.mktime(utcnow.timetuple())))
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
             self._log('There is an update available for {0}'.format(component))

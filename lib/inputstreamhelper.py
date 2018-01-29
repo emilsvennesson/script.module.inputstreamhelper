@@ -489,21 +489,23 @@ class Helper(object):
         wv_config = self._load_widevine_config()
         latest_version = self._latest_widevine_version()
         if 'x86' in self._arch():
+            component = 'Widevine CDM'
             current_version = wv_config['version']
         else:
+            component = 'Chrome OS'
             current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
-        self._log('Latest Widevine version is {0}'.format(latest_version))
-        self._log('Current Widevine version installed is {0}'.format(current_version))
+        self._log('Latest {0} version is {1}'.format(component, latest_version))
+        self._log('Current {0} version installed is {1}'.format(component, current_version))
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
-            self._log('There is an update available for Widevine CDM.')
+            self._log('There is an update available for {0}'.format(component))
             dialog = xbmcgui.Dialog()
             if dialog.yesno(LANGUAGE(30001), LANGUAGE(30033), yeslabel=LANGUAGE(30034), nolabel=LANGUAGE(30028)):
                 self._install_widevine()
             else:
-                self._log('User declined to update Widevine CDM.')
+                self._log('User declined to update {0}.'.format(component))
         else:
-            self._log('User is on the latest available Widevine CDM version.')
+            self._log('User is on the latest available {0} version.'.format(component))
 
     def _widevine_eula(self):
         """Display the Widevine EULA and prompt user to accept it."""

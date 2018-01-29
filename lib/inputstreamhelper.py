@@ -138,13 +138,14 @@ class Helper(object):
             arch_bit = platform.architecture()[0]
             if arch_bit == '32bit':
                 arch = 'x86'
-            elif arch_bit == '64bit':
+            else:
                 arch = 'x86_64'
+        elif 'armv' in arch:
+            arch = 'armv' + arch.split('v')[1][:-1]
         if arch in config.X86_MAP:
             return config.X86_MAP[arch]
-        elif 'armv' in arch:
-            arm_arch = 'armv' + arch.split('v')[1][:-1]
-            return arm_arch
+        elif arch in config.ARM_MAP:
+            return config.ARM_MAP[arch]
 
         return arch
 

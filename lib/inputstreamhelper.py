@@ -367,15 +367,21 @@ class Helper(object):
         datetime_obj = datetime.utcnow()
         ADDON.setSetting('last_update', str(time.mktime(datetime_obj.timetuple())))
         if 'x86' in self._arch() or eula:
-            self._url = config.WIDEVINE_CURRENT_VERSION_URL
-            return self._http_request()
+            if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
+                return config.WIDEVINE_LEGACY_VERSION
+            else:
+                self._url = config.WIDEVINE_CURRENT_VERSION_URL
+                return self._http_request()
         else:
             return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
 
     def _chromeos_config(self):
         """Parse the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
-        self._url = config.CHROMEOS_RECOVERY_CONF
+        if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
+            self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
+        else:
+            self._url = config.CHROMEOS_RECOVERY_URL
         conf = [x for x in self._http_request().split('\n\n') if 'name=' in x]
         for device in conf:
             device_dict = {}

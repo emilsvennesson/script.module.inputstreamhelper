@@ -140,3 +140,11 @@ msgstr ""
 msgctxt "#30032"
 msgid "Your system is missing the following libraries required by Widevine DRM: [B]{0}[/B]. Install the libraries to play this content."
 msgstr ""
+
+msgctxt "#30033"
+msgid "There is an update available for [B]Widevine DRM[/B].[CR][CR]Do you want to install the update?"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Update"
+msgstr ""

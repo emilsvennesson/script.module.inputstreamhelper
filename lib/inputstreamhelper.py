@@ -111,6 +111,11 @@ class Helper(object):
         return os.path.join(cls._addon_cdm_path(), config.WIDEVINE_CONFIG_NAME)
 
     @classmethod
+    def _load_widevine_config(cls):
+        with open(cls._widevine_config_path(), 'r') as config_file:
+            return json.loads(config_file.read())
+
+    @classmethod
     def _widevine_path(cls):
         for filename in os.listdir(cls._ia_cdm_path()):
             if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
@@ -355,7 +360,7 @@ class Helper(object):
 
         return True
 
-    def _current_widevine_version(self):
+    def _latest_widevine_version(self):
         """Return the latest available version of Widevine CDM/Chrome OS."""
         if 'x86' in self._arch():
             self._url = config.WIDEVINE_CURRENT_VERSION_URL
@@ -385,7 +390,7 @@ class Helper(object):
         """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
-            cdm_version = self._current_widevine_version()
+            cdm_version = self._latest_widevine_version()
             cdm_os = config.WIDEVINE_OS_MAP[self._os()]
             cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
@@ -479,6 +484,26 @@ class Helper(object):
         else:
             return self._install_widevine_arm()
 
+    def _update_widevine(self):
+        wv_config = self._load_widevine_config()
+        latest_version = self._latest_widevine_version()
+        if 'x86' in self._arch():
+            current_version = wv_config['version']
+        else:
+            current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
+        self._log('Latest Widevine version is {0}'.format(latest_version))
+        self._log('Current Widevine version installed is {0}'.format(current_version))
+
+        if LooseVersion(latest_version) > LooseVersion(current_version):
+            self._log('There is an update available for Widevine CDM.')
+            dialog = xbmcgui.Dialog()
+            if dialog.yesno(LANGUAGE(30001), LANGUAGE(30033), yeslabel=LANGUAGE(30034), nolabel=LANGUAGE(30028)):
+                self._install_widevine()
+            else:
+                self._log('User declined to update Widevine CDM.')
+        else:
+            self._log('User is on the latest available Widevine CDM version.')
+
     def _widevine_eula(self):
         """Display the Widevine EULA and prompt user to accept it."""
         if os.path.exists(os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
@@ -486,7 +511,7 @@ class Helper(object):
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._current_widevine_version(), 'mac', 'x64')
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(), 'mac', 'x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
                 with zipfile.ZipFile(self._download_path) as z:
@@ -547,16 +572,16 @@ class Helper(object):
             dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
             return self._install_widevine()
 
-            if 'x86' in self._arch():  # check that widevine arch matches system arch
-                with open(self._widevine_config_path(), 'r') as f:
-                    widevine_manifest = json.loads(f.read())
-                if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
-                    dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                    return self._install_widevine()
-
+        if 'x86' in self._arch():  # check that widevine arch matches system arch
+            wv_config = self._load_widevine_config()
+            if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
+                dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
+                return self._install_widevine()
         if self._missing_widevine_libs():
             dialog.ok(LANGUAGE(30004), LANGUAGE(30032).format(', '.join(self._missing_widevine_libs())))
             return False
+
+        self._update_widevine()
 
         return True
 

@@ -567,15 +567,10 @@ class Helper(object):
             return None
 
         if self._cmd_exists('ldd'):
-            cmd = ['ldd', self._widevine_path()]
-            try:
-                output = subprocess.check_output(cmd)
-            except subprocess.CalledProcessError, error:
-                self._log('ldd cmd failed with output: {0}'.format(error.output))
-                return None
-            self._log('ldd output: \n{0}'.format(output))
-
             missing_libs = []
+            cmd = ['ldd', self._widevine_path()]
+            output = subprocess.check_output(cmd)
+            self._log('ldd output: \n{0}'.format(output))
             for line in output.splitlines():
                 if '=>' not in line:
                     continue

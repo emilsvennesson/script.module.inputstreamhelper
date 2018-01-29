@@ -69,7 +69,7 @@ class Helper(object):
     @classmethod
     def _diskspace(cls):
         """Return the free disk space available (in bytes) in cdm_path."""
-        statvfs = os.statvfs(cls._cdm_path())
+        statvfs = os.statvfs(cls._addon_cdm_path())
         return statvfs.f_frsize * statvfs.f_bavail
 
     @classmethod
@@ -89,7 +89,7 @@ class Helper(object):
         return mnt_path
 
     @classmethod
-    def _cdm_path(cls):
+    def _addon_cdm_path(cls):
         cdm_path = os.path.join(ADDON_PROFILE, 'cdm')
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
@@ -107,8 +107,8 @@ class Helper(object):
         return cdm_path
 
     @classmethod
-    def _widevine_manifest_path(cls):
-        return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE)
+    def _widevine_config_path(cls):
+        return os.path.join(cls._addon_cdm_path(), config.WIDEVINE_CONFIG_NAME)
 
     @classmethod
     def _widevine_path(cls):
@@ -360,7 +360,7 @@ class Helper(object):
         self._url = config.WIDEVINE_CURRENT_VERSION_URL
         return self._http_request()
 
-    def _parse_chromeos_recovery_conf(self):
+    def _chromeos_config(self):
         """Parse the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
         self._url = config.CHROMEOS_RECOVERY_CONF
@@ -391,7 +391,7 @@ class Helper(object):
             if downloaded:
                 busy_dialog = xbmcgui.DialogBusy()
                 busy_dialog.create()
-                self._unzip(self._cdm_path())
+                self._unzip(self._addon_cdm_path())
                 if self._widevine_eula():
                     self._install_cdm()
                     self._cleanup()
@@ -400,6 +400,8 @@ class Helper(object):
                     return False
 
                 if self._has_widevine():
+                    os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE),
+                              self._widevine_config_path())
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                     busy_dialog.close()
                     return self._check_widevine()
@@ -411,7 +413,8 @@ class Helper(object):
 
     def _install_widevine_arm(self):
         """Install Widevine CDM on ARM-based architectures."""
-        device = [x for x in self._parse_chromeos_recovery_conf() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
+        cos_config = self._chromeos_config()
+        device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)) and dialog.yesno(LANGUAGE(30001), LANGUAGE(30006).format(
@@ -452,6 +455,8 @@ class Helper(object):
                     self._install_cdm()
                     self._cleanup()
                     if self._has_widevine():
+                        with open(self._widevine_config_path(), 'w') as config_file:
+                            config_file.write(json.dumps(cos_config, indent=4))
                         dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                         busy_dialog.close()
                         return self._check_widevine()
@@ -465,10 +470,16 @@ class Helper(object):
 
         return False
 
+    def _install_widevine(self):
+        if 'x86' in self._arch():
+            return self._install_widevine_x86()
+        else:
+            return self._install_widevine_arm()
+
     def _widevine_eula(self):
         """Display the Widevine EULA and prompt user to accept it."""
-        if os.path.exists(os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)):
-            license_file = os.path.join(self._cdm_path(), config.WIDEVINE_LICENSE_FILE)
+        if os.path.exists(os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
+            license_file = os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
@@ -489,7 +500,7 @@ class Helper(object):
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
                 if filename == 'libwidevinecdm.so':
-                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._cdm_path(), filename))
+                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._addon_cdm_path(), filename))
                     return True
 
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
@@ -525,16 +536,20 @@ class Helper(object):
             return None
 
     def _check_widevine(self):
+        if self._os() == 'Android':  # no checks needed for Android
+            return True
+
         dialog = xbmcgui.Dialog()
-        if 'x86' in self._arch():  # check that widevine arch matches system arch
-            if not os.path.exists(self._widevine_manifest_path()):
-                dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                return self._install_widevine_x86()
-            with open(self._widevine_manifest_path(), 'r') as f:
-                widevine_manifest = json.loads(f.read())
-            if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
-                dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
-                return self._install_widevine_x86()
+        if not os.path.exists(self._widevine_config_path()):
+            dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
+            return self._install_widevine()
+
+            if 'x86' in self._arch():  # check that widevine arch matches system arch
+                with open(self._widevine_config_path(), 'r') as f:
+                    widevine_manifest = json.loads(f.read())
+                if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != widevine_manifest['arch']:
+                    dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
+                    return self._install_widevine()
 
         if self._missing_widevine_libs():
             dialog.ok(LANGUAGE(30004), LANGUAGE(30032).format(', '.join(self._missing_widevine_libs())))
@@ -544,10 +559,10 @@ class Helper(object):
 
     def _install_cdm(self):
         """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
-        for cdm_file in os.listdir(self._cdm_path()):
+        for cdm_file in os.listdir(self._addon_cdm_path()):
             if cdm_file.endswith(config.CDM_EXTENSIONS):
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
-                cdm_path_addon = os.path.join(self._cdm_path(), cdm_file)
+                cdm_path_addon = os.path.join(self._addon_cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
                 if self._os() == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
@@ -608,10 +623,7 @@ class Helper(object):
             if not self._supports_widevine():
                 return False
             if not self._has_widevine():
-                if 'x86' in self._arch():
-                    return self._install_widevine_x86()
-                else:
-                    return self._install_widevine_arm()
+                return self._install_widevine()
 
             return self._check_widevine()
 

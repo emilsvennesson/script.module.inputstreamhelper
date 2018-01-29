@@ -13,8 +13,7 @@ DRM_SCHEMES = {
 CDM_EXTENSIONS = (
     '.so',
     '.dll',
-    '.dylib',
-    '.json'
+    '.dylib'
 )
 
 X86_MAP = {
@@ -66,6 +65,8 @@ WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{0}-{1}-{2}.zip'
 WIDEVINE_LICENSE_FILE = 'LICENSE.txt'
 
 WIDEVINE_MANIFEST_FILE = 'manifest.json'
+
+WIDEVINE_CONFIG_NAME = 'widevine_config.json'
 
 CHROMEOS_RECOVERY_CONF = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 

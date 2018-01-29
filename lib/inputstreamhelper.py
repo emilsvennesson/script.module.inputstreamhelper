@@ -360,9 +360,9 @@ class Helper(object):
 
         return True
 
-    def _latest_widevine_version(self):
+    def _latest_widevine_version(self, eula=False):
         """Return the latest available version of Widevine CDM/Chrome OS."""
-        if 'x86' in self._arch():
+        if 'x86' in self._arch() or eula:
             self._url = config.WIDEVINE_CURRENT_VERSION_URL
             return self._http_request()
         else:
@@ -389,34 +389,34 @@ class Helper(object):
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
-        if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
-            cdm_version = self._latest_widevine_version()
-            cdm_os = config.WIDEVINE_OS_MAP[self._os()]
-            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
+        cdm_version = self._latest_widevine_version()
+        cdm_os = config.WIDEVINE_OS_MAP[self._os()]
+        cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
+        self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
 
-            downloaded = self._http_request(download=True)
-            if downloaded:
-                busy_dialog = xbmcgui.DialogBusy()
-                busy_dialog.create()
-                self._unzip(self._addon_cdm_path())
-                if self._widevine_eula():
-                    self._install_cdm()
-                    self._cleanup()
-                else:
-                    self._cleanup()
-                    return False
+        downloaded = self._http_request(download=True)
+        if downloaded:
+            busy_dialog = xbmcgui.DialogBusy()
+            busy_dialog.create()
+            self._unzip(self._addon_cdm_path())
+            if self._widevine_eula():
+                self._install_cdm()
+                self._cleanup()
+            else:
+                self._cleanup()
+                return False
 
-                if self._has_widevine():
-                    if os.path.lexists(self._widevine_config_path()):
-                        os.remove(self._widevine_config_path())
-                    os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
-                    dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
-                    busy_dialog.close()
-                    return self._check_widevine()
-                else:
-                    busy_dialog.close()
-                    dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
+            if self._has_widevine():
+                if os.path.lexists(self._widevine_config_path()):
+                    os.remove(self._widevine_config_path())
+                os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE),
+                          self._widevine_config_path())
+                dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
+                busy_dialog.close()
+                return self._check_widevine()
+            else:
+                busy_dialog.close()
+                dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
 
         return False
 
@@ -426,8 +426,8 @@ class Helper(object):
         device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         dialog = xbmcgui.Dialog()
-        if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)) and dialog.yesno(LANGUAGE(30001), LANGUAGE(30006).format(
-                self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
+        if dialog.yesno(LANGUAGE(30001),
+                        LANGUAGE(30006).format(self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if self._os() != 'Linux':
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os()))
                 return False
@@ -514,7 +514,7 @@ class Helper(object):
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(), 'mac', 'x64')
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(eula=True), 'mac', 'x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
                 with zipfile.ZipFile(self._download_path) as z:
@@ -658,7 +658,9 @@ class Helper(object):
             if not self._supports_widevine():
                 return False
             if not self._has_widevine():
-                return self._install_widevine()
+                dialog = xbmcgui.Dialog()
+                if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
+                    return self._install_widevine()
 
             return self._check_widevine()
 

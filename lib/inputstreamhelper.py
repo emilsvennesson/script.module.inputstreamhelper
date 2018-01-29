@@ -408,8 +408,9 @@ class Helper(object):
                     return False
 
                 if self._has_widevine():
-                    os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE),
-                              self._widevine_config_path())
+                    if os.path.lexists(self._widevine_config_path()):
+                        os.remove(self._widevine_config_path())
+                    os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                     dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
                     busy_dialog.close()
                     return self._check_widevine()

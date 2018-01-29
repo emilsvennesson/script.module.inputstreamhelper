@@ -187,6 +187,7 @@ class Helper(object):
         return False
 
     def _run_cmd(self, cmd, sudo=False, ask=True):
+        """Run subprocess command and return if it succeeds as a bool."""
         dialog = xbmcgui.Dialog()
         if ask and os.getuid() != 0 and not dialog.yesno(LANGUAGE(30001), LANGUAGE(30030), yeslabel=LANGUAGE(30029),
                                                          nolabel=LANGUAGE(30028)):
@@ -394,7 +395,7 @@ class Helper(object):
                     device_dict[key] = value
             devices.append(device_dict)
 
-        self._log('chromeos devices: {0}'.format(devices))
+        self._log('chromeos devices: \n{0}'.format(devices))
         return devices
 
     def _install_widevine_x86(self):
@@ -491,12 +492,14 @@ class Helper(object):
         return False
 
     def _install_widevine(self):
+        """Simple wrap function to call the right Widevine installer method depending on architecture."""
         if 'x86' in self._arch():
             return self._install_widevine_x86()
         else:
             return self._install_widevine_arm()
 
     def _update_widevine(self):
+        """Prompt user to upgrade Widevine CDM when a newer version is available."""
         utcnow = datetime.utcnow()
         last_update = ADDON.getSetting('last_update')
         if last_update:
@@ -534,6 +537,7 @@ class Helper(object):
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
+            self._log('Acquiring Widevine EULA from x86 files.')
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(eula=True), 'mac', 'x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
@@ -558,6 +562,7 @@ class Helper(object):
         return False
 
     def _missing_widevine_libs(self):
+        """Parse ldd output of libwidevinecdm.so and display dialog if any depending libraries are missing."""
         if self._os() != 'Linux':  # this should only be needed for linux
             return None
 
@@ -591,17 +596,20 @@ class Helper(object):
             return None
 
     def _check_widevine(self):
+        """Check that all Widevine components are installed and available."""
         if self._os() == 'Android':  # no checks needed for Android
             return True
 
         dialog = xbmcgui.Dialog()
         if not os.path.exists(self._widevine_config_path()):
+            self._log('Widevine config is missing. Reinstall is required.')
             dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
             return self._install_widevine()
 
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
             if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
+                self._log('Widevine arch/system arch mismatch. Reinstall is required.')
                 dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
                 return self._install_widevine()
         if self._missing_widevine_libs():

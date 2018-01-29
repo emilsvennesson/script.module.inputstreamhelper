@@ -142,10 +142,8 @@ class Helper(object):
                 arch = 'x86_64'
         elif 'armv' in arch:
             arch = 'armv' + arch.split('v')[1][:-1]
-        if arch in config.X86_MAP:
-            return config.X86_MAP[arch]
-        elif arch in config.ARM_MAP:
-            return config.ARM_MAP[arch]
+        if arch in config.ARCH_MAP:
+            return config.ARCH_MAP[arch]
 
         return arch
 

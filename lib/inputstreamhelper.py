@@ -383,7 +383,7 @@ class Helper(object):
             self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
         else:
             self._url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_request().split('\n\n') if 'name=' in x]
+        conf = [x for x in self._http_request().split('\n\n') if 'hwidmatch=' in x]
         for device in conf:
             device_dict = {}
             for device_info in device.splitlines():

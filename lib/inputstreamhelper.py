@@ -570,13 +570,14 @@ class Helper(object):
         """Parse ldd output of libwidevinecdm.so and display dialog if any depending libraries are missing."""
         if self._os() != 'Linux':  # this should only be needed for linux
             return None
-
         if self._cmd_exists('ldd'):
             if not os.access(self._widevine_path(), os.X_OK):
+                self._log('Changing {0} permissions to 755.'.format(self._widevine_path()))
                 os.chmod(self._widevine_path(), 0755)  # this needs to be octal in python 3
+
             missing_libs = []
             cmd = ['ldd', self._widevine_path()]
-            output = subprocess.check_output(cmd)
+            output = subprocess.call(cmd)
             self._log('ldd output: \n{0}'.format(output))
             for line in output.splitlines():
                 if '=>' not in line:
@@ -594,7 +595,7 @@ class Helper(object):
                 self._log('Widevine is missing the following libraries: {0}'.format(missing_libs))
                 return missing_libs
         else:
-            self._log('ldd is not available - unable to check for missing widevine libs')
+            self._log('ldd is not available - can\'t check for missing widevine libs')
             return None
 
     def _check_widevine(self):

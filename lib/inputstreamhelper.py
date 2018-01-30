@@ -5,6 +5,7 @@ import json
 import time
 import subprocess
 import shutil
+import re
 from distutils.version import LooseVersion
 from datetime import datetime, timedelta
 
@@ -141,7 +142,10 @@ class Helper(object):
             else:
                 arch = 'x86_64'
         elif 'armv' in arch:
-            arch = 'armv' + arch.split('v')[1][:-1]
+            arch = 'armv'
+            arch_version = re.search('\d+', arch.split('v')[1])
+            if arch_version is not None:
+                arch += arch_version.group(0)
         if arch in config.ARCH_MAP:
             return config.ARCH_MAP[arch]
 

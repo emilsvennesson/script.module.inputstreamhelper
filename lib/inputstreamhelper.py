@@ -200,6 +200,7 @@ class Helper(object):
             output = subprocess.check_output(cmd)
             success = True
             self._log('{0} cmd executed successfully.'.format(cmd))
+            self._log('{0} cmd output: {1} \n'.format(cmd, output))
         except subprocess.CalledProcessError as error:
             self._log('cmd failed with output: {0}'.format(error.output))
             output = False

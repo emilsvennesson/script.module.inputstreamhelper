@@ -364,9 +364,14 @@ class Helper(object):
 
     def _latest_widevine_version(self, eula=False):
         """Return the latest available version of Widevine CDM/Chrome OS."""
-        datetime_obj = datetime.utcnow()
-        ADDON.setSetting('last_update', str(time.mktime(datetime_obj.timetuple())))
-        if 'x86' in self._arch() or eula:
+        if eula:
+            self._url = config.WIDEVINE_CURRENT_VERSION_URL
+            return self._http_request()
+        else:
+            datetime_obj = datetime.utcnow()
+            ADDON.setSetting('last_update', str(time.mktime(datetime_obj.timetuple())))
+
+        if 'x86' in self._arch():
             if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
                 return config.WIDEVINE_LEGACY_VERSION
             else:

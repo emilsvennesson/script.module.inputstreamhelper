@@ -516,7 +516,6 @@ class Helper(object):
             current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
         self._log('Latest {0} version is {1}'.format(component, latest_version))
         self._log('Current {0} version installed is {1}'.format(component, current_version))
-        ADDON.setSetting('last_update', str(time.mktime(utcnow.timetuple())))
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
             self._log('There is an update available for {0}'.format(component))

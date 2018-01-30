@@ -572,6 +572,8 @@ class Helper(object):
             return None
 
         if self._cmd_exists('ldd'):
+            if not os.access(self._widevine_path(), os.X_OK):
+                os.chmod(self._widevine_path(), 0755)  # this needs to be octal in python 3
             missing_libs = []
             cmd = ['ldd', self._widevine_path()]
             output = subprocess.check_output(cmd)

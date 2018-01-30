@@ -138,9 +138,7 @@ class Helper(object):
         if arch == 'AMD64':
             arch_bit = platform.architecture()[0]
             if arch_bit == '32bit':
-                arch = 'x86'
-            else:
-                arch = 'x86_64'
+                arch = 'x86'  # else, arch = AMD64
         elif 'armv' in arch:
             arm_version = re.search('\d+', arch.split('v')[1])
             if arm_version:

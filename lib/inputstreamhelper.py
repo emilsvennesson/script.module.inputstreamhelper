@@ -212,6 +212,12 @@ class Helper(object):
         else:
             return success
 
+    def _load_loop_module(self):
+        """Load loop module."""
+        cmd = ['modprobe', '-q', 'loop']
+        success = self._run_cmd(cmd, sudo=True, ask=True)
+        return success
+
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
         cmd = ['losetup', '-f']
@@ -227,7 +233,7 @@ class Helper(object):
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
-        success = self._run_cmd(cmd, sudo=True, ask=True)
+        success = self._run_cmd(cmd, sudo=True, ask=False)
         if success:
             self._attached_loop_dev = True
             return True
@@ -482,8 +488,8 @@ class Helper(object):
 
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
-                    self._set_loop_dev(), self._losetup(bin_path),
-                    self._mnt_loop_dev()
+                    self._load_loop_module(), self._set_loop_dev(),
+                    self._losetup(bin_path), self._mnt_loop_dev()
                 ]
                 if all(success):
                     self._extract_widevine_from_img()

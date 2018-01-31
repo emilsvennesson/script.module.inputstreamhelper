@@ -216,10 +216,7 @@ class Helper(object):
         """Load loop module."""
         cmd = ['modprobe', '-q', 'loop']
         success = self._run_cmd(cmd, sudo=True, ask=True)
-        if success:
-            return True
-        else:
-            return False
+        return success
 
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""

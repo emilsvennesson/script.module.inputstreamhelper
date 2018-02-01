@@ -166,7 +166,7 @@ class Helper(object):
         msg = '{0}: {1}'.format(logging_prefix, string)
         xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
 
-    def _parse_chromeos_offset(self, bin_path):
+    def _chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""
         if self._cmd_exists('fdisk'):
             cmd = ['fdisk', bin_path, '-l']
@@ -232,7 +232,7 @@ class Helper(object):
 
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
+        cmd = ['losetup', self._loop_dev, bin_path, '-o', self._chromeos_offset(bin_path)]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             self._attached_loop_dev = True

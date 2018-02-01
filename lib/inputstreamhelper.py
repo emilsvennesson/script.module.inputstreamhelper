@@ -682,6 +682,9 @@ class Helper(object):
             unattach_output = self._run_cmd(cmd, sudo=True)
             if unattach_output['success']:
                 self._loop_dev = False
+        if self._modprobe_loop:
+            dialog = xbmcgui.Dialog()
+            dialog.notification(LANGUAGE(30035), LANGUAGE(30036))
 
         shutil.rmtree(self._temp_path())
         return True

@@ -148,3 +148,11 @@ msgstr ""
 msgctxt "#30034"
 msgid "Update"
 msgstr ""
+
+msgctxt "#30035"
+msgid "[B]loop[/B] is still loaded"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Unload it by running [B]modprobe -r loop[/B] in the terminal."
+msgstr ""

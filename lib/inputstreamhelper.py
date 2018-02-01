@@ -171,11 +171,10 @@ class Helper(object):
             cmd = ['fdisk', bin_path, '-l']
         else:  # parted
             cmd = ['parted', '-s', bin_path, 'unit s print']
-        self._log('losetup calculation cmd: {0}'.format(cmd))
 
-        output = self._run_cmd(cmd, sudo=False, ask=False, output=True)
-        if output:
-            for line in output.splitlines():
+        output = self._run_cmd(cmd, sudo=False, ask=False)
+        if output['success']:
+            for line in output['output'].splitlines():
                 partition_data = line.split()
                 if partition_data:
                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
@@ -185,7 +184,7 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
-    def _run_cmd(self, cmd, sudo=False, ask=True, output=True):
+    def _run_cmd(self, cmd, sudo=False, ask=True):
         """Run subprocess command and return if it succeeds as a bool."""
         dialog = xbmcgui.Dialog()
         if ask and os.getuid() != 0 and not dialog.yesno(LANGUAGE(30001), LANGUAGE(30030), yeslabel=LANGUAGE(30029),
@@ -194,6 +193,7 @@ class Helper(object):
             return cmd
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
+
         try:
             output = subprocess.check_output(cmd)
             success = True
@@ -201,29 +201,29 @@ class Helper(object):
             if output.rstrip():
                 self._log('{0} cmd output: \n{1}'.format(cmd, output))
         except subprocess.CalledProcessError as error:
-            self._log('cmd failed with output: {0}'.format(error.output))
-            output = False
+            output = error.output
             success = False
+            self._log('{0} failed with output: \n{1}'.format(cmd, output))
         if 'sudo' in cmd:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
-        if output:
-            return output
-        else:
-            return success
+        return {
+            'output': output,
+            'success': success
+        }
 
     def _load_loop_module(self):
         """Load loop module."""
         cmd = ['modprobe', '-q', 'loop']
-        success = self._run_cmd(cmd, sudo=True, ask=True)
-        return success
+        output = self._run_cmd(cmd, sudo=True, ask=True)
+        return output['success']
 
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
         cmd = ['losetup', '-f']
         output = self._run_cmd(cmd, sudo=False, ask=False, output=True)
-        if output:
-            self._loop_dev = output.strip()
+        if output['success']:
+            self._loop_dev = output['output'].strip()
             self._log('Found free loop device: {0}'.format(self._loop_dev))
             return True
         else:
@@ -233,8 +233,8 @@ class Helper(object):
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
-        success = self._run_cmd(cmd, sudo=True, ask=False)
-        if success:
+        output = self._run_cmd(cmd, sudo=True, ask=False)
+        if output['success']:
             self._attached_loop_dev = True
             return True
         else:
@@ -243,8 +243,8 @@ class Helper(object):
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
         cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
-        success = self._run_cmd(cmd, sudo=True, ask=False)
-        if success:
+        output = self._run_cmd(cmd, sudo=True, ask=False)
+        if output['success']:
             self._mounted = True
             return True
         else:
@@ -591,9 +591,9 @@ class Helper(object):
 
             missing_libs = []
             cmd = ['ldd', self._widevine_path()]
-            output = self._run_cmd(cmd, sudo=False, ask=False, output=True)
-            if output:
-                for line in output.splitlines():
+            output = self._run_cmd(cmd, sudo=False, ask=False)
+            if output['success']:
+                for line in output['output'].splitlines():
                     if '=>' not in line:
                         continue
                     lib_path = line.strip().split('=>')
@@ -670,13 +670,13 @@ class Helper(object):
         """Clean up after Widevine DRM installation."""
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
-            unmount_success = self._run_cmd(cmd, sudo=True, ask=False)
-            if unmount_success:
+            umount_output = self._run_cmd(cmd, sudo=True, ask=False)
+            if umount_output['success']:
                 self._mounted = False
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
-            unattach_success = self._run_cmd(cmd, sudo=True, ask=False)
-            if unattach_success:
+            unattach_output = self._run_cmd(cmd, sudo=True, ask=False)
+            if unattach_output['success']:
                 self._loop_dev = False
 
         shutil.rmtree(self._temp_path())

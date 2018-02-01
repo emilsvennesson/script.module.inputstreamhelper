@@ -227,7 +227,7 @@ class Helper(object):
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
         cmd = ['losetup', '-f']
-        output = self._run_cmd(cmd, sudo=False, ask=False, output=True)
+        output = self._run_cmd(cmd, sudo=False, ask=False)
         if output['success']:
             self._loop_dev = output['output'].strip()
             self._log('Found free loop device: {0}'.format(self._loop_dev))

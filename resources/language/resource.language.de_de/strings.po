@@ -130,8 +130,8 @@ msgid "OK"
 msgstr ""
 
 msgctxt "#30030"
-msgid "Administrative rights ([B]sudo[/B]) is required to mount the Chrome OS image. Press OK to grant the installation permission to run the mount command as [B]sudo[/B]."
-msgstr "Administratiren Rechte ([B]sudo[/B]) sind erforderlich um das Chrome OS Image zu mounten. Mit OK bestätigen sie, dass der mount befehl via [B]sudo[/B] ausgeführt werden darf."
+msgid "The installation may need to run the following commands with root permissions: [B]{0}[/B]."
+msgstr "The installation may need to run the following commands with root permissions: [B]{0}[/B]."
 
 msgctxt "#30031"
 msgid "An update of [B]Widevine CDM[/B] is required to play this content."

@@ -173,7 +173,7 @@ class Helper(object):
         else:  # parted
             cmd = ['parted', '-s', bin_path, 'unit s print']
 
-        output = self._run_cmd(cmd, sudo=False, ask=False)
+        output = self._run_cmd(cmd, sudo=False)
         if output['success']:
             for line in output['output'].splitlines():
                 partition_data = line.split()
@@ -185,13 +185,9 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
-    def _run_cmd(self, cmd, sudo=False, ask=True):
+    def _run_cmd(self, cmd, sudo=False):
         """Run subprocess command and return if it succeeds as a bool."""
         dialog = xbmcgui.Dialog()
-        if ask and os.getuid() != 0 and not dialog.yesno(LANGUAGE(30001), LANGUAGE(30030), yeslabel=LANGUAGE(30029),
-                                                         nolabel=LANGUAGE(30028)):
-            self._log('User refused to give sudo permissions.')
-            return cmd
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
 
@@ -221,13 +217,13 @@ class Helper(object):
         else:
             self._modprobe_loop = True
             cmd = ['modprobe', '-q', 'loop']
-            output = self._run_cmd(cmd, sudo=True, ask=True)
+            output = self._run_cmd(cmd, sudo=True)
             return output['success']
 
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""
         cmd = ['losetup', '-f']
-        output = self._run_cmd(cmd, sudo=False, ask=False)
+        output = self._run_cmd(cmd, sudo=False)
         if output['success']:
             self._loop_dev = output['output'].strip()
             self._log('Found free loop device: {0}'.format(self._loop_dev))
@@ -239,7 +235,7 @@ class Helper(object):
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
         cmd = ['losetup', self._loop_dev, bin_path, '-o', self._parse_chromeos_offset(bin_path)]
-        output = self._run_cmd(cmd, sudo=True, ask=False)
+        output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             self._attached_loop_dev = True
             return True
@@ -249,7 +245,7 @@ class Helper(object):
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
         cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
-        output = self._run_cmd(cmd, sudo=True, ask=False)
+        output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             self._mounted = True
             return True
@@ -460,6 +456,7 @@ class Helper(object):
 
     def _install_widevine_arm(self):
         """Install Widevine CDM on ARM-based architectures."""
+        root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         cos_config = self._chromeos_config()
         device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
@@ -482,6 +479,9 @@ class Helper(object):
             if not self._cmd_exists('losetup'):
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30021).format('losetup'))
                 return False
+            if os.getuid() != 0:  # ask for permissions to run cmds as root
+                if not dialog.yesno(LANGUAGE(30001), LANGUAGE(30030).format(', '.join(root_cmds)), yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028)):
+                    return False
 
             self._url = device['url']
             downloaded = self._http_request(download=True, message=LANGUAGE(30022))
@@ -597,7 +597,7 @@ class Helper(object):
 
             missing_libs = []
             cmd = ['ldd', self._widevine_path()]
-            output = self._run_cmd(cmd, sudo=False, ask=False)
+            output = self._run_cmd(cmd, sudo=False)
             if output['success']:
                 for line in output['output'].splitlines():
                     if '=>' not in line:
@@ -676,12 +676,12 @@ class Helper(object):
         """Clean up after Widevine DRM installation."""
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
-            umount_output = self._run_cmd(cmd, sudo=True, ask=False)
+            umount_output = self._run_cmd(cmd, sudo=True)
             if umount_output['success']:
                 self._mounted = False
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
-            unattach_output = self._run_cmd(cmd, sudo=True, ask=False)
+            unattach_output = self._run_cmd(cmd, sudo=True)
             if unattach_output['success']:
                 self._loop_dev = False
 

@@ -212,7 +212,7 @@ class Helper(object):
     def _check_loop(self):
         """Check if loop module needs to be loaded into system."""
         if not self._run_cmd(['modinfo', 'loop'])['success']:
-            self.log('loop is built in the kernel.')
+            self._log('loop is built in the kernel.')
             return True  # assume loop is built in the kernel
         else:
             self._modprobe_loop = True
@@ -494,7 +494,7 @@ class Helper(object):
 
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
-                    self._load_loop_module(), self._set_loop_dev(),
+                    self._check_loop(), self._set_loop_dev(),
                     self._losetup(bin_path), self._mnt_loop_dev()
                 ]
                 if all(success):

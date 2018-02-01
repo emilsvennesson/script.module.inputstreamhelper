@@ -30,6 +30,7 @@ class Helper(object):
         self._url = None
         self._download_path = None
         self._loop_dev = None
+        self._modprobe_loop = False
         self._attached_loop_dev = False
         self._mounted = False
 
@@ -212,11 +213,16 @@ class Helper(object):
             'success': success
         }
 
-    def _load_loop_module(self):
-        """Load loop module."""
-        cmd = ['modprobe', '-q', 'loop']
-        output = self._run_cmd(cmd, sudo=True, ask=True)
-        return output['success']
+    def _check_loop(self):
+        """Check if loop module needs to be loaded into system."""
+        if not self._run_cmd(['modinfo', 'loop'])['success']:
+            self.log('loop is built in the kernel.')
+            return True  # assume loop is built in the kernel
+        else:
+            self._modprobe_loop = True
+            cmd = ['modprobe', '-q', 'loop']
+            output = self._run_cmd(cmd, sudo=True, ask=True)
+            return output['success']
 
     def _set_loop_dev(self):
         """Set an unused loop device that's available for use."""

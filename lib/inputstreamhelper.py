@@ -187,20 +187,18 @@ class Helper(object):
 
     def _run_cmd(self, cmd, sudo=False):
         """Run subprocess command and return if it succeeds as a bool."""
-        dialog = xbmcgui.Dialog()
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
-
         try:
-            output = subprocess.check_output(cmd)
+            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             success = True
             self._log('{0} cmd executed successfully.'.format(cmd))
-            if output.rstrip():
-                self._log('{0} cmd output: \n{1}'.format(cmd, output))
         except subprocess.CalledProcessError as error:
             output = error.output
             success = False
-            self._log('{0} failed with output: \n{1}'.format(cmd, output))
+            self._log('{0} cmd failed.'.format(cmd))
+        if output.rstrip():
+            self._log('{0} cmd output: \n{1}'.format(cmd, output))
         if 'sudo' in cmd:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 

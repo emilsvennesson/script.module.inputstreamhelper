@@ -580,7 +580,7 @@ class Helper(object):
             for filename in files:
                 if filename == 'libwidevinecdm.so':
                     cdm_path = os.path.join(root, filename)
-                    self.log('Found libwidevinecdm.so in {0}'.format(cdm_path))
+                    self._log('Found libwidevinecdm.so in {0}'.format(cdm_path))
                     shutil.copyfile(cdm_path, os.path.join(self._addon_cdm_path(), filename))
                     return True
 

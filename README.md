@@ -16,12 +16,13 @@ import xbmcgui
 import inputstreamhelper
 
 def play_item():
-    is_helper = inputstreamhelper.Helper('mpd', drm='widevine')
+    protocol = 'mpd'
+    is_helper = inputstreamhelper.Helper(protocol, drm='widevine')
     stream_url = 'http://yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd'
     if is_helper.check_inputstream():
         playitem = xbmcgui.ListItem(path=stream_url)
-        playitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
-        playitem.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+        playitem.setProperty('inputstreamaddon', ia_helper.inputstream_addon)
+        playitem.setProperty('inputstream.adaptive.manifest_type', protocol)
         xbmc.Player().play(item=stream_url, listitem=playitem)
 
 play_item()

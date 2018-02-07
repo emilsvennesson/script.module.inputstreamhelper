@@ -40,7 +40,7 @@ class Helper(object):
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
         else:
-            self._inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
+            self.inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
 
         if self.drm:
             if self.drm not in config.DRM_SCHEMES:
@@ -157,7 +157,7 @@ class Helper(object):
         return platform.system()
 
     def _inputstream_version(self):
-        addon = xbmcaddon.Addon(self._inputstream_addon)
+        addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')
 
     def _log(self, string):
@@ -317,7 +317,7 @@ class Helper(object):
             'id': 1,
             'method': 'Addons.GetAddonDetails',
             'params': {
-                'addonid': self._inputstream_addon
+                'addonid': self.inputstream_addon
             }
         }
         data = self._json_rpc_request(payload)
@@ -333,7 +333,7 @@ class Helper(object):
             'id': 1,
             'method': 'Addons.GetAddonDetails',
             'params': {
-                'addonid': self._inputstream_addon,
+                'addonid': self.inputstream_addon,
                 'properties': ['enabled']
             }
         }
@@ -347,7 +347,7 @@ class Helper(object):
             'id': 1,
             'method': 'Addons.SetAddonEnabled',
             'params': {
-                'addonid': self._inputstream_addon,
+                'addonid': self.inputstream_addon,
                 'enabled': True
             }
         }
@@ -701,15 +701,15 @@ class Helper(object):
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
-            self._log('HLS is unsupported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
+            self._log('HLS is unsupported on {0} version {1}'.format(self.inputstream_addon, self._inputstream_version()))
             dialog = xbmcgui.Dialog()
             dialog.ok(LANGUAGE(30004),
-                      LANGUAGE(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
+                      LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
             return False
 
     def _check_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
-        if not self.drm or not self._inputstream_addon == 'inputstream.adaptive':
+        if not self.drm or not self.inputstream_addon == 'inputstream.adaptive':
             return True
 
         if self.drm == 'widevine':
@@ -730,12 +730,12 @@ class Helper(object):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
         dialog = xbmcgui.Dialog()
         if not self._has_inputstream():
-            self._log('{0} is not installed.'.format(self._inputstream_addon))
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self._inputstream_addon))
+            self._log('{0} is not installed.'.format(self.inputstream_addon))
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
             return False
         elif not self._inputstream_enabled():
-            self._log('{0} is not enabled.'.format(self._inputstream_addon))
-            ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self._inputstream_addon, self._inputstream_addon))
+            self._log('{0} is not enabled.'.format(self.inputstream_addon))
+            ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
             if ok:
                 self._enable_inputstream()
             else:
@@ -743,5 +743,5 @@ class Helper(object):
         if self.protocol == 'hls' and not self._supports_hls():
             return False
 
-        self._log('{0} is installed and enabled.'.format(self._inputstream_addon))
+        self._log('{0} is installed and enabled.'.format(self.inputstream_addon))
         return self._check_drm()

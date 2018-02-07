@@ -22,7 +22,7 @@ msgid "[B]Widevine CDM[/B] is required to play this content.[CR][CR]Do you want 
 msgstr "Die [B]Widevine CDM[/B] Bibliothek ist nicht installiert, ist aber nötig um den Inhalt wiederzugeben.[CR][CR]Soll die [B]Widevine CDM[/B] Bibliothek installiert werden?"
 
 msgctxt "#30003"
-msgid "[B]Widevine CDM[/B] was successfully installed!"
+msgid "[B]Widevine CDM[/B] was successfully installed."
 msgstr "[B]Widevine CDM[/B] Bibliothek wurde erfolgreich installiert"
 
 msgctxt "#30004"
@@ -155,4 +155,8 @@ msgstr ""
 
 msgctxt "#30036"
 msgid "Unload it by running [B]modprobe -r loop[/B] in the terminal."
+msgstr ""
+
+msgctxt "#30037"
+msgid "Success!"
 msgstr ""

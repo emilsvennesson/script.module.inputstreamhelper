@@ -443,7 +443,7 @@ class Helper(object):
                     os.remove(self._widevine_config_path())
                 os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE),
                           self._widevine_config_path())
-                dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
+                dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
                 busy_dialog.close()
                 return self._check_widevine()
             else:
@@ -502,7 +502,7 @@ class Helper(object):
                     if self._has_widevine():
                         with open(self._widevine_config_path(), 'w') as config_file:
                             config_file.write(json.dumps(cos_config, indent=4))
-                        dialog.ok(LANGUAGE(30001), LANGUAGE(30003))
+                        dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
                         busy_dialog.close()
                         return self._check_widevine()
                     else:

@@ -415,7 +415,6 @@ class Helper(object):
                     device_dict[key] = value
             devices.append(device_dict)
 
-        self._log('chromeos devices: \n{0}'.format(devices))
         return devices
 
     def _install_widevine_x86(self):
@@ -583,7 +582,9 @@ class Helper(object):
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
                 if filename == 'libwidevinecdm.so':
-                    shutil.copyfile(os.path.join(root, filename), os.path.join(self._addon_cdm_path(), filename))
+                    cdm_path = os.path.join(root, filename)
+                    self.log('Found libwidevinecdm.so in {0}'.format(cdm_path))
+                    shutil.copyfile(cdm_path, os.path.join(self._addon_cdm_path(), filename))
                     return True
 
         self._log('Failed to find Widevine CDM binary in Chrome OS image.')
@@ -635,7 +636,7 @@ class Helper(object):
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
             if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
-                self._log('Widevine arch/system arch mismatch. Reinstall is required.')
+                self._log('Widevine/system arch mismatch. Reinstall is required.')
                 dialog.ok(LANGUAGE(30001), LANGUAGE(30031))
                 return self._install_widevine()
         if self._missing_widevine_libs():
@@ -700,8 +701,7 @@ class Helper(object):
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
         else:
-            self._log(
-                'HLS is unsupported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
+            self._log('HLS is unsupported on {0} version {1}'.format(self._inputstream_addon, self._inputstream_version()))
             dialog = xbmcgui.Dialog()
             dialog.ok(LANGUAGE(30004),
                       LANGUAGE(30017).format(self._inputstream_addon, config.HLS_MINIMUM_IA_VERSION))

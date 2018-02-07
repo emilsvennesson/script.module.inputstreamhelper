@@ -54,22 +54,6 @@ class Helper(object):
     class InputStreamException(Exception):
         pass
 
-    @staticmethod
-    def sizeof_fmt(num, suffix='B'):
-        """Return size of file in a human readable string."""
-        # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
-        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
-            if abs(num) < 1024.0:
-                return "%3.1f%s%s" % (num, unit, suffix)
-            num /= 1024.0
-        return "%.1f%s%s" % (num, 'Yi', suffix)
-
-    @staticmethod
-    def _cmd_exists(cmd):
-        """Check whether cmd exists on system."""
-        # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
-        return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
-
     @classmethod
     def _diskspace(cls):
         """Return the free disk space available (in bytes) in cdm_path."""
@@ -155,6 +139,22 @@ class Helper(object):
             return 'Android'
 
         return platform.system()
+
+    @staticmethod
+    def sizeof_fmt(num, suffix='B'):
+        """Return size of file in a human readable string."""
+        # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+        for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+            if abs(num) < 1024.0:
+                return "%3.1f%s%s" % (num, unit, suffix)
+            num /= 1024.0
+        return "%.1f%s%s" % (num, 'Yi', suffix)
+
+    @staticmethod
+    def _cmd_exists(cmd):
+        """Check whether cmd exists on system."""
+        # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+        return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
     def _inputstream_version(self):
         addon = xbmcaddon.Addon(self.inputstream_addon)
@@ -341,7 +341,7 @@ class Helper(object):
         return data['result']['addon']['enabled']
 
     def _enable_inputstream(self):
-        """Enable selected InputStream add-on."""
+        """Enables selected InputStream add-on."""
         payload = {
             'jsonrpc': '2.0',
             'id': 1,
@@ -358,7 +358,7 @@ class Helper(object):
             return True
 
     def _supports_widevine(self):
-        """Check if Widevine is supported on the architecture/operating system/Kodi version."""
+        """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         dialog = xbmcgui.Dialog()
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
             self._log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
@@ -380,14 +380,12 @@ class Helper(object):
         return True
 
     def _latest_widevine_version(self, eula=False):
-        """Return the latest available version of Widevine CDM/Chrome OS."""
+        """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
             self._url = config.WIDEVINE_CURRENT_VERSION_URL
             return self._http_request()
-        else:
-            datetime_obj = datetime.utcnow()
-            ADDON.setSetting('last_update', str(time.mktime(datetime_obj.timetuple())))
 
+        ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
                 return config.WIDEVINE_LEGACY_VERSION
@@ -398,7 +396,7 @@ class Helper(object):
             return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
 
     def _chromeos_config(self):
-        """Parse the Chrome OS recovery configuration and put it in a dictionary."""
+        """Parses the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
         if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
             self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
@@ -453,7 +451,7 @@ class Helper(object):
         return False
 
     def _install_widevine_arm(self):
-        """Install Widevine CDM on ARM-based architectures."""
+        """Installs Widevine CDM on ARM-based architectures."""
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         cos_config = self._chromeos_config()
         device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
@@ -520,19 +518,18 @@ class Helper(object):
         return False
 
     def _install_widevine(self):
-        """Simple wrap function to call the right Widevine installer method depending on architecture."""
+        """Wrapper function that calls Widevine installer method depending on architecture."""
         if 'x86' in self._arch():
             return self._install_widevine_x86()
         else:
             return self._install_widevine_arm()
 
     def _update_widevine(self):
-        """Prompt user to upgrade Widevine CDM when a newer version is available."""
-        utcnow = datetime.utcnow()
+        """Prompts user to upgrade Widevine CDM when a newer version is available."""
         last_update = ADDON.getSetting('last_update')
         if last_update:
             last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
-            if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= utcnow:
+            if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
                 self._log('Widevine update check was made on {0}'.format(last_update_dt.isoformat()))
                 return
 
@@ -558,7 +555,7 @@ class Helper(object):
             self._log('User is on the latest available {0} version.'.format(component))
 
     def _widevine_eula(self):
-        """Display the Widevine EULA and prompt user to accept it."""
+        """Displays the Widevine EULA and prompts user to accept it."""
         if os.path.exists(os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
             license_file = os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)
             with open(license_file, 'r') as f:
@@ -578,7 +575,7 @@ class Helper(object):
         return dialog.yesno(LANGUAGE(30026), eula, yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028))
 
     def _extract_widevine_from_img(self):
-        """Extract the Widevine CDM binary from the mounted Chrome OS image."""
+        """Extracts the Widevine CDM binary from the mounted Chrome OS image."""
         for root, dirs, files in os.walk(self._mnt_path()):
             for filename in files:
                 if filename == 'libwidevinecdm.so':
@@ -591,7 +588,7 @@ class Helper(object):
         return False
 
     def _missing_widevine_libs(self):
-        """Parse ldd output of libwidevinecdm.so and display dialog if any depending libraries are missing."""
+        """Parses ldd output of libwidevinecdm.so and displays dialog if any depending libraries are missing."""
         if self._os() != 'Linux':  # this should only be needed for linux
             return None
         if self._cmd_exists('ldd'):
@@ -623,7 +620,7 @@ class Helper(object):
         return None
 
     def _check_widevine(self):
-        """Check that all Widevine components are installed and available."""
+        """Checks that all Widevine components are installed and available."""
         if self._os() == 'Android':  # no checks needed for Android
             return True
 
@@ -647,7 +644,7 @@ class Helper(object):
         return True
 
     def _install_cdm(self):
-        """Loop through local cdm folder and symlink/copy binaries to inputstream cdm_path."""
+        """Loops through local cdm folder and symlinks/copies binaries to inputstream cdm_path."""
         for cdm_file in os.listdir(self._addon_cdm_path()):
             if cdm_file.endswith(config.CDM_EXTENSIONS):
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
@@ -663,7 +660,7 @@ class Helper(object):
         return True
 
     def _unzip(self, unzip_dir, file_to_unzip=None):
-        """Unzip files to specified path."""
+        """Unzips files to specified path."""
         zip_obj = zipfile.ZipFile(self._download_path)
         if file_to_unzip:
             for filename in zip_obj.namelist():
@@ -676,7 +673,7 @@ class Helper(object):
             return True
 
     def _cleanup(self):
-        """Clean up after Widevine DRM installation."""
+        """Clean up function after Widevine CDM installation."""
         if self._mounted:
             cmd = ['umount', self._mnt_path()]
             umount_output = self._run_cmd(cmd, sudo=True)

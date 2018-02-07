@@ -141,7 +141,7 @@ class Helper(object):
         return platform.system()
 
     @staticmethod
-    def sizeof_fmt(num, suffix='B'):
+    def _sizeof_fmt(num, suffix='B'):
         """Return size of file in a human readable string."""
         # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
         for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
@@ -458,13 +458,13 @@ class Helper(object):
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         dialog = xbmcgui.Dialog()
         if dialog.yesno(LANGUAGE(30001),
-                        LANGUAGE(30006).format(self.sizeof_fmt(required_diskspace))) and self._widevine_eula():
+                        LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if self._os() != 'Linux':
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os()))
                 return False
             if required_diskspace >= self._diskspace():
                 dialog.ok(LANGUAGE(30004),
-                          LANGUAGE(30018).format(self.sizeof_fmt(required_diskspace)))
+                          LANGUAGE(30018).format(self._sizeof_fmt(required_diskspace)))
                 return False
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30020).format('fdisk', 'parted'))

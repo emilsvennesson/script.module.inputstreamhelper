@@ -441,11 +441,12 @@ class Helper(object):
             if self._has_widevine():
                 if os.path.lexists(self._widevine_config_path()):
                     os.remove(self._widevine_config_path())
-                os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE),
-                          self._widevine_config_path())
-                dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
-                busy_dialog.close()
-                return self._check_widevine()
+                os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
+                wv_check = self._check_widevine()
+                if wv_check:
+                    dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
+                    busy_dialog.close()
+                return wv_check
             else:
                 busy_dialog.close()
                 dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
@@ -504,7 +505,11 @@ class Helper(object):
                             config_file.write(json.dumps(cos_config, indent=4))
                         dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
                         busy_dialog.close()
-                        return self._check_widevine()
+                        wv_check = self._check_widevine()
+                        if wv_check:
+                            dialog.notification(LANGUAGE(30037), LANGUAGE(30003))
+                            busy_dialog.close()
+                        return wv_check
                     else:
                         busy_dialog.close()
                         dialog.ok(LANGUAGE(30004), LANGUAGE(30005))
@@ -638,7 +643,6 @@ class Helper(object):
             return False
 
         self._update_widevine()
-
         return True
 
     def _install_cdm(self):

@@ -689,6 +689,8 @@ class Helper(object):
         if self._modprobe_loop:
             dialog = xbmcgui.Dialog()
             dialog.notification(LANGUAGE(30035), LANGUAGE(30036))
+        if not self._has_widevine():
+            shutil.rmtree(self._addon_cdm_path())
 
         shutil.rmtree(self._temp_path())
         return True

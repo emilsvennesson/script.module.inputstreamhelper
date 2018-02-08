@@ -21,7 +21,7 @@ def play_item():
     stream_url = 'http://yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd'
     if is_helper.check_inputstream():
         playitem = xbmcgui.ListItem(path=stream_url)
-        playitem.setProperty('inputstreamaddon', ia_helper.inputstream_addon)
+        playitem.setProperty('inputstreamaddon', is_helper.inputstream_addon)
         playitem.setProperty('inputstream.adaptive.manifest_type', protocol)
         xbmc.Player().play(item=stream_url, listitem=playitem)
 

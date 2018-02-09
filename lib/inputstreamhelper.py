@@ -117,6 +117,13 @@ class Helper(object):
         return version.split(' ')[0]
 
     @classmethod
+    def _legacy(cls):
+        if LooseVersion('18.0') > cls._kodi_version():
+            return True
+        else:
+            return False
+
+    @classmethod
     def _arch(cls):
         """Map together and return the system architecture."""
         arch = platform.machine()
@@ -387,7 +394,7 @@ class Helper(object):
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
-            if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
+            if self._legacy():
                 return config.WIDEVINE_LEGACY_VERSION
             else:
                 self._url = config.WIDEVINE_CURRENT_VERSION_URL
@@ -398,7 +405,7 @@ class Helper(object):
     def _chromeos_config(self):
         """Parses the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
-        if LooseVersion(self._kodi_version()) < LooseVersion('18.0'):
+        if self._legacy():
             self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
         else:
             self._url = config.CHROMEOS_RECOVERY_URL

@@ -426,6 +426,8 @@ class Helper(object):
         """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
         cdm_version = self._latest_widevine_version()
+        if self._legacy():  # google has a different naming scheme on older widevine versions
+            cdm_version = cdm_version.split('.')[-1]
         cdm_os = config.WIDEVINE_OS_MAP[self._os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)

@@ -722,7 +722,7 @@ class Helper(object):
 
     def _check_drm(self):
         """Main function for ensuring that specified DRM system is installed and available."""
-        if not self.drm or not self.inputstream_addon == 'inputstream.adaptive':
+        if not self.drm or self.inputstream_addon != 'inputstream.adaptive':
             return True
 
         if self.drm == 'widevine':

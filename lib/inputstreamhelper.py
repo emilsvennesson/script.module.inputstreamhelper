@@ -727,7 +727,7 @@ class Helper(object):
                 return False
             if not self._has_widevine():
                 dialog = xbmcgui.Dialog()
-                if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002)):
+                if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):
                     return self._install_widevine()
                 else:
                     return False

@@ -18,7 +18,7 @@ msgid "Information"
 msgstr ""
 
 msgctxt "#30002"
-msgid "[B]Widevine CDM[/B] is required to play this content.[CR][CR]Do you want to install [B]Widevine CDM[/B]?"
+msgid "This content is DRM protected and requires the proprietary decryption module [B]Widevine CDM[/B] for playback."
 msgstr ""
 
 msgctxt "#30003"
@@ -98,7 +98,7 @@ msgid "[B]'{0}'[/B] command needs to exist on system to extract the [B]Widevine 
 msgstr ""
 
 msgctxt "#30022"
-msgid "Downloading Chrome OS recovery image."
+msgid "Downloading the Chrome OS recovery image."
 msgstr ""
 
 msgctxt "#30023"
@@ -159,4 +159,8 @@ msgstr ""
 
 msgctxt "#30037"
 msgid "Success!"
+msgstr ""
+
+msgctxt "#30038"
+msgid "Install Widevine"
 msgstr ""

@@ -6,7 +6,7 @@ A simple Kodi module that makes life easier for add-on developers relying on Inp
 * Checks if HLS is supported in inputstream.adaptive
 * Automatically installs Widevine CDM on supported platforms (optional)
   * Keeps Widevine CDM up-to-date with the latest version available (Kodi 18 and higher)
-  * Checks for missing depending libraries by parsing the output from  `ldd`
+  * Checks for missing depending libraries by parsing the output from  `ldd` (Linux)
 
 ## Example ##
 

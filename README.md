@@ -15,17 +15,24 @@ import xbmc
 import xbmcgui
 import inputstreamhelper
 
-def play_item():
-    protocol = 'mpd'
-    is_helper = inputstreamhelper.Helper(protocol, drm='widevine')
-    stream_url = 'http://yt-dash-mse-test.commondatastorage.googleapis.com/media/car-20120827-manifest.mpd'
-    if is_helper.check_inputstream():
-        playitem = xbmcgui.ListItem(path=stream_url)
-        playitem.setProperty('inputstreamaddon', is_helper.inputstream_addon)
-        playitem.setProperty('inputstream.adaptive.manifest_type', protocol)
-        xbmc.Player().play(item=stream_url, listitem=playitem)
+PROTOCOL = 'mpd'
+DRM = 'com.widevine.alpha'
+STREAM_URL = 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd'
+LICENSE_URL = 'https://cwip-shaka-proxy.appspot.com/no_auth'
 
-play_item()
+
+def play():
+    is_helper = inputstreamhelper.Helper(PROTOCOL, drm=DRM)
+    if is_helper.check_inputstream():
+        playitem = xbmcgui.ListItem(path=STREAM_URL)
+        playitem.setProperty('inputstreamaddon', is_helper.inputstream_addon)
+        playitem.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
+        playitem.setProperty('inputstream.adaptive.license_type', DRM)
+        playitem.setProperty('inputstream.adaptive.license_key', LICENSE_URL + '||R{SSM}|')
+        xbmc.Player().play(item=STREAM_URL, listitem=playitem)
+
+if __name__ == '__main__':
+    play()
 ```
 
 The Helper class takes two arguments: protocol (the media streaming protocol) and the optional argument 'drm'.

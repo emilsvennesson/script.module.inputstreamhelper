@@ -535,10 +535,13 @@ class Helper(object):
 
     def _install_widevine(self):
         """Wrapper function that calls Widevine installer method depending on architecture."""
-        if 'x86' in self._arch():
-            return self._install_widevine_x86()
-        else:
-            return self._install_widevine_arm()
+        if self._supports_widevine():
+            if 'x86' in self._arch():
+                return self._install_widevine_x86()
+            else:
+                return self._install_widevine_arm()
+
+        return False
 
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
@@ -723,8 +726,6 @@ class Helper(object):
             return True
 
         if self.drm == 'widevine':
-            if not self._supports_widevine():
-                return False
             if not self._has_widevine():
                 dialog = xbmcgui.Dialog()
                 if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):

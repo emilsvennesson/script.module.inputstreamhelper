@@ -24,14 +24,15 @@ ARCH_MAP = {
     'i686': 'x86',
     'armv7': 'arm',
     'armv8': 'arm',
-    'aarch64': 'arm',
-    'aarch64_be': 'arm'
+    'aarch64': 'arm64',
+    'aarch64_be': 'arm64'
 }
 
 WIDEVINE_SUPPORTED_ARCHS = [
     'x86_64',
     'x86',
-    'arm'
+    'arm',
+    'arm64'
 ]
 
 WIDEVINE_ARCH_MAP_X86 = {

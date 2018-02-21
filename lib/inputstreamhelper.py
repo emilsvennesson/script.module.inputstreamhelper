@@ -755,7 +755,6 @@ class Helper(object):
             else:
                 return False
         self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
-        dialog = xbmcgui.Dialog()
         if self.protocol == 'hls' and not self._supports_hls():
             dialog.ok(LANGUAGE(30004),
                       LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))

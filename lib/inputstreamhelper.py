@@ -118,10 +118,7 @@ class Helper(object):
 
     @classmethod
     def _legacy(cls):
-        if LooseVersion('18.0') > cls._kodi_version():
-            return True
-        else:
-            return False
+        return LooseVersion('18.0') > cls._kodi_version()
 
     @classmethod
     def _arch(cls):

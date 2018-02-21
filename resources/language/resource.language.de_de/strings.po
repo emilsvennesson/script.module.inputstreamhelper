@@ -18,8 +18,8 @@ msgid "Information"
 msgstr "Informationen"
 
 msgctxt "#30002"
-msgid "This content is DRM protected and requires the proprietary decryption module [B]Widevine CDM[/B] for playback."
-msgstr "This content is DRM protected and requires the proprietary decryption module [B]Widevine CDM[/B] for playback."
+msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
+msgstr "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
 
 msgctxt "#30003"
 msgid "[B]Widevine CDM[/B] was successfully installed."
@@ -142,7 +142,7 @@ msgid "Your system is missing the following libraries required by Widevine CDM: 
 msgstr ""
 
 msgctxt "#30033"
-msgid "There is an update available for [B]Widevine CDM[/B].[CR][CR]Do you want to install the update?"
+msgid "There is an update available for [B]Widevine CDM[/B]."
 msgstr ""
 
 msgctxt "#30034"

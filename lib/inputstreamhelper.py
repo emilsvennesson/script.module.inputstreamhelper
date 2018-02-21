@@ -566,7 +566,7 @@ class Helper(object):
         if LooseVersion(latest_version) > LooseVersion(current_version):
             self._log('There is an update available for {0}'.format(component))
             dialog = xbmcgui.Dialog()
-            if dialog.yesno(LANGUAGE(30001), LANGUAGE(30033), yeslabel=LANGUAGE(30034), nolabel=LANGUAGE(30028)):
+            if dialog.yesno(LANGUAGE(30040), LANGUAGE(30033), yeslabel=LANGUAGE(30034), nolabel=LANGUAGE(30028)):
                 self._install_widevine()
             else:
                 self._log('User declined to update {0}.'.format(component))
@@ -733,7 +733,7 @@ class Helper(object):
         if self.drm == 'widevine':
             if not self._has_widevine():
                 dialog = xbmcgui.Dialog()
-                if dialog.yesno(LANGUAGE(30001), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):
+                if dialog.yesno(LANGUAGE(30041), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):
                     return self._install_widevine()
                 else:
                     return False
@@ -755,6 +755,7 @@ class Helper(object):
             else:
                 return False
         self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+        dialog = xbmcgui.Dialog()
         if self.protocol == 'hls' and not self._supports_hls():
             dialog.ok(LANGUAGE(30004),
                       LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))

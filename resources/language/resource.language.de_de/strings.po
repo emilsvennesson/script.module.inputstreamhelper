@@ -168,3 +168,11 @@ msgstr ""
 msgctxt "#30039"
 msgid "[B]Widevine CDM[/B] is currently not available natively on ARM64. Please switch to a 32-bit userspace for [B]Widevine CDM[/B] support."
 msgstr ""
+
+msgctxt "#30040"
+msgid "Update available"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Widevine CDM is required"
+msgstr ""

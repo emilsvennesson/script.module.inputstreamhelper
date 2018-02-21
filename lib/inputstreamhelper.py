@@ -635,6 +635,11 @@ class Helper(object):
                     self._log('Widevine is missing the following libraries: {0}'.format(missing_libs))
                     return missing_libs
 
+        if self._arch() == 'arm64':
+            self._log('ARM64 ldd check failed. User needs 32-bit userspace.')
+            dialog = xbmcgui.Dialog()
+            dialog.ok(LANGUAGE(30004), LANGUAGE(30039))
+
         self._log('Failed to check for missing Widevine libraries.')
         return None
 

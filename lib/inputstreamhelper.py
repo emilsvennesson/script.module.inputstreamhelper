@@ -56,8 +56,8 @@ class Helper(object):
 
     @classmethod
     def _diskspace(cls):
-        """Return the free disk space available (in bytes) in cdm_path."""
-        statvfs = os.statvfs(cls._addon_cdm_path())
+        """Return the free disk space available (in bytes) in temp_path."""
+        statvfs = os.statvfs(cls._temp_path())
         return statvfs.f_frsize * statvfs.f_bavail
 
     @classmethod

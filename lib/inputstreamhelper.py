@@ -728,12 +728,19 @@ class Helper(object):
             return True
 
         if self.drm == 'widevine':
+            dialog = xbmcgui.Dialog()
+            if not ADDON.getSetting('disabled'):
+                if dialog.yesno(LANGUAGE(30001), LANGUAGE(30042)):
+                    ADDON.setSetting('disabled', str(True))
+                    return True
+                else:
+                    ADDON.setSetting('disabled', str(False))
             if not self._has_widevine():
-                dialog = xbmcgui.Dialog()
                 if dialog.yesno(LANGUAGE(30041), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):
                     return self._install_widevine()
                 else:
                     return False
+
 
             return self._check_widevine()
 
@@ -741,20 +748,22 @@ class Helper(object):
 
     def check_inputstream(self):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
-        dialog = xbmcgui.Dialog()
-        if not self._has_inputstream():
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
-            return False
-        elif not self._inputstream_enabled():
-            ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
-            if ok:
-                self._enable_inputstream()
-            else:
+        if not ADDON.getSetting('disabled') == str(True):
+            dialog = xbmcgui.Dialog()
+            if not self._has_inputstream():
+                dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
                 return False
-        self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
-        if self.protocol == 'hls' and not self._supports_hls():
-            dialog.ok(LANGUAGE(30004),
-                      LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
-            return False
+            elif not self._inputstream_enabled():
+                ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
+                if ok:
+                    self._enable_inputstream()
+                else:
+                    return False
+            self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+            if self.protocol == 'hls' and not self._supports_hls():
+                dialog.ok(LANGUAGE(30004),
+                        LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
+                return False
 
-        return self._check_drm()
+            return self._check_drm()
+        return True

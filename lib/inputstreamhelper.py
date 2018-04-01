@@ -741,7 +741,6 @@ class Helper(object):
                 else:
                     return False
 
-
             return self._check_widevine()
 
         return True

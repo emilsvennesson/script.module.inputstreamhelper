@@ -180,3 +180,7 @@ msgstr ""
 msgctxt "#30042"
 msgid "Do you want to disable inputstreamhelper?\n (Note: Disabling is only recommended for developers knowing what they're doing!)"
 msgstr "Möchten sie den Inputstreamhelper deaktivieren?\n (Hinweis: Die Deaktivierung wird nur Entwicklern empfohlen, die wissen was sie tun!)"
+
+msgctxt "#30043"
+msgid "Are you sure? This can't be reverted."
+msgstr "Sind Sie sicher? Das kann nicht rückgängig gemacht werden."

@@ -731,8 +731,9 @@ class Helper(object):
             dialog = xbmcgui.Dialog()
             if not ADDON.getSetting('disabled'):
                 if dialog.yesno(LANGUAGE(30001), LANGUAGE(30042)):
-                    ADDON.setSetting('disabled', str(True))
-                    return True
+                    if dialog.yesno(LANGUAGE(30001), LANGUAGE(30043)):
+						ADDON.setSetting('disabled', str(True))
+						return True
                 else:
                     ADDON.setSetting('disabled', str(False))
             if not self._has_widevine():

@@ -151,7 +151,7 @@ msgstr "Aggiorna"
 
 msgctxt "#30035"
 msgid "[B]loop[/B] is still loaded"
-msgstr "[B]ciclo[/B] ancora in corso"
+msgstr "[B]loop[/B] e' ancora in memoria"
 
 msgctxt "#30036"
 msgid "Unload it by running [B]modprobe -r loop[/B] in the terminal."

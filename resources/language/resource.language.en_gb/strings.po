@@ -176,3 +176,11 @@ msgstr ""
 msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr ""
+
+msgctxt "#30042"
+msgid "Do you want to disable inputstreamhelper?\n (Note: Disabling is only recommended for developers knowing what they're doing!)"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Are you sure? This can't be reverted."
+msgstr ""

@@ -160,6 +160,20 @@ class Helper(object):
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
+    def _helper_disabled(self):
+        """Return if inputstreamhelper has been disabled in settings.xml."""
+        disabled = ADDON.getSetting('disabled')
+        if not disabled:
+            ADDON.setSetting('disabled', 'false')  # create default entry
+            disabled = 'false'
+
+        if disabled == 'true':
+            self._log('inputstreamhelper is disabled in settings.xml.')
+            return True
+        else:
+            self._log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml (Note: only recommended for developers knowing what they\'re doing!)')
+            return False
+
     def _inputstream_version(self):
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')
@@ -741,6 +755,8 @@ class Helper(object):
 
     def check_inputstream(self):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
+        if self._helper_disabled():  # blindly return True if helper has been disabled
+            return True
         dialog = xbmcgui.Dialog()
         if not self._has_inputstream():
             dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
@@ -752,6 +768,7 @@ class Helper(object):
             else:
                 return False
         self._log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+
         if self.protocol == 'hls' and not self._supports_hls():
             dialog.ok(LANGUAGE(30004),
                       LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))

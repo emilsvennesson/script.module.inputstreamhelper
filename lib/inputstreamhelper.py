@@ -8,6 +8,7 @@ import shutil
 import re
 from distutils.version import LooseVersion
 from datetime import datetime, timedelta
+import struct
 
 import requests
 

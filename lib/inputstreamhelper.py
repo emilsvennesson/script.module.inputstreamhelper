@@ -203,12 +203,12 @@ class Helper(object):
         self._log('Failed to calculate losetup offset.')
         return False
 
-    def _run_cmd(self, cmd, sudo=False):
+    def _run_cmd(self, cmd, sudo=False, useshell=False):
         """Run subprocess command and return if it succeeds as a bool."""
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
         try:
-            output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            output = subprocess.check_output(cmd, shell=useshell, stderr=subprocess.STDOUT)
             success = True
             self._log('{0} cmd executed successfully.'.format(cmd))
         except subprocess.CalledProcessError as error:
@@ -233,7 +233,7 @@ class Helper(object):
         else:
             self._modprobe_loop = True
             cmd = ['modprobe', '-q', 'loop']
-            output = self._run_cmd(cmd, sudo=True)
+            output = self._run_cmd(cmd, sudo=True, useshell=True)
             return output['success']
 
     def _set_loop_dev(self):

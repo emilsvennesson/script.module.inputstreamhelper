@@ -227,7 +227,13 @@ class Helper(object):
 
     def _check_loop(self):
         """Check if loop module needs to be loaded into system."""
-        if not self._run_cmd(['modinfo', 'loop'])['success']:
+        loopcheck = False
+        try:
+            loopcheck = self._run_cmd(['modinfo', 'loop'])['success']
+        except:
+            self._log('loop check caused an error, assuming not built in.')
+
+        if loopcheck:
             self._log('loop is built in the kernel.')
             return True  # assume loop is built in the kernel
         else:

@@ -125,6 +125,9 @@ class Helper(object):
     def _arch(cls):
         """Map together and return the system architecture."""
         arch = platform.machine()
+        if arch == 'aarch64' and (struct.calcsize("P") * 8) == 32:
+            """Detected 64-bit kernel in 32-bit userspace, use 32-bit arm widevine"""
+            arch = 'arm'
         if arch == 'AMD64':
             arch_bit = platform.architecture()[0]
             if arch_bit == '32bit':

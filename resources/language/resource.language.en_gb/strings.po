@@ -212,3 +212,8 @@ msgstr ""
 msgctxt "#30050"
 msgid "Finishing..."
 msgstr ""
+
+msgctxt "#30053"
+msgid "Disable"
+msgstr ""
+

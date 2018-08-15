@@ -176,3 +176,7 @@ msgstr "Aggiornamento disponibile"
 msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr "E' richiesto Widevine CDM"
+
+msgctxt "#30042"
+msgid "Disable"
+msgstr ""

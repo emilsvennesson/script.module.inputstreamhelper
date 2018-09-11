@@ -440,6 +440,16 @@ class Helper(object):
 
         return devices
 
+    def _backup_cdm(self):
+        """Loops through local cdm folder and creates backup."""
+        for cdm_file in os.listdir(self._addon_cdm_path()):
+            if cdm_file.endswith(config.CDM_EXTENSIONS):
+                self._log('Backing up file: {0}'.format(cdm_file))
+                cdm_file_current = os.path.join(self._addon_cdm_path(), cdm_file)
+                shutil.copyfile(cdm_file_current, cdm_file_current + '.bak')
+
+        return True
+
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         dialog = xbmcgui.Dialog()
@@ -546,6 +556,7 @@ class Helper(object):
 
     def _install_widevine(self):
         """Wrapper function that calls Widevine installer method depending on architecture."""
+        self._backup_cdm() # Copies cdm to .bak if it exists.
         if self._supports_widevine():
             if 'x86' in self._arch():
                 return self._install_widevine_x86()
@@ -775,3 +786,14 @@ class Helper(object):
             return False
 
         return self._check_drm()
+
+    def revert_cdm(self):
+        """Reverts backup of cdm."""
+        for cdm_backup in os.listdir(self._addon_cdm_path()):
+            if cdm_backup.endswith('.bak'):
+                self._log('Reverting backup: {0}'.format(cdm_backup))
+                cdm_file_backup = os.path.join(self._addon_cdm_path(), cdm_backup)
+                shutil.copyfile(cdm_file_backup, cdm_file_backup[:-3])
+                self._install_cdm()
+
+        return True

@@ -19,7 +19,7 @@ import xbmcgui
 import xbmcvfs
 
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
-ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile')).decode('utf-8')
 LANGUAGE = ADDON.getLocalizedString
 
 
@@ -88,7 +88,7 @@ class Helper(object):
     def _ia_cdm_path(cls):
         """Return the specified CDM path for inputstream.adaptive."""
         addon = xbmcaddon.Addon('inputstream.adaptive')
-        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
+        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH')).decode('utf-8')
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
 
@@ -274,7 +274,7 @@ class Helper(object):
             return True
         else:
             if self._widevine_path():
-                self._log('Found Widevine binary at {0}'.format(self._widevine_path()))
+                self._log('Found Widevine binary at {0}'.format(self._widevine_path().encode('utf-8')))
                 return True
             else:
                 self._log('Widevine is not installed.')

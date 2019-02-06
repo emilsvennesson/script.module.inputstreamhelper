@@ -78,7 +78,7 @@ CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recov
 
 CHROMEOS_RECOVERY_URL_LEGACY = 'https://gist.githubusercontent.com/emilsvennesson/5e74181c9a833129ad0bb03ccb41d81f/raw/8d162568277caaa31b54f4773e75a20514856825/recovery.conf'
 
-CHROMEOS_ARM_HWID = 'SPRING'
+CHROMEOS_ARM_HWID = 'SKATE'
 
 CHROMEOS_BLOCK_SIZE = 512
 

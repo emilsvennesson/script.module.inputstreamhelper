@@ -205,19 +205,14 @@ class Helper:
 
     def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""
-        disabled = ADDON.getSetting('disabled')
-        if not disabled:
-            ADDON.setSetting('disabled', 'false')  # create default entry
-            disabled = 'false'
-
-        if disabled == 'true':
+        disabled = ADDON.getSettingBool('disabled')
+        if disabled:
             self._log('inputstreamhelper is disabled in settings.xml.')
             return True
 
         self._log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml \
         (Note: only recommended for developers knowing what they\'re doing!)')
         return False
-
     def _inputstream_version(self):
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')

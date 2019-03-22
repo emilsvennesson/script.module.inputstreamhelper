@@ -837,3 +837,49 @@ class Helper:
             return False
 
         return self._check_drm()
+
+    def _get_global_setting(self, setting):
+        json_result = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Settings.GetSettingValue", "params": {"setting": "%s"}, "id": 1}' % setting)
+        return json.loads(json_result)['result']['value']
+
+    def _get_proxies(self):
+        usehttpproxy = self._get_global_setting('network.usehttpproxy')
+        if usehttpproxy is False:
+            return dict()
+
+        httpproxytype = self._get_global_setting('network.httpproxytype')
+
+        if httpproxytype != 0:
+            dialog = xbmcgui.Dialog()
+            dialog.ok(LANGUAGE(30042), LANGUAGE(30043))
+
+        if httpproxytype == 0:
+            httpproxyscheme = 'http'
+        elif httpproxytype == 1:
+            httpproxyscheme = 'socks4'
+        elif httpproxytype == 2:
+            httpproxyscheme = 'socks4a'
+        elif httpproxytype == 3:
+            httpproxyscheme = 'socks5'
+        elif httpproxytype == 4:
+            httpproxyscheme = 'socks5h'
+        else:
+            httpproxyscheme = 'http'
+
+        httpproxyserver = self._get_global_setting('network.httpproxyserver')
+        httpproxyport = self._get_global_setting('network.httpproxyport')
+        httpproxyusername = self._get_global_setting('network.httpproxyusername')
+        httpproxypassword = self._get_global_setting('network.httpproxypassword')
+
+        if httpproxyserver and httpproxyport and httpproxyusername and httpproxypassword:
+            proxy_address = '%s://%s:%s@%s:%s' % (httpproxyscheme, httpproxyusername, httpproxypassword, httpproxyserver, httpproxyport)
+        elif httpproxyserver and httpproxyport and httpproxyusername:
+            proxy_address = '%s://%s@%s:%s' % (httpproxyscheme, httpproxyusername, httpproxyserver, httpproxyport)
+        elif httpproxyserver and httpproxyport:
+            proxy_address = '%s://%s:%s' % (httpproxyscheme, httpproxyserver, httpproxyport)
+        elif httpproxyserver:
+            proxy_address = '%s://%s' % (httpproxyscheme, httpproxyserver)
+        else:
+            return dict()
+
+        return dict(http=proxy_address, https=proxy_address)

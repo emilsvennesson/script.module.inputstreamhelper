@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 INPUTSTREAM_PROTOCOLS = {
     'mpd': 'inputstream.adaptive',
     'ism': 'inputstream.adaptive',

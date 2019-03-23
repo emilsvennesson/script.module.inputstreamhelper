@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import platform
 import zipfile
@@ -13,13 +15,10 @@ import requests
 
 import config
 
-import xbmc
-import xbmcaddon
-import xbmcgui
-import xbmcvfs
+from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
-ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile')).decode('utf-8')
+ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 LANGUAGE = ADDON.getLocalizedString
 
 
@@ -88,7 +87,7 @@ class Helper(object):
     def _ia_cdm_path(cls):
         """Return the specified CDM path for inputstream.adaptive."""
         addon = xbmcaddon.Addon('inputstream.adaptive')
-        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH')).decode('utf-8')
+        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
 
@@ -118,7 +117,7 @@ class Helper(object):
 
     @classmethod
     def _legacy(cls):
-        return LooseVersion('18.0') > cls._kodi_version()
+        return LooseVersion('18.0') > LooseVersion(cls._kodi_version())
 
     @classmethod
     def _arch(cls):
@@ -326,7 +325,7 @@ class Helper(object):
                 progress_dialog.close()
                 return True
         else:
-            return req.content
+            return req.text
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -606,7 +605,7 @@ class Helper(object):
 
     def _extract_widevine_from_img(self):
         """Extracts the Widevine CDM binary from the mounted Chrome OS image."""
-        for root, dirs, files in os.walk(self._mnt_path()):
+        for root, dirs, files in os.walk(str(self._mnt_path())):
             for filename in files:
                 if filename == 'libwidevinecdm.so':
                     cdm_path = os.path.join(root, filename)

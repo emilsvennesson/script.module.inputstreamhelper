@@ -212,3 +212,12 @@ msgstr ""
 msgctxt "#30050"
 msgid "Finishing..."
 msgstr ""
+
+msgctxt "#30054"
+msgid "Run inputstreamhelper manually"
+msgstr ""
+
+msgctxt "#30055"
+msgid "Force a reinstall"
+msgstr ""
+

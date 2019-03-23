@@ -2,4 +2,6 @@
 <settings>
    <setting id="disabled" value="" visible="false" />
    <setting id="last_update" value="" visible="false" />
+   <setting label=30054 id="run_manually" type="action" action="RunScript(special://home/addons/script.module.inputstreamhelper/lib/run_manually.py)" />
+   <setting label=30055 id="force_reinstall" type="action" action="RunScript(special://home/addons/script.module.inputstreamhelper/lib/run_manually.py, force_reinstall)" />
 </settings>

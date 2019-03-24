@@ -895,9 +895,10 @@ class Helper:
             self._log('inputstream addon not installed')
             return False
 
-    def check_inputstream(self):
+    def check_inputstream(self, ignore_disabled=False):
+
         """Main function. Ensures that all components are available for InputStream add-on playback."""
-        if self._helper_disabled():  # blindly return True if helper has been disabled
+        if self._helper_disabled() and not ignore_disabled:  # blindly return True if helper has been disabled
             return True
         if self.drm == 'widevine' and not self._supports_widevine():
             return False

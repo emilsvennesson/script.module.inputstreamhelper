@@ -182,5 +182,5 @@ msgid "SOCKS proxies are currently unsupported"
 msgstr "SOCKS proxies are currently unsupported"
 
 msgctxt "#30043"
-msgid "Using a SOCKS proxy requires the requests[socks] library installed."
-msgstr "Using a SOCKS proxy requires the requests[socks] library installed."
+msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."

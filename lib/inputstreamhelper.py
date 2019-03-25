@@ -23,6 +23,12 @@ import config
 
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 
+try:
+    import socks  # pylint: disable=unused-import
+    HAS_SOCKS = True
+except ImportError:
+    HAS_SOCKS = False
+
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 LANGUAGE = ADDON.getLocalizedString
@@ -849,10 +855,6 @@ class Helper:
 
         httpproxytype = self._get_global_setting('network.httpproxytype')
 
-        if httpproxytype != 0:
-            dialog = xbmcgui.Dialog()
-            dialog.ok(LANGUAGE(30042), LANGUAGE(30043))
-
         if httpproxytype == 0:
             httpproxyscheme = 'http'
         elif httpproxytype == 1:
@@ -881,5 +883,10 @@ class Helper:
             proxy_address = '%s://%s' % (httpproxyscheme, httpproxyserver)
         else:
             return dict()
+
+        if httpproxytype != 0 and HAS_SOCKS is False:
+            dialog = xbmcgui.Dialog()
+            dialog.ok(LANGUAGE(30042), LANGUAGE(30043))
+            return None
 
         return dict(http=proxy_address, https=proxy_address)

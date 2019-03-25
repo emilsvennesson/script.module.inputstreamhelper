@@ -15,23 +15,29 @@ from datetime import datetime, timedelta
 
 try:  # Python 3
     from urllib.error import HTTPError
-    from urllib.request import urlopen
+    from urllib.request import build_opener, install_opener, ProxyHandler, urlopen
 except ImportError:  # Python 2
-    from urllib2 import HTTPError, urlopen
+    from urllib2 import build_opener, HTTPError, install_opener, ProxyHandler, urlopen
 
 import config
 
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 
-try:
-    import socks  # pylint: disable=unused-import
-    HAS_SOCKS = True
-except ImportError:
-    HAS_SOCKS = False
-
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 LANGUAGE = ADDON.getLocalizedString
+
+
+def has_socks():
+    ''' Test if socks is installed, and remember this information '''
+    if not hasattr(has_socks, 'installed'):
+        try:
+            import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
+            has_socks.installed = True
+        except ImportError:
+            has_socks.installed = False
+            return None  # Detect if this is the first run
+    return has_socks.installed
 
 
 class Helper:
@@ -61,6 +67,9 @@ class Helper:
                 raise self.InputStreamException('UnsupportedDRMScheme')
 
             self.drm = config.DRM_SCHEMES[drm]
+
+        # Add proxy support to HTTP requests
+        install_opener(build_opener(ProxyHandler(self._get_proxies())))
 
     def __repr__(self):
         return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
@@ -851,20 +860,20 @@ class Helper:
     def _get_proxies(self):
         usehttpproxy = self._get_global_setting('network.usehttpproxy')
         if usehttpproxy is False:
-            return dict()
+            return None
 
         httpproxytype = self._get_global_setting('network.httpproxytype')
 
-        if httpproxytype == 0:
-            httpproxyscheme = 'http'
-        elif httpproxytype == 1:
-            httpproxyscheme = 'socks4'
-        elif httpproxytype == 2:
-            httpproxyscheme = 'socks4a'
-        elif httpproxytype == 3:
-            httpproxyscheme = 'socks5'
-        elif httpproxytype == 4:
-            httpproxyscheme = 'socks5h'
+        socks_supported = has_socks()
+        if httpproxytype != 0 and not socks_supported:
+            # Only open the dialog the first time (to avoid multiple popups)
+            if socks_supported is None:
+                xbmcgui.Dialog().ok('', LANGUAGE(30042))  # Requires PySocks
+            return None
+
+        proxy_types = ['http', 'socks4', 'socks4a', 'socks5', 'socks5h']
+        if 0 <= httpproxytype <= 5:
+            httpproxyscheme = proxy_types[httpproxytype]
         else:
             httpproxyscheme = 'http'
 
@@ -882,11 +891,6 @@ class Helper:
         elif httpproxyserver:
             proxy_address = '%s://%s' % (httpproxyscheme, httpproxyserver)
         else:
-            return dict()
-
-        if httpproxytype != 0 and HAS_SOCKS is False:
-            dialog = xbmcgui.Dialog()
-            dialog.ok(LANGUAGE(30042), LANGUAGE(30043))
             return None
 
         return dict(http=proxy_address, https=proxy_address)

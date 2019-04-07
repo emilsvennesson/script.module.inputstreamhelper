@@ -752,14 +752,27 @@ class Helper(object):
 
         return True
 
+    def _install_inputstream(self):
+        """Install inputstream addon."""
+        try:  # See if there's an installed repo that has it
+            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), True)
+            addon = xbmcaddon.Addon('{}'.format(self.inputstream_addon))
+            self._log('inputstream addon installed from repo')
+            return True
+        except RuntimeError:
+            self._log('inputstream addon not installed')
+            return False
+
     def check_inputstream(self):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
         if self._helper_disabled():  # blindly return True if helper has been disabled
             return True
         dialog = xbmcgui.Dialog()
         if not self._has_inputstream():
-            dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
-            return False
+            # Try to install inputstream addon
+            if not self._install_inputstream():
+                dialog.ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
+                return False
         elif not self._inputstream_enabled():
             ok = dialog.yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))
             if ok:

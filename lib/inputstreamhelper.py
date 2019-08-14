@@ -553,10 +553,27 @@ class Helper(object):
 
         return False
 
+    def _first_run(self):
+        """Check if this add-on version is running for the first time"""
+
+        # Get versions
+        settings_version = ADDON.getSetting('version')
+        if settings_version == '':
+            settings_version = '0.3.4'  # settings_version didn't exist in version 0.3.4 and older
+        addon_version = ADDON.getAddonInfo('version')
+
+        # Compare versions
+        if LooseVersion(addon_version) > LooseVersion(settings_version):
+            # New version found, save addon_version to settings
+            ADDON.setSetting('version', addon_version)
+            self._log('inputstreamhelper version %s is running for the first time' % addon_version)
+            return True
+        return False
+
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
         last_update = ADDON.getSetting('last_update')
-        if last_update:
+        if last_update and not self._first_run():
             last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
             if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
                 self._log('Widevine update check was made on {0}'.format(last_update_dt.isoformat()))

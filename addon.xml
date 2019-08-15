@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="script.module.inputstreamhelper"
-       version="0.3.5"
-       name="InputStream Helper"
-       provider-name="emilsvennesson">
+<addon id="script.module.inputstreamhelper" version="0.3.5" name="InputStream Helper" provider-name="emilsvennesson">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
         <import addon="script.module.kodi-six" version="0.0.4"/>
@@ -16,7 +13,7 @@
         + Auto install inputstream.adaptive (mediaminister)
         + Fix latest Widevine version detection (dagwieers)
         + Check for Widevine updates on new release (mediaminister)
-    </news>
+        </news>
         <platform>all</platform>
         <license>MIT License</license>
         <source>https://github.com/emilsvennesson/script.module.inputstreamhelper</source>

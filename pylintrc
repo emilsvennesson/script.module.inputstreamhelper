@@ -1,0 +1,9 @@
+[MESSAGES CONTROL]
+disable=
+    import-error,
+    invalid-name,
+    line-too-long,
+    no-self-use,
+    too-many-branches,
+    too-many-instance-attributes,
+    too-many-return-statements,

@@ -406,16 +406,18 @@ class Helper(object):
     def _latest_widevine_version(self, eula=False):
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
-            self._url = config.WIDEVINE_CURRENT_VERSION_URL
-            return self._http_request()
+            self._url = config.WIDEVINE_VERSIONS_URL
+            versions = self._http_request()
+            return versions.split()[-1]
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             if self._legacy():
                 return config.WIDEVINE_LEGACY_VERSION
             else:
-                self._url = config.WIDEVINE_CURRENT_VERSION_URL
-                return self._http_request()
+                self._url = config.WIDEVINE_VERSIONS_URL
+                versions = self._http_request()
+                return versions.split()[-1]
         else:
             return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
 
@@ -447,7 +449,7 @@ class Helper(object):
             cdm_version = cdm_version.split('.')[-1]
         cdm_os = config.WIDEVINE_OS_MAP[self._os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
-        self._url = config.WIDEVINE_DOWNLOAD_URL.format(cdm_version, cdm_os, cdm_arch)
+        self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
         downloaded = self._http_request(download=True)
         if downloaded:
@@ -591,7 +593,7 @@ class Helper(object):
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
             self._log('Acquiring Widevine EULA from x86 files.')
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(self._latest_widevine_version(eula=True), 'mac', 'x64')
+            self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
             downloaded = self._http_request(download=True, message=LANGUAGE(30025))
             if downloaded:
                 with zipfile.ZipFile(self._download_path) as z:

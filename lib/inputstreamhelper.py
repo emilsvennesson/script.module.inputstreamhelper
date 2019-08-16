@@ -13,7 +13,11 @@ import re
 from distutils.version import LooseVersion
 from datetime import datetime, timedelta
 
-import requests
+try:  # Python 3
+    from urllib.error import HTTPError
+    from urllib.request import urlopen
+except ImportError:  # Python 2
+    from urllib2 import HTTPError, urlopen
 
 import config
 
@@ -295,44 +299,60 @@ class Helper:
 
         return json.loads(response)
 
-    def _http_request(self, download=False, message=None):
+    def _http_get(self):
+        ''' Perform an HTTP GET request and return content '''
+        self._log('Request URL: {0}'.format(self._url))
+        try:
+            req = urlopen(self._url)
+            self._log('Response code: {0}'.format(req.getcode()))
+            if 400 <= req.getcode() < 600:
+                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), self._url), response=req)
+        except HTTPError:
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(self._url.split('/')[-1]))
+            return None
+        content = req.read()
+        self._log('Response: {0}'.format(content))
+        return content
+
+    def _http_download(self, message=None):
         """Makes HTTP request and displays a progress dialog on download."""
         self._log('Request URL: {0}'.format(self._url))
         filename = self._url.split('/')[-1]
         try:
-            req = requests.get(self._url, stream=download)
-            self._log('Response code: {0}'.format(req.status_code))
-            if not download:
-                self._log('Response: {0}'.format(req.content))
-            req.raise_for_status()
-        except requests.exceptions.HTTPError:
+            req = urlopen(self._url)
+            self._log('Response code: {0}'.format(req.getcode()))
+            if 400 <= req.getcode() < 600:
+                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), self._url), response=req)
+        except HTTPError:
             xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(filename))
             return False
 
-        if download:
-            if not message:  # display "downloading [filename]"
-                message = LANGUAGE(30015).format(filename)
+        if not message:  # display "downloading [filename]"
+            message = LANGUAGE(30015).format(filename)
 
-            self._download_path = os.path.join(self._temp_path(), filename)
-            total_length = float(req.headers.get('content-length'))
-            progress_dialog = xbmcgui.DialogProgress()
-            progress_dialog.create(LANGUAGE(30014), message)
+        self._download_path = os.path.join(self._temp_path(), filename)
+        total_length = float(req.info().get('content-length'))
+        progress_dialog = xbmcgui.DialogProgress()
+        progress_dialog.create(LANGUAGE(30014), message)
 
-            with open(self._download_path, 'wb') as f:
-                dl = 0
-                for chunk in req.iter_content(chunk_size=1024):
-                    f.write(chunk)
-                    dl += len(chunk)
-                    percent = int(dl * 100 / total_length)
-                    if progress_dialog.iscanceled():
-                        progress_dialog.close()
-                        req.close()
-                        return False
-                    progress_dialog.update(percent)
-            progress_dialog.close()
-            return True
+        chunk_size = 32 * 1024
+        with open(self._download_path, 'wb') as f:
+            dl = 0
+            while True:
+                chunk = req.read(chunk_size)
+                if not chunk:
+                    break
+                f.write(chunk)
+                dl += len(chunk)
+                percent = int(dl * 100 / total_length)
+                if progress_dialog.iscanceled():
+                    progress_dialog.close()
+                    req.close()
+                    return False
+                progress_dialog.update(percent)
 
-        return req.text
+        progress_dialog.close()
+        return True
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -416,15 +436,16 @@ class Helper:
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
             self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_request()
+            versions = self._http_get()
             return versions.split()[-1]
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             if self._legacy():
                 return config.WIDEVINE_LEGACY_VERSION
+
             self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_request()
+            versions = self._http_get()
             return versions.split()[-1]
 
         return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
@@ -436,7 +457,7 @@ class Helper:
             self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
         else:
             self._url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_request().split('\n\n') if 'hwidmatch=' in x]
+        conf = [x for x in self._http_get().split('\n\n') if 'hwidmatch=' in x]
         for device in conf:
             device_dict = {}
             for device_info in device.splitlines():
@@ -458,7 +479,7 @@ class Helper:
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-        downloaded = self._http_request(download=True)
+        downloaded = self._http_download()
         if downloaded:
             busy_dialog = xbmcgui.DialogBusy()
             busy_dialog.create()
@@ -520,7 +541,7 @@ class Helper:
                     return False
 
             self._url = device['url']
-            downloaded = self._http_request(download=True, message=LANGUAGE(30022))
+            downloaded = self._http_download(message=LANGUAGE(30022))
             if downloaded:
                 xbmcgui.Dialog().ok(LANGUAGE(30023), LANGUAGE(30024))
                 busy_dialog = xbmcgui.DialogBusy()
@@ -622,7 +643,7 @@ class Helper:
         else:  # grab the license from the x86 files
             self._log('Acquiring Widevine EULA from x86 files.')
             self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded = self._http_request(download=True, message=LANGUAGE(30025))
+            downloaded = self._http_download(message=LANGUAGE(30025))
             if not downloaded:
                 return False
 

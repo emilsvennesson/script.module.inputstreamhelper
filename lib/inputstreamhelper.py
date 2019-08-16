@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-''' The main inputstreamhelper Helper class '''
+''' Implements the main InputStream Helper class '''
 from __future__ import absolute_import, division, unicode_literals
 
 import os
@@ -24,11 +24,11 @@ ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 LANGUAGE = ADDON.getLocalizedString
 
 
-class Helper(object):
-    ''' The main inputstreamhelper class '''
+class Helper:
+    ''' The main InputStream Helper class '''
 
     def __init__(self, protocol, drm=None):
-        ''' Initialize Helper class '''
+        ''' Initialize InputStream Helper class '''
         self._log('Platform information: {0}'.format(platform.uname()))
 
         self._url = None
@@ -56,7 +56,7 @@ class Helper(object):
         return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
 
     class InputStreamException(Exception):
-        ''' Stub exception '''
+        ''' Stub Exception '''
         pass
 
     @classmethod
@@ -781,9 +781,13 @@ class Helper(object):
 
     def _install_inputstream(self):
         """Install inputstream addon."""
-        try:  # See if there's an installed repo that has it
+        try:
+            # See if there's an installed repo that has it
             xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), True)
-            # addon = xbmcaddon.Addon('{}'.format(self.inputstream_addon))
+
+            # Check if InputStream add-on exists!
+            addon = xbmcaddon.Addon('{}'.format(self.inputstream_addon))  # pylint: disable=unused-variable
+
             self._log('inputstream addon installed from repo')
             return True
         except RuntimeError:
@@ -795,7 +799,7 @@ class Helper(object):
         if self._helper_disabled():  # blindly return True if helper has been disabled
             return True
         if not self._has_inputstream():
-            # Try to install inputstream addon
+            # Try to install InputStream add-on
             if not self._install_inputstream():
                 xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))
                 return False

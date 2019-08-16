@@ -786,7 +786,7 @@ class Helper:
             xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), True)
 
             # Check if InputStream add-on exists!
-            addon = xbmcaddon.Addon('{}'.format(self.inputstream_addon))  # pylint: disable=unused-variable
+            xbmcaddon.Addon('{}'.format(self.inputstream_addon))
 
             self._log('inputstream addon installed from repo')
             return True

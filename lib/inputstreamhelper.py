@@ -436,7 +436,7 @@ class Helper:
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
             self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get()
+            versions = self._http_get().decode()
             return versions.split()[-1]
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
@@ -445,7 +445,7 @@ class Helper:
                 return config.WIDEVINE_LEGACY_VERSION
 
             self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get()
+            versions = self._http_get().decode()
             return versions.split()[-1]
 
         return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
@@ -457,7 +457,7 @@ class Helper:
             self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
         else:
             self._url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_get().split('\n\n') if 'hwidmatch=' in x]
+        conf = [x for x in self._http_get().decode().split('\n\n') if 'hwidmatch=' in x]
         for device in conf:
             device_dict = {}
             for device_info in device.splitlines():

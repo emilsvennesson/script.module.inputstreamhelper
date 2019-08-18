@@ -1,4 +1,6 @@
 # script.module.inputstreamhelper #
+[![Build Status](https://travis-ci.com/emilsvennesson/script.module.inputstreamhelper.svg?branch=master)](https://travis-ci.com/emilsvennesson/script.module.inputstreamhelper)
+
 A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.
 
 ## Features ##

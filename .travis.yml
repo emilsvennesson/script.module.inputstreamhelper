@@ -1,0 +1,22 @@
+language: python
+
+python:
+- '2.7'
+- '3.6'
+- '3.7-dev'
+
+sudo: false
+
+env:
+  PYTHONPATH: lib:test
+
+install:
+- pip install -r requirements.txt
+
+script:
+- tox
+- tox -e flake8
+- pylint lib/ test/
+#- kodi-addon-checker . --branch=krypton
+#- kodi-addon-checker . --branch=leia
+#- python test/test_ishelper.py

@@ -1,20 +1,24 @@
-# script.module.inputstreamhelper #
-[![Build Status](https://travis-ci.com/emilsvennesson/script.module.inputstreamhelper.svg?branch=master)](https://travis-ci.com/emilsvennesson/script.module.inputstreamhelper)
+[![GitHub release](https://img.shields.io/github/release/emilsvennesson/script.module.inputstreamhelper.svg)](https://github.com/emilsvennesson/script.module.inputstreamhelper/releases)
+[![Build Status](https://travis-ci.org/emilsvennesson/script.module.inputstreamhelper.svg?branch=master)](https://travis-ci.org/emilsvennesson/script.module.inputstreamhelper)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Contributors](https://img.shields.io/github/contributors/emilsvennesson/script.module.inputstreamhelper.svg)](https://github.com/emilsvennesson/script.module.inputstreamhelper/graphs/contributors)
 
-A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.
+# InputStream Helper #
+**script.module.inputstreamhelper** is a simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.
 
 ## Features ##
-* Displays informative dialogs if required InputStream components are unavailable
-* Checks if HLS is supported in inputstream.adaptive
-* Automatically installs Widevine CDM on supported platforms (optional)
-  * Keeps Widevine CDM up-to-date with the latest version available (Kodi 18 and higher)
-  * Checks for missing depending libraries by parsing the output from  `ldd` (Linux)
+- Displays informative dialogs if required InputStream components are unavailable
+- Checks if HLS is supported in inputstream.adaptive
+- Automatically installs Widevine CDM on supported platforms (optional)
+  - Keeps Widevine CDM up-to-date with the latest version available (Kodi 18 and higher)
+  - Checks for missing depending libraries by parsing the output from  `ldd` (Linux)
 
 ## Example ##
 
 ```python
-import xbmc
+import sys
 import xbmcgui
+import xbmcplugin
 import inputstreamhelper
 
 PROTOCOL = 'mpd'
@@ -31,7 +35,7 @@ def play():
         playitem.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
         playitem.setProperty('inputstream.adaptive.license_type', DRM)
         playitem.setProperty('inputstream.adaptive.license_key', LICENSE_URL + '||R{SSM}|')
-        xbmc.Player().play(item=STREAM_URL, listitem=playitem)
+        xbmcplugin.setResolvedUrl(handle=sys.argv[1], succeeded=True, listitem=play_item)
 
 if __name__ == '__main__':
     play()
@@ -42,10 +46,10 @@ The Helper class takes two arguments: protocol (the media streaming protocol) an
 It is recommended to not add your InputStream add-on as a dependency in addon.xml. It can cause confusion with users not being able to install your add-on because the InputStream add-on is disabled. InputStream Helper addresses issues such as these and helps the user to install/enable required InputStream components.
 
 ## Accepted protocol arguments: ##
- * mpd
- * ism
- * hls
- * rtmp
+ * **mpd** -- *MPEG-DASH*
+ * **ism** -- *Microsoft Smooth Streaming*
+ * **hls** -- *HTTP Live Streaming from Apple*
+ * **rtmp** -- *Real-Time Messaging Protocol*
 
 ## Accepted drm arguments: ##
  * widevine

@@ -47,21 +47,20 @@ class Helper:
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
-        else:
-            self.inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
+
+        self.inputstream_addon = config.INPUTSTREAM_PROTOCOLS[self.protocol]
 
         if self.drm:
             if self.drm not in config.DRM_SCHEMES:
                 raise self.InputStreamException('UnsupportedDRMScheme')
-            else:
-                self.drm = config.DRM_SCHEMES[drm]
+
+            self.drm = config.DRM_SCHEMES[drm]
 
     def __repr__(self):
         return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
 
     class InputStreamException(Exception):
         ''' Stub Exception '''
-        pass
 
     @classmethod
     def _diskspace(cls):

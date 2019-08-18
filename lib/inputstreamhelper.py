@@ -177,7 +177,8 @@ class Helper:
             self._log('inputstreamhelper is disabled in settings.xml.')
             return True
 
-        self._log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml (Note: only recommended for developers knowing what they\'re doing!)')
+        self._log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml \
+        (Note: only recommended for developers knowing what they\'re doing!)')
         return False
 
     def _inputstream_version(self):
@@ -330,8 +331,8 @@ class Helper:
                     progress_dialog.update(percent)
             progress_dialog.close()
             return True
-        else:
-            return req.text
+
+        return req.text
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""

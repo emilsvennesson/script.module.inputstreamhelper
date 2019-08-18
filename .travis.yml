@@ -19,5 +19,4 @@ script:
 - pylint lib/ test/
 #- kodi-addon-checker . --branch=krypton
 #- kodi-addon-checker . --branch=leia
-#- python test/test_apihelper.py
-#- python test/run.py /
+#- python test/test_ishelper.py

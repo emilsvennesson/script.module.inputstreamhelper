@@ -3,7 +3,9 @@ disable=
     import-error,
     invalid-name,
     line-too-long,
+    no-name-in-module,  # https://github.com/PyCQA/pylint/issues/73
     no-self-use,
+    old-style-class,
     too-many-branches,
     too-many-instance-attributes,
     too-many-return-statements,

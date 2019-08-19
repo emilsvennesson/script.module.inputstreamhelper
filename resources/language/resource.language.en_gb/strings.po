@@ -176,3 +176,7 @@ msgstr ""
 msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr ""
+
+msgctxt "#30042"
+msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."

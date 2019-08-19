@@ -829,6 +829,9 @@ class Helper:
         """Main function. Ensures that all components are available for InputStream add-on playback."""
         if self._helper_disabled():  # blindly return True if helper has been disabled
             return True
+        if self.drm == 'widevine' \
+          and not self._supports_widevine():
+            return False
         if not self._has_inputstream():
             # Try to install InputStream add-on
             if not self._install_inputstream():

@@ -235,6 +235,10 @@ class Helper:
             output = error.output
             success = False
             self._log('{0} cmd failed.'.format(cmd))
+        except OSError as error:
+            output = ''
+            success = False
+            self._log('{0} cmd doesn\'t exist.'.format(cmd))
         if output.rstrip():
             self._log('{0} cmd output: \n{1}'.format(cmd, output))
         if 'sudo' in cmd:

@@ -213,6 +213,7 @@ class Helper:
         self._log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml \
         (Note: only recommended for developers knowing what they\'re doing!)')
         return False
+
     def _inputstream_version(self):
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')

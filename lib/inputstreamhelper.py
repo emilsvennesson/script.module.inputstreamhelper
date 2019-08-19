@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+import platform
 import zipfile
 import json
 import time
@@ -30,6 +31,8 @@ LANGUAGE = ADDON.getLocalizedString
 
 def has_socks():
     ''' Test if socks is installed, and remember this information '''
+
+    # If it wasn't stored before, check if socks is installed
     if not hasattr(has_socks, 'installed'):
         try:
             import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
@@ -37,18 +40,19 @@ def has_socks():
         except ImportError:
             has_socks.installed = False
             return None  # Detect if this is the first run
+
+    # Return the stored value
     return has_socks.installed
 
 
 def system_os():
-    ''' Get system platform, and this information '''
+    ''' Get system platform, and remember this information '''
 
     # If it wasn't stored before, get the correct value
     if not hasattr(system_os, 'name'):
         if xbmc.getCondVisibility('system.platform.android'):
             system_os.name = 'Android'
         else:
-            import platform
             system_os.name = platform.system()
 
     # Return the stored value
@@ -60,8 +64,6 @@ class Helper:
 
     def __init__(self, protocol, drm=None):
         ''' Initialize InputStream Helper class '''
-        self._log('Platform information: {0}'.format(platform.uname()))
-
         self._url = None
         self._download_path = None
         self._loop_dev = None
@@ -71,6 +73,11 @@ class Helper:
 
         self.protocol = protocol
         self.drm = drm
+
+        try:
+            self._log('Platform information: {0}'.format(platform.uname()))
+        except IOError:  # Survive [Errno 10] No child processes
+            self._log('Platform information: undetermined')
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
@@ -440,13 +447,13 @@ class Helper:
             return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:
-            self._log('Unsupported Widevine OS found: {0}'.format(os()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(os()))
+            self._log('Unsupported Widevine OS found: {0}'.format(system_os()))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(system_os()))
             return False
 
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[os()]) > LooseVersion(self._kodi_version()):
+        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[os()]))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))
             return False
 
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
@@ -491,7 +498,7 @@ class Helper:
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         cdm_version = self._latest_widevine_version()
-        cdm_os = config.WIDEVINE_OS_MAP[os()]
+        cdm_os = config.WIDEVINE_OS_MAP[system_os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
@@ -532,7 +539,7 @@ class Helper:
         if xbmcgui.Dialog().yesno(LANGUAGE(30001),
                                   LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if system_os() != 'Linux':
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(os()))
+                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(system_os()))
                 return False
 
             if required_diskspace >= self._diskspace():

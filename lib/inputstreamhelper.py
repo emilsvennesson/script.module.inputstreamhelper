@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
-import platform
 import zipfile
 import json
 import time
@@ -39,6 +38,21 @@ def has_socks():
             has_socks.installed = False
             return None  # Detect if this is the first run
     return has_socks.installed
+
+
+def system_os():
+    ''' Get system platform, and this information '''
+
+    # If it wasn't stored before, get the correct value
+    if not hasattr(system_os, 'name'):
+        if xbmc.getCondVisibility('system.platform.android'):
+            system_os.name = 'Android'
+        else:
+            import platform
+            system_os.name = platform.system()
+
+    # Return the stored value
+    return system_os.name
 
 
 class Helper:
@@ -159,13 +173,6 @@ class Helper:
             return config.ARCH_MAP[arch]
 
         return arch
-
-    @classmethod
-    def _os(cls):
-        if xbmc.getCondVisibility('system.platform.android'):
-            return 'Android'
-
-        return platform.system()
 
     @staticmethod
     def _sizeof_fmt(num, suffix='B'):
@@ -298,7 +305,7 @@ class Helper:
 
     def _has_widevine(self):
         """Checks if Widevine CDM is installed on system."""
-        if self._os() == 'Android':  # widevine is built in on android
+        if system_os() == 'Android':  # widevine is built in on android
             return True
 
         if self._widevine_path():
@@ -432,14 +439,14 @@ class Helper:
             xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30007))
             return False
 
-        if self._os() not in config.WIDEVINE_SUPPORTED_OS:
-            self._log('Unsupported Widevine OS found: {0}'.format(self._os()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os()))
+        if system_os() not in config.WIDEVINE_SUPPORTED_OS:
+            self._log('Unsupported Widevine OS found: {0}'.format(os()))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(os()))
             return False
 
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]) > LooseVersion(self._kodi_version()):
+        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[os()]) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[os()]))
             return False
 
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
@@ -484,7 +491,7 @@ class Helper:
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         cdm_version = self._latest_widevine_version()
-        cdm_os = config.WIDEVINE_OS_MAP[self._os()]
+        cdm_os = config.WIDEVINE_OS_MAP[os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
@@ -524,8 +531,8 @@ class Helper:
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         if xbmcgui.Dialog().yesno(LANGUAGE(30001),
                                   LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
-            if self._os() != 'Linux':
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os()))
+            if system_os() != 'Linux':
+                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(os()))
                 return False
 
             if required_diskspace >= self._diskspace():
@@ -677,7 +684,7 @@ class Helper:
 
     def _missing_widevine_libs(self):
         """Parses ldd output of libwidevinecdm.so and displays dialog if any depending libraries are missing."""
-        if self._os() != 'Linux':  # this should only be needed for linux
+        if system_os() != 'Linux':  # this should only be needed for linux
             return None
 
         if self._cmd_exists('ldd'):
@@ -714,7 +721,7 @@ class Helper:
 
     def _check_widevine(self):
         """Checks that all Widevine components are installed and available."""
-        if self._os() == 'Android':  # no checks needed for Android
+        if system_os() == 'Android':  # no checks needed for Android
             return True
 
         if not os.path.exists(self._widevine_config_path()):
@@ -743,7 +750,7 @@ class Helper:
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
                 cdm_path_addon = os.path.join(self._addon_cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
-                if self._os() == 'Windows':  # copy on windows
+                if system_os() == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:
                     if os.path.lexists(cdm_path_inputstream):

@@ -140,11 +140,6 @@ class Helper:
         return version.split(' ')[0]
 
     @classmethod
-    def _legacy(cls):
-        ''' Return whether this is a legacy system '''
-        return LooseVersion('18.0') > LooseVersion(cls._kodi_version())
-
-    @classmethod
     def _arch(cls):
         """Map together and return the system architecture."""
         arch = platform.machine()
@@ -455,9 +450,6 @@ class Helper:
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
-            if self._legacy():
-                return config.WIDEVINE_LEGACY_VERSION
-
             self._url = config.WIDEVINE_VERSIONS_URL
             versions = self._http_get().decode()
             return versions.split()[-1]
@@ -467,10 +459,7 @@ class Helper:
     def _chromeos_config(self):
         """Parses the Chrome OS recovery configuration and put it in a dictionary."""
         devices = []
-        if self._legacy():
-            self._url = config.CHROMEOS_RECOVERY_URL_LEGACY
-        else:
-            self._url = config.CHROMEOS_RECOVERY_URL
+        self._url = config.CHROMEOS_RECOVERY_URL
         conf = [x for x in self._http_get().decode().split('\n\n') if 'hwidmatch=' in x]
         for device in conf:
             device_dict = {}
@@ -487,8 +476,6 @@ class Helper:
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         cdm_version = self._latest_widevine_version()
-        if self._legacy():  # google has a different naming scheme on older widevine versions
-            cdm_version = cdm_version.split('.')[-1]
         cdm_os = config.WIDEVINE_OS_MAP[self._os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)

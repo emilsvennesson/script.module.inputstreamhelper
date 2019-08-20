@@ -31,6 +31,8 @@ LANGUAGE = ADDON.getLocalizedString
 
 def has_socks():
     ''' Test if socks is installed, and remember this information '''
+
+    # If it wasn't stored before, check if socks is installed
     if not hasattr(has_socks, 'installed'):
         try:
             import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
@@ -38,7 +40,23 @@ def has_socks():
         except ImportError:
             has_socks.installed = False
             return None  # Detect if this is the first run
+
+    # Return the stored value
     return has_socks.installed
+
+
+def system_os():
+    ''' Get system platform, and remember this information '''
+
+    # If it wasn't stored before, get the correct value
+    if not hasattr(system_os, 'name'):
+        if xbmc.getCondVisibility('system.platform.android'):
+            system_os.name = 'Android'
+        else:
+            system_os.name = platform.system()
+
+    # Return the stored value
+    return system_os.name
 
 
 class Helper:
@@ -46,8 +64,6 @@ class Helper:
 
     def __init__(self, protocol, drm=None):
         ''' Initialize InputStream Helper class '''
-        self._log('Platform information: {0}'.format(platform.uname()))
-
         self._url = None
         self._download_path = None
         self._loop_dev = None
@@ -57,6 +73,11 @@ class Helper:
 
         self.protocol = protocol
         self.drm = drm
+
+        try:
+            self._log('Platform information: {0}'.format(platform.uname()))
+        except IOError:  # Survive [Errno 10] No child processes
+            self._log('Platform information: undetermined')
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise self.InputStreamException('UnsupportedProtocol')
@@ -159,13 +180,6 @@ class Helper:
             return config.ARCH_MAP[arch]
 
         return arch
-
-    @classmethod
-    def _os(cls):
-        if xbmc.getCondVisibility('system.platform.android'):
-            return 'Android'
-
-        return platform.system()
 
     @staticmethod
     def _sizeof_fmt(num, suffix='B'):
@@ -298,7 +312,7 @@ class Helper:
 
     def _has_widevine(self):
         """Checks if Widevine CDM is installed on system."""
-        if self._os() == 'Android':  # widevine is built in on android
+        if system_os() == 'Android':  # widevine is built in on android
             return True
 
         if self._widevine_path():
@@ -432,14 +446,14 @@ class Helper:
             xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30007))
             return False
 
-        if self._os() not in config.WIDEVINE_SUPPORTED_OS:
-            self._log('Unsupported Widevine OS found: {0}'.format(self._os()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(self._os()))
+        if system_os() not in config.WIDEVINE_SUPPORTED_OS:
+            self._log('Unsupported Widevine OS found: {0}'.format(system_os()))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(system_os()))
             return False
 
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]) > LooseVersion(self._kodi_version()):
+        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
             self._log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[self._os()]))
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))
             return False
 
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
@@ -484,7 +498,7 @@ class Helper:
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         cdm_version = self._latest_widevine_version()
-        cdm_os = config.WIDEVINE_OS_MAP[self._os()]
+        cdm_os = config.WIDEVINE_OS_MAP[system_os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
@@ -524,8 +538,8 @@ class Helper:
         required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
         if xbmcgui.Dialog().yesno(LANGUAGE(30001),
                                   LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
-            if self._os() != 'Linux':
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(self._os()))
+            if system_os() != 'Linux':
+                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(system_os()))
                 return False
 
             if required_diskspace >= self._diskspace():
@@ -677,7 +691,7 @@ class Helper:
 
     def _missing_widevine_libs(self):
         """Parses ldd output of libwidevinecdm.so and displays dialog if any depending libraries are missing."""
-        if self._os() != 'Linux':  # this should only be needed for linux
+        if system_os() != 'Linux':  # this should only be needed for linux
             return None
 
         if self._cmd_exists('ldd'):
@@ -714,7 +728,7 @@ class Helper:
 
     def _check_widevine(self):
         """Checks that all Widevine components are installed and available."""
-        if self._os() == 'Android':  # no checks needed for Android
+        if system_os() == 'Android':  # no checks needed for Android
             return True
 
         if not os.path.exists(self._widevine_config_path()):
@@ -743,7 +757,7 @@ class Helper:
                 self._log('[install_cdm] found file: {0}'.format(cdm_file))
                 cdm_path_addon = os.path.join(self._addon_cdm_path(), cdm_file)
                 cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
-                if self._os() == 'Windows':  # copy on windows
+                if system_os() == 'Windows':  # copy on windows
                     shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
                 else:
                     if os.path.lexists(cdm_path_inputstream):

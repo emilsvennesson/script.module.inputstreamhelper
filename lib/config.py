@@ -79,7 +79,28 @@ WIDEVINE_UPDATE_INTERVAL_DAYS = 14
 
 CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 
-CHROMEOS_ARM_HWID = 'SKATE'
+CHROMEOS_RECOVERY_ARM_HWIDS = [
+    'BOB',
+    'WHITETIP',
+    'SKATE',
+    'SPRING',
+    'SNOW',
+    'ELM',
+    'HANA',
+    'BIG',
+    'BLAZE',
+    'RELM',
+    'DUMO',
+    'SCARLET',
+    'FIEVEL',
+    'JAQ',
+    'JERRY',
+    'MICKEY',
+    'MIGHTY',
+    'MINNIE',
+    'SPEEDY',
+    'TIGER',
+]
 
 CHROMEOS_BLOCK_SIZE = 512
 

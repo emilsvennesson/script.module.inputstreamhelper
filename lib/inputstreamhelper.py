@@ -552,7 +552,7 @@ class Helper:
         downloaded = self._http_download()
         if downloaded:
             progress_dialog = xbmcgui.DialogProgress()
-            progress_dialog.create()
+            progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
             self._unzip(self._addon_cdm_path())
 
             if not self._widevine_eula():

@@ -205,8 +205,12 @@ class Helper:
 
     def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""
-        disabled = ADDON.getSettingBool('disabled')
-        if disabled:
+        disabled = ADDON.getSetting('disabled')
+        if not disabled:
+            ADDON.setSetting('disabled', 'false')  # create default entry
+            disabled = 'false'
+
+        if disabled == 'true':
             self._log('inputstreamhelper is disabled in settings.xml.')
             return True
 

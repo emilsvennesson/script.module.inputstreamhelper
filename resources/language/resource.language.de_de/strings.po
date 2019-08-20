@@ -177,6 +177,3 @@ msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr ""
 
-msgctxt "#30047"
-msgid "Disable"
-msgstr "Deaktivieren"

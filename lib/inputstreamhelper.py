@@ -582,6 +582,10 @@ class Helper:
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
+        if arm_device is None:
+            self._log('We could not find an ARM device in recovery.conf')
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))
+            return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
         if xbmcgui.Dialog().yesno(LANGUAGE(30001),  # Due to distributing issues, this takes a long time
                                   LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():

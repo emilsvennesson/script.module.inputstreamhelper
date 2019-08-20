@@ -450,13 +450,15 @@ class Helper:
         return True
 
     def _select_best_chromeos_image(self, devices):
+        self._log('Find best ARM image to use from recovery.conf')
+
         best = None
         for device in devices:
             # Select ARM hardware only
             for arm_hwid in config.CHROMEOS_RECOVERY_ARM_HWIDS:
                 if arm_hwid in device['hwidmatch']:
                     hwid = arm_hwid
-                    break  # We found and ARM device
+                    break  # We found an ARM device, rejoice !
             else:
                 continue  # Not ARM, skip this device
 
@@ -473,13 +475,13 @@ class Helper:
 
             # Select the newest version
             if LooseVersion(device['version']) > LooseVersion(best['version']):
-                self._log('{device[hwid]} ({device[name]}) is newer than {best[hwid]} ({best[name]})'.format(device=device, best=best))  # pylint: disable=invalid-format-index
+                self._log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})'.format(device=device, best=best))  # pylint: disable=invalid-format-index
                 best = device
 
             # Select the smallest image (disk space requirement)
             elif LooseVersion(device['version']) == LooseVersion(best['version']):
                 if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
-                    self._log('{device[hwid]} ({device[name]}) is smaller than {best[hwid]} ({best[name]})'.format(device=device, best=best))  # pylint: disable=invalid-format-index
+                    self._log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})'.format(device=device, best=best, device_size=int(device['filesize']) + int(device['zipfilesize']), best_size=int(best['filesize']) + int(best['zipfilesize'])))  # pylint: disable=invalid-format-index
                     best = device
 
         return best
@@ -499,6 +501,10 @@ class Helper:
 
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
+        if arm_device is None:
+            self._log('We could not find an ARM device in recovery.conf')
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))
+            return ''
         return arm_device['version']
 
     def _chromeos_config(self):

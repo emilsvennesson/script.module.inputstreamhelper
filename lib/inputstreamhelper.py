@@ -551,8 +551,8 @@ class Helper:
 
         downloaded = self._http_download()
         if downloaded:
-            busy_dialog = xbmcgui.DialogProgress()
-            busy_dialog.create()
+            progress_dialog = xbmcgui.DialogProgress()
+            progress_dialog.create()
             self._unzip(self._addon_cdm_path())
 
             if not self._widevine_eula():
@@ -569,10 +569,10 @@ class Helper:
                 wv_check = self._check_widevine()
                 if wv_check:
                     xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))  # Widevine successfully installed
-                    busy_dialog.close()
+                progress_dialog.close()
                 return wv_check
 
-            busy_dialog.close()
+            progress_dialog.close()
             xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))  # An error occurred
 
         return False
@@ -613,38 +613,38 @@ class Helper:
             self._url = arm_device['url']
             downloaded = self._http_download(message=LANGUAGE(30022))  # Downloading the recovery image
             if downloaded:
-                busy_dialog = xbmcgui.DialogProgress()
-                busy_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
+                progress_dialog = xbmcgui.DialogProgress()
+                progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
                 bin_filename = self._url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
 
-                busy_dialog.update(5, line1=LANGUAGE(30045), line2=LANGUAGE(30046), line3=LANGUAGE(30047))  # Uncompressing image
+                progress_dialog.update(5, line1=LANGUAGE(30045), line2=LANGUAGE(30046), line3=LANGUAGE(30047))  # Uncompressing image
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
                     self._check_loop(), self._set_loop_dev(),
                     self._losetup(bin_path), self._mnt_loop_dev()
                 ]
                 if all(success):
-                    busy_dialog.update(90, line1=LANGUAGE(30048))  # Extracting Widevine CDM
+                    progress_dialog.update(91, line1=LANGUAGE(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img()
-                    busy_dialog.update(95, line1=LANGUAGE(30049))  # Installing Widevine CDM
+                    progress_dialog.update(94, line1=LANGUAGE(30049))  # Installing Widevine CDM
                     self._install_cdm()
-                    busy_dialog.update(100, line1=LANGUAGE(30050))  # Finishing
+                    progress_dialog.update(97, line1=LANGUAGE(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         with open(self._widevine_config_path(), 'w') as config_file:
                             config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
                         if wv_check:
-                            busy_dialog.update(99, line1=LANGUAGE(30003))  # Widevine installation was successful
-                        xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))  # Widevine installation was successful
-                        busy_dialog.close()
+                            progress_dialog.update(100, line1=LANGUAGE(30003))  # Widevine installation was successful
+                            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))  # Widevine installation was successful
+                        progress_dialog.close()
                         return wv_check
                 else:
-                    busy_dialog.update(100, line1=LANGUAGE(30050))  # Finishing
+                    progress_dialog.update(100, line1=LANGUAGE(30050))  # Finishing
                     self._cleanup()
 
-                busy_dialog.close()
+                progress_dialog.close()
                 xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))  # An error occurred
 
         return False

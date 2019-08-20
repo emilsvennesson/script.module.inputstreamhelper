@@ -186,7 +186,7 @@ msgid "Extracting Widevine CDM"
 msgstr ""
 
 msgctxt "#30044"
-msgid "Prepare downloaded image..."
+msgid "Preparing downloaded image..."
 msgstr ""
 
 msgctxt "#30045"

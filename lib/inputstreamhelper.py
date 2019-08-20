@@ -10,7 +10,7 @@ import time
 import subprocess
 import shutil
 import re
-from distutils.version import LooseVersion
+from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
 from datetime import datetime, timedelta
 import struct
 
@@ -222,7 +222,8 @@ class Helper:
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')
 
-    def _log(self, string):
+    @staticmethod
+    def _log(string):
         ''' InputStream Helper log method '''
         xbmc.log(msg='[{0}-{1}]: {2}'.format(ADDON_ID, ADDON_VERSION, string), level=xbmc.LOGDEBUG)
 
@@ -260,7 +261,7 @@ class Helper:
         except OSError as error:
             output = ''
             success = False
-            self._log('{0} cmd doesn\'t exist.'.format(cmd))
+            self._log('{0} cmd doesn\'t exist. {1}'.format(cmd, error))
         if output.rstrip():
             self._log('{0} cmd output: \n{1}'.format(cmd, output))
         if 'sudo' in cmd:
@@ -759,9 +760,9 @@ class Helper:
             output = self._run_cmd(cmd, sudo=False)
             if output['success']:
                 for line in output['output'].splitlines():
-                    if '=>' not in line:
+                    if '=>' not in str(line):
                         continue
-                    lib_path = line.strip().split('=>')
+                    lib_path = str(line).strip().split('=>')
                     lib = lib_path[0].strip()
                     path = lib_path[1].strip()
                     if path == 'not found':
@@ -883,7 +884,7 @@ class Helper:
         """Install inputstream addon."""
         try:
             # See if there's an installed repo that has it
-            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), True)
+            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon))
 
             # Check if InputStream add-on exists!
             xbmcaddon.Addon('{}'.format(self.inputstream_addon))
@@ -919,7 +920,8 @@ class Helper:
 
         return self._check_drm()
 
-    def _get_global_setting(self, setting):
+    @staticmethod
+    def _get_global_setting(setting):
         json_result = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "Settings.GetSettingValue", "params": {"setting": "%s"}, "id": 1}' % setting)
         return json.loads(json_result)['result']['value']
 

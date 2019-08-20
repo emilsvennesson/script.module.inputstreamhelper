@@ -22,15 +22,15 @@ CDM_EXTENSIONS = (
 )
 
 ARCH_MAP = {
-    'x86_64': 'x86_64',
+    'aarch64': 'arm64',
+    'aarch64_be': 'arm64',
     'AMD64': 'x86_64',
-    'x86': 'x86',
-    'i386': 'x86',
-    'i686': 'x86',
     'armv7': 'arm',
     'armv8': 'arm',
-    'aarch64': 'arm64',
-    'aarch64_be': 'arm64'
+    'i386': 'x86',
+    'i686': 'x86',
+    'x86': 'x86',
+    'x86_64': 'x86_64',
 }
 
 WIDEVINE_SUPPORTED_ARCHS = [
@@ -79,7 +79,29 @@ WIDEVINE_UPDATE_INTERVAL_DAYS = 14
 
 CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 
-CHROMEOS_ARM_HWID = 'SKATE'
+# Last updated: 2019-08-20 (version 12239.67.0)
+CHROMEOS_RECOVERY_ARM_HWIDS = [
+    'BOB',
+    'WHITETIP',
+    'SKATE',
+    'SPRING',
+    'SNOW',
+    'ELM',
+    'HANA',
+    'BIG',
+    'BLAZE',
+    'RELM',
+    'DUMO',
+    'SCARLET',
+    'FIEVEL',
+    'JAQ',
+    'JERRY',
+    'MICKEY',
+    'MIGHTY',
+    'MINNIE',
+    'SPEEDY',
+    'TIGER',
+]
 
 CHROMEOS_BLOCK_SIZE = 512
 

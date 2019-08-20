@@ -463,6 +463,43 @@ class Helper:
 
         return True
 
+    def _select_best_chromeos_image(self, devices):
+        self._log('Find best ARM image to use from recovery.conf')
+
+        best = None
+        for device in devices:
+            # Select ARM hardware only
+            for arm_hwid in config.CHROMEOS_RECOVERY_ARM_HWIDS:
+                if arm_hwid in device['hwidmatch']:
+                    hwid = arm_hwid
+                    break  # We found an ARM device, rejoice !
+            else:
+                continue  # Not ARM, skip this device
+
+            device['hwid'] = hwid
+
+            # Select the first ARM device
+            if best is None:
+                best = device
+                continue  # Go to the next device
+
+            # Skip identical hwid
+            if hwid == best['hwid']:
+                continue
+
+            # Select the newest version
+            if LooseVersion(device['version']) > LooseVersion(best['version']):
+                self._log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})'.format(device=device, best=best))  # pylint: disable=invalid-format-index
+                best = device
+
+            # Select the smallest image (disk space requirement)
+            elif LooseVersion(device['version']) == LooseVersion(best['version']):
+                if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
+                    self._log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})'.format(device=device, best=best, device_size=int(device['filesize']) + int(device['zipfilesize']), best_size=int(best['filesize']) + int(best['zipfilesize'])))  # pylint: disable=invalid-format-index
+                    best = device
+
+        return best
+
     def _latest_widevine_version(self, eula=False):
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
@@ -476,21 +513,30 @@ class Helper:
             versions = self._http_get().decode()
             return versions.split()[-1]
 
-        return [x for x in self._chromeos_config() if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
+        devices = self._chromeos_config()
+        arm_device = self._select_best_chromeos_image(devices)
+        if arm_device is None:
+            self._log('We could not find an ARM device in recovery.conf')
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))
+            return ''
+        return arm_device['version']
 
     def _chromeos_config(self):
         """Parses the Chrome OS recovery configuration and put it in a dictionary."""
-        devices = []
         self._url = config.CHROMEOS_RECOVERY_URL
         conf = [x for x in self._http_get().decode().split('\n\n') if 'hwidmatch=' in x]
+
+        devices = []
         for device in conf:
-            device_dict = {}
+            device_dict = dict()
             for device_info in device.splitlines():
-                key_value = device_info.split('=')
-                key = key_value[0]
-                if len(key_value) > 1:  # some keys have empty values
-                    value = key_value[1]
+                if not device_info:
+                    continue
+                try:
+                    key, value = device_info.split('=')
                     device_dict[key] = value
+                except ValueError:
+                    continue
             devices.append(device_dict)
 
         return devices
@@ -533,10 +579,10 @@ class Helper:
     def _install_widevine_arm(self):
         """Installs Widevine CDM on ARM-based architectures."""
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
-        cos_config = self._chromeos_config()
-        device = [x for x in cos_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]
-        required_diskspace = int(device['filesize']) + int(device['zipfilesize'])
-        if xbmcgui.Dialog().yesno(LANGUAGE(30001),
+        devices = self._chromeos_config()
+        arm_device = self._select_best_chromeos_image(devices)
+        required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
+        if xbmcgui.Dialog().yesno(LANGUAGE(30001),  # Due to distributing issues, this takes a long time
                                   LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if system_os() != 'Linux':
                 xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(system_os()))
@@ -563,8 +609,8 @@ class Helper:
                 if not xbmcgui.Dialog().yesno(LANGUAGE(30001), LANGUAGE(30030).format(', '.join(root_cmds)), yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028)):
                     return False
 
-            self._url = device['url']
-            downloaded = self._http_download(message=LANGUAGE(30022))
+            self._url = arm_device['url']
+            downloaded = self._http_download(message=LANGUAGE(30022))  # Downloading the recovery image
             if downloaded:
                 xbmcgui.Dialog().ok(LANGUAGE(30023), LANGUAGE(30024))
                 busy_dialog = xbmcgui.DialogBusy()
@@ -583,7 +629,7 @@ class Helper:
                     self._cleanup()
                     if self._has_widevine():
                         with open(self._widevine_config_path(), 'w') as config_file:
-                            config_file.write(json.dumps(cos_config, indent=4))
+                            config_file.write(json.dumps(devices, indent=4))
                         xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))
                         busy_dialog.close()
                         wv_check = self._check_widevine()
@@ -644,7 +690,7 @@ class Helper:
             current_version = wv_config['version']
         else:
             component = 'Chrome OS'
-            current_version = [x for x in wv_config if config.CHROMEOS_ARM_HWID in x['hwidmatch']][0]['version']
+            current_version = self._select_best_chromeos_image(wv_config)['version']
         self._log('Latest {0} version is {1}'.format(component, latest_version))
         self._log('Current {0} version installed is {1}'.format(component, current_version))
 
@@ -843,8 +889,7 @@ class Helper:
         """Main function. Ensures that all components are available for InputStream add-on playback."""
         if self._helper_disabled():  # blindly return True if helper has been disabled
             return True
-        if self.drm == 'widevine' \
-          and not self._supports_widevine():
+        if self.drm == 'widevine' and not self._supports_widevine():
             return False
         if not self._has_inputstream():
             # Try to install InputStream add-on

@@ -26,7 +26,15 @@ from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+ADDON_ID = ADDON.getAddonInfo('id')
+ADDON_VERSION = ADDON.getAddonInfo('version')
 LANGUAGE = ADDON.getLocalizedString
+
+
+# NOTE: Work around issue caused by platform still using os.popen()
+#       This helps to survive 'IOError: [Errno 10] No child processes'
+if hasattr(os, 'popen'):
+    del os.popen
 
 
 class InputStreamException(Exception):
@@ -78,10 +86,7 @@ class Helper:
         self.protocol = protocol
         self.drm = drm
 
-        try:
-            self._log('Platform information: {0}'.format(platform.uname()))
-        except IOError:  # Survive [Errno 10] No child processes
-            self._log('Platform information: undetermined')
+        self._log('Platform information: {0}'.format(platform.uname()))
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise InputStreamException('UnsupportedProtocol')
@@ -218,10 +223,8 @@ class Helper:
         return addon.getAddonInfo('version')
 
     def _log(self, string):
-        """InputStream Helper log method."""
-        logging_prefix = '[{0}-{1}]'.format(ADDON.getAddonInfo('id'), ADDON.getAddonInfo('version'))
-        msg = '{0}: {1}'.format(logging_prefix, string)
-        xbmc.log(msg=msg, level=xbmc.LOGDEBUG)
+        ''' InputStream Helper log method '''
+        xbmc.log(msg='[{0}-{1}]: {2}'.format(ADDON_ID, ADDON_VERSION, string), level=xbmc.LOGDEBUG)
 
     def _chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""

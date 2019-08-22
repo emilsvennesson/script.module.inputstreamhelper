@@ -9,7 +9,7 @@ git_branch = $(shell git rev-parse --abbrev-ref HEAD)
 git_hash = $(shell git rev-parse --short HEAD)
 
 zip_name = $(name)-$(version)-$(git_branch)-$(git_hash).zip
-include_files = addon.xml changelog.txt LICENSE.txt README.md lib/ resources/
+include_files = addon.py addon.xml changelog.txt LICENSE.txt README.md lib/ resources/
 include_paths = $(patsubst %,$(name)/%,$(include_files))
 exclude_files = \*.new \*.orig \*.pyc \*.pyo
 zip_dir = $(name)/

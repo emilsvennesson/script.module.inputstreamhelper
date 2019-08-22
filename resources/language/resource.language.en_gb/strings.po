@@ -213,7 +213,30 @@ msgctxt "#30050"
 msgid "Finishing..."
 msgstr ""
 
-msgctxt "#30053"
-msgid "Disable"
+msgctxt "#30051"
+msgid "Widevine CDM was successfully removed."
 msgstr ""
 
+msgctxt "#30052"
+msgid "Widevine CDM was not found."
+msgstr ""
+
+msgctxt "#30900"
+msgid "Troubleshooting"
+msgstr ""
+
+msgctxt "#30903"
+msgid "Disable InputStream Helper"
+msgstr ""
+
+msgctxt "#30904"
+msgid "When disabled, DRM updates are suspended and DRM playback may fail!"
+msgstr ""
+
+msgctxt "#30905"
+msgid "Install the Widevine CDM library..."
+msgstr ""
+
+msgctxt "#30907"
+msgid "Remove the Widevine CDM library..."
+msgstr ""

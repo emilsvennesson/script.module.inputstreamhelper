@@ -24,7 +24,7 @@ all: test zip
 
 package: zip
 
-test: sanity unit run
+test: sanity unit
 
 sanity: tox pylint
 
@@ -41,13 +41,9 @@ addon: clean
 	kodi-addon-checker . --branch=krypton
 	kodi-addon-checker . --branch=leia
 
-unit:
+unit: clean
 	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
 	python -m unittest discover
-
-run:
-	@echo -e "$(white)=$(blue) Run CLI$(reset)"
-#	python test/run.py /
 
 zip: clean
 	@echo -e "$(white)=$(blue) Building new package$(reset)"
@@ -56,6 +52,8 @@ zip: clean
 	@echo -e "$(white)=$(blue) Successfully wrote package as: $(white)../$(zip_name)$(reset)"
 
 clean:
+	@echo -e "$(white)=$(blue) Cleaning up$(reset)"
 	find resources/ test/ -name '*.pyc' -type f -delete
 	find resources/ test/ -name '__pycache__' -type d -delete
 	rm -rf .pytest_cache/ .tox/ *.log
+	rm -f test/cdm/libwidevinecdm.so

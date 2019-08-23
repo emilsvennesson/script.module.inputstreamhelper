@@ -2,10 +2,18 @@
 <addon id="script.module.inputstreamhelper" version="0.3.5" name="InputStream Helper" provider-name="emilsvennesson">
     <requires>
         <import addon="xbmc.python" version="2.25.0"/>
+        <import addon="script.module.inputstreamhelper" version="0.3.5" optional="true"/>
         <import addon="script.module.kodi-six" version="0.0.4"/>
         <import addon="script.module.pysocks" version="1.6.8" optional="true"/>
+        <import addon="script.module.routing" version="0.2.0"/>
     </requires>
-    <extension library="lib" point="xbmc.python.module"/>
+    <extension point="xbmc.python.module" library="lib"/>
+    <!-- This is needed for running from RunPlugin() -->
+    <extension point="xbmc.python.pluginsource" library="addon.py">
+        <provides>executable</provides>
+    </extension>
+    <!-- This is needed for running from Information pane -->
+    <extension point="xbmc.python.script" library="addon.py"/>
     <extension point="xbmc.addon.metadata">
         <description lang="en_GB">A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.</description>
         <description lang="el_GR">Μία απλή μονάδα για το Kodi η οποία διευκολύνει την ζωή των προγραμματιστών οι οποίοι εξαρτώνται από τα πρόσθετσ InputStream και αναπαραγωγή τύπου DRM.</description>

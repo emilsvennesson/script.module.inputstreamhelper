@@ -27,7 +27,7 @@ def py2_encode(string, encoding='utf-8'):
 
     In Python 3 the string is not changed.
     """
-    if PY2 and isinstance(string, unicode):  # noqa  # pylint: disable=undefined-variable
+    if PY2 and isinstance(string, unicode):  # noqa pylint: disable=undefined-variable
         string = string.encode(encoding)
     return string
 

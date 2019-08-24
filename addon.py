@@ -4,7 +4,7 @@
 from __future__ import absolute_import, division, unicode_literals
 import sys
 from routing import Plugin
-from inputstreamhelper import install_widevine, open_settings, remove_widevine
+from inputstreamhelper import ADDON, Helper, remove_widevine
 
 plugin = Plugin()
 
@@ -14,14 +14,20 @@ plugin = Plugin()
 @plugin.route('/settings')
 def settings():
     ''' Entry point to open the plugin settings '''
-    open_settings()
+    ADDON.openSettings()
+
+
+@plugin.route('/check/<protocol>/<drm>')
+def check_inputstream(protocol, drm=None):
+    ''' The API interface to check inputstream '''
+    Helper(protocol, drm=drm).check_inputstream()
 
 
 @plugin.route('/widevine/install')
 @plugin.route('/widevine/install/latest')
 def widevine_install():
     ''' The API interface to install Widevine CDM '''
-    install_widevine()
+    Helper('mpd', drm='widevine').install_widevine()
 
 
 @plugin.route('/widevine/remove')

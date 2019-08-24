@@ -106,7 +106,6 @@ class Helper:
 
     def __init__(self, protocol, drm=None):
         ''' Initialize InputStream Helper class '''
-        self._url = None
         self._download_path = None
         self._loop_dev = None
         self._modprobe_loop = False
@@ -362,30 +361,31 @@ class Helper:
 
         return json.loads(response)
 
-    def _http_get(self):
+    @staticmethod
+    def _http_get(url):
         ''' Perform an HTTP GET request and return content '''
-        log('Request URL: {0}'.format(self._url))
+        log('Request URL: {0}'.format(url))
         try:
-            req = urlopen(self._url)
+            req = urlopen(url)
             log('Response code: {0}'.format(req.getcode()))
             if 400 <= req.getcode() < 600:
-                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), self._url), response=req)
+                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(self._url.split('/')[-1]))  # Failed to retrieve file
+            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(url.split('/')[-1]))  # Failed to retrieve file
             return None
         content = req.read()
         log('Response: {0}'.format(content))
         return content
 
-    def _http_download(self, message=None):
+    def _http_download(self, url, message=None):
         """Makes HTTP request and displays a progress dialog on download."""
-        log('Request URL: {0}'.format(self._url))
-        filename = self._url.split('/')[-1]
+        log('Request URL: {0}'.format(url))
+        filename = url.split('/')[-1]
         try:
-            req = urlopen(self._url)
+            req = urlopen(url)
             log('Response code: {0}'.format(req.getcode()))
             if 400 <= req.getcode() < 600:
-                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), self._url), response=req)
+                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
             xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(filename))  # Failed to retrieve file
             return False
@@ -536,14 +536,14 @@ class Helper:
     def _latest_widevine_version(self, eula=False):
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
-            self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get().decode()
+            url = config.WIDEVINE_VERSIONS_URL
+            versions = self._http_get(url).decode()
             return versions.split()[-1]
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
-            self._url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get().decode()
+            url = config.WIDEVINE_VERSIONS_URL
+            versions = self._http_get(url).decode()
             return versions.split()[-1]
 
         devices = self._chromeos_config()
@@ -556,8 +556,8 @@ class Helper:
 
     def _chromeos_config(self):
         """Parses the Chrome OS recovery configuration and put it in a dictionary."""
-        self._url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_get().decode().split('\n\n') if 'hwidmatch=' in x]
+        url = config.CHROMEOS_RECOVERY_URL
+        conf = [x for x in self._http_get(url).decode().split('\n\n') if 'hwidmatch=' in x]
 
         devices = []
         for device in conf:
@@ -579,9 +579,9 @@ class Helper:
         cdm_version = self._latest_widevine_version()
         cdm_os = config.WIDEVINE_OS_MAP[system_os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
-        self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
+        url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-        downloaded = self._http_download()
+        downloaded = self._http_download(url)
         if downloaded:
             progress_dialog = xbmcgui.DialogProgress()
             progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
@@ -646,12 +646,12 @@ class Helper:
                 if not xbmcgui.Dialog().yesno(LANGUAGE(30001), LANGUAGE(30030).format(', '.join(root_cmds)), yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028)):
                     return False
 
-            self._url = arm_device['url']
-            downloaded = self._http_download(message=LANGUAGE(30022))  # Downloading the recovery image
+            url = arm_device['url']
+            downloaded = self._http_download(url, message=LANGUAGE(30022))  # Downloading the recovery image
             if downloaded:
                 progress_dialog = xbmcgui.DialogProgress()
                 progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
-                bin_filename = self._url.split('/')[-1].replace('.zip', '')
+                bin_filename = url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
 
                 progress_dialog.update(5, line1=LANGUAGE(30045), line2=LANGUAGE(30046), line3=LANGUAGE(30047))  # Uncompressing image
@@ -750,8 +750,8 @@ class Helper:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
-            self._url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded = self._http_download(message=LANGUAGE(30025))  # Acquiring EULA
+            url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
+            downloaded = self._http_download(url, message=LANGUAGE(30025))  # Acquiring EULA
             if not downloaded:
                 return False
 

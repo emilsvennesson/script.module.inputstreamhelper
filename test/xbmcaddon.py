@@ -53,12 +53,13 @@ def __read_addon_xml(path):
 
 
 ADDON_INFO = __read_addon_xml('addon.xml')
+ADDON_ID = list(ADDON_INFO)[0]
 
 
 class Addon:
     ''' A reimplementation of the xbmcaddon Addon class '''
 
-    def __init__(self, id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, id=ADDON_ID):  # pylint: disable=redefined-builtin
         ''' A stub constructor for the xbmcaddon Addon class '''
         self.id = id
 

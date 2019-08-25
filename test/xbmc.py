@@ -33,7 +33,7 @@ except OSError as e:
     }
 
 
-def executebuiltin(string):  # pylint: disable=unused-argument
+def executebuiltin(function, wait=False):  # pylint: disable=unused-argument
     ''' A stub implementation of the xbmc executebuiltin() function '''
     return
 

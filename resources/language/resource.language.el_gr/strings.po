@@ -21,10 +21,6 @@ msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
 msgstr "Το πρόσθετο αυτό εξαρτάται από την ιδιοταγή μονάδα αποκρυπτογράφισης [B]Widevine CDM[/B] για αναπαραγωγή."
 
-msgctxt "#30003"
-msgid "[B]Widevine CDM[/B] was successfully installed."
-msgstr "Το [B]Widevine CDM[/B] έχει επιτυχώς εγκατασταθεί."
-
 msgctxt "#30004"
 msgid "Error"
 msgstr "Σφάλμα"
@@ -176,3 +172,7 @@ msgstr "Η ενημέρωση ολοκληρώθηκε"
 msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr "Απαιτείται το Widevine CDM"
+
+msgctxt "#30051"
+msgid "[B]Widevine CDM[/B] successfully installed."
+msgstr "Το [B]Widevine CDM[/B] έχει επιτυχώς εγκατασταθεί."

@@ -4,7 +4,7 @@
 from __future__ import absolute_import, division, unicode_literals
 import sys
 from routing import Plugin
-from inputstreamhelper import ADDON, Helper, remove_widevine
+from inputstreamhelper import ADDON, Helper
 
 plugin = Plugin()
 
@@ -33,7 +33,7 @@ def widevine_install():
 @plugin.route('/widevine/remove')
 def widevine_remove():
     ''' The API interface to remove Widevine CDMs '''
-    remove_widevine()
+    Helper('mpd', drm='widevine').remove_widevine()
 
 
 if __name__ == '__main__':

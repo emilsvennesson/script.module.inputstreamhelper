@@ -76,31 +76,6 @@ def system_os():
     return system_os.name
 
 
-def open_settings():
-    ''' API entry point for opening inpustreamhelper settings '''
-    ADDON.openSettings()
-
-
-def install_widevine():
-    ''' API entry point for installing Widevine CDM '''
-    Helper('mpd', drm='widevine').install_widevine()
-
-
-def remove_widevine():
-    ''' API entry point for removing Widevine CDM '''
-    # NOTE: Pretty crude way of ensuring CDM is removed
-    cdm_path = xbmc.translatePath(xbmcaddon.Addon('inputstream.adaptive').getSetting('DECRYPTERPATH'))
-    for extension in config.CDM_EXTENSIONS:
-        widevinecdm = os.path.join(cdm_path, 'libwidevinecdm' + extension)
-        if os.path.exists(widevinecdm):
-            log('Remove Widevine CDM at {0}'.format(widevinecdm))
-            os.remove(widevinecdm)
-            xbmcgui.Dialog().ok('{0} v{1}'.format(ADDON_ID, ADDON_VERSION), LANGUAGE(30051))
-            break
-    else:
-        xbmcgui.Dialog().ok('{0} v{1}'.format(ADDON_ID, ADDON_VERSION), LANGUAGE(30052))
-
-
 class Helper:
     ''' The main InputStream Helper class '''
 
@@ -177,7 +152,7 @@ class Helper:
 
     @classmethod
     def _widevine_config_path(cls):
-        return os.path.join(cls._addon_cdm_path(), config.WIDEVINE_CONFIG_NAME)
+        return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
 
     @classmethod
     def _load_widevine_config(cls):
@@ -186,9 +161,10 @@ class Helper:
 
     @classmethod
     def _widevine_path(cls):
-        for filename in os.listdir(cls._ia_cdm_path()):
-            if 'widevine' in filename and filename.endswith(config.CDM_EXTENSIONS):
-                return os.path.join(cls._ia_cdm_path(), filename)
+        ''' Get full widevine path '''
+        widevine_path = os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CDM_FILENAME[system_os()])
+        if xbmcvfs.exists(widevine_path):
+            return widevine_path
 
         return False
 
@@ -585,22 +561,21 @@ class Helper:
         if downloaded:
             progress_dialog = xbmcgui.DialogProgress()
             progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
-            self._unzip(self._addon_cdm_path())
+            self._unzip(self._ia_cdm_path())
 
             if not self._widevine_eula():
                 self._cleanup()
                 return False
 
-            self._install_cdm()
             self._cleanup()
 
             if self._has_widevine():
                 if os.path.lexists(self._widevine_config_path()):
                     os.remove(self._widevine_config_path())
-                os.rename(os.path.join(self._addon_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
+                os.rename(os.path.join(self._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
-                    xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))  # Widevine successfully installed
+                    xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30051))  # Success! Widevine successfully installed.
                 progress_dialog.close()
                 return wv_check
 
@@ -664,7 +639,6 @@ class Helper:
                     progress_dialog.update(91, line1=LANGUAGE(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img()
                     progress_dialog.update(94, line1=LANGUAGE(30049))  # Installing Widevine CDM
-                    self._install_cdm()
                     progress_dialog.update(97, line1=LANGUAGE(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
@@ -672,8 +646,8 @@ class Helper:
                             config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
                         if wv_check:
-                            progress_dialog.update(100, line1=LANGUAGE(30003))  # Widevine installation was successful
-                            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30003))  # Widevine installation was successful
+                            progress_dialog.update(100, line1=LANGUAGE(30051))  # Widevine CDM successfully installed.
+                            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30051))  # Success! Widevine CDM successfully installed.
                         progress_dialog.close()
                         return wv_check
                 else:
@@ -693,6 +667,17 @@ class Helper:
 
             return self._install_widevine_arm()
 
+        return False
+
+    def remove_widevine(self):
+        """Removes Widevine CDM"""
+        widevinecdm = self._widevine_path()
+        if widevinecdm and xbmcvfs.exists(widevinecdm):
+            log('Remove Widevine CDM at {0}'.format(widevinecdm))
+            xbmcvfs.delete(widevinecdm)
+            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30052))  # Success! Widevine successfully removed.
+            return True
+        xbmcgui.Dialog().notification(LANGUAGE(30004), LANGUAGE(30053))  # Error. Widevine CDM not found.
         return False
 
     @staticmethod
@@ -744,8 +729,8 @@ class Helper:
 
     def _widevine_eula(self):
         """Displays the Widevine EULA and prompts user to accept it."""
-        if os.path.exists(os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
-            license_file = os.path.join(self._addon_cdm_path(), config.WIDEVINE_LICENSE_FILE)
+        if os.path.exists(os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
+            license_file = os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)
             with open(license_file, 'r') as f:
                 eula = f.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
@@ -768,7 +753,7 @@ class Helper:
                 if filename == 'libwidevinecdm.so':
                     cdm_path = os.path.join(root, filename)
                     log('Found libwidevinecdm.so in {0}'.format(cdm_path))
-                    shutil.copyfile(cdm_path, os.path.join(self._addon_cdm_path(), filename))
+                    shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), filename))
                     return True
 
         log('Failed to find Widevine CDM binary in Chrome OS image.')
@@ -835,22 +820,6 @@ class Helper:
         self._update_widevine()
         return True
 
-    def _install_cdm(self):
-        """Loops through local cdm folder and symlinks/copies binaries to inputstream cdm_path."""
-        for cdm_file in os.listdir(self._addon_cdm_path()):
-            if cdm_file.endswith(config.CDM_EXTENSIONS):
-                log('[install_cdm] found file: {0}'.format(cdm_file))
-                cdm_path_addon = os.path.join(self._addon_cdm_path(), cdm_file)
-                cdm_path_inputstream = os.path.join(self._ia_cdm_path(), cdm_file)
-                if system_os() == 'Windows':  # copy on windows
-                    shutil.copyfile(cdm_path_addon, cdm_path_inputstream)
-                else:
-                    if os.path.lexists(cdm_path_inputstream):
-                        os.remove(cdm_path_inputstream)  # it's ok to overwrite
-                    os.symlink(cdm_path_addon, cdm_path_inputstream)
-
-        return True
-
     def _unzip(self, unzip_dir, file_to_unzip=None):
         """Unzips files to specified path."""
         zip_obj = zipfile.ZipFile(self._download_path)
@@ -880,7 +849,7 @@ class Helper:
         if self._modprobe_loop:
             xbmcgui.Dialog().notification(LANGUAGE(30035), LANGUAGE(30036))  # Unload by hand in CLI
         if not self._has_widevine():
-            shutil.rmtree(self._addon_cdm_path())
+            shutil.rmtree(self._ia_cdm_path())
 
         shutil.rmtree(self._temp_path())
         return True
@@ -913,7 +882,7 @@ class Helper:
         """Install inputstream addon."""
         try:
             # See if there's an installed repo that has it
-            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon))
+            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), wait=True)
 
             # Check if InputStream add-on exists!
             xbmcaddon.Addon('{}'.format(self.inputstream_addon))

@@ -15,11 +15,12 @@ DRM_SCHEMES = {
     'com.widevine.alpha': 'widevine'
 }
 
-CDM_EXTENSIONS = (
-    '.so',
-    '.dll',
-    '.dylib'
-)
+WIDEVINE_CDM_FILENAME = {
+    'Android': None,
+    'Linux': 'libwidevinecdm.so',
+    'Windows': 'widevinecdm.dll',
+    'Darwin': 'libwidevinecdm.dylib'
+}
 
 ARCH_MAP = {
     'aarch64': 'arm64',

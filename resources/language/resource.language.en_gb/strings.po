@@ -21,10 +21,6 @@ msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
 msgstr ""
 
-msgctxt "#30003"
-msgid "[B]Widevine CDM[/B] was successfully installed."
-msgstr ""
-
 msgctxt "#30004"
 msgid "Error"
 msgstr ""
@@ -214,11 +210,15 @@ msgid "Finishing..."
 msgstr ""
 
 msgctxt "#30051"
-msgid "Widevine CDM was successfully removed."
+msgid "[B]Widevine CDM[/B] successfully installed."
 msgstr ""
 
 msgctxt "#30052"
-msgid "Widevine CDM was not found."
+msgid "[B]Widevine CDM[/B] successfully removed."
+msgstr ""
+
+msgctxt "#30053"
+msgid "[B]Widevine CDM[/B] not found."
 msgstr ""
 
 msgctxt "#30900"
@@ -234,9 +234,9 @@ msgid "When disabled, DRM updates are suspended and DRM playback may fail!"
 msgstr ""
 
 msgctxt "#30905"
-msgid "Install the Widevine CDM library..."
+msgid "Install Widevine CDM library..."
 msgstr ""
 
 msgctxt "#30907"
-msgid "Remove the Widevine CDM library..."
+msgid "Remove Widevine CDM library..."
 msgstr ""

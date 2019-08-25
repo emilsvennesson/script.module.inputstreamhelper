@@ -21,10 +21,6 @@ msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
 msgstr "Per la riproduzzione, questo addon fa affidamento al modulo di decriptazione proprietario [B]Widevine CDM[/B]"
 
-msgctxt "#30003"
-msgid "[B]Widevine CDM[/B] was successfully installed."
-msgstr "[B]Widevine CDM[/B] installato con successo."
-
 msgctxt "#30004"
 msgid "Error"
 msgstr "Errore"
@@ -177,3 +173,6 @@ msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr "E' richiesto Widevine CDM"
 
+msgctxt "#30051"
+msgid "[B]Widevine CDM[/B] successfully installed."
+msgstr "[B]Widevine CDM[/B] installato con successo."

@@ -748,9 +748,9 @@ class Helper:
 
     def _extract_widevine_from_img(self):
         """Extracts the Widevine CDM binary from the mounted Chrome OS image."""
-        for root, dirs, files in os.walk(self._mnt_path()):  # pylint: disable=unused-variable
+        for root, dirs, files in os.walk(str(self._mnt_path())):  # pylint: disable=unused-variable
             for filename in files:
-                if filename == 'libwidevinecdm.so':
+                if filename == str('libwidevinecdm.so'):
                     cdm_path = os.path.join(root, filename)
                     log('Found libwidevinecdm.so in {0}'.format(cdm_path))
                     shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), filename))

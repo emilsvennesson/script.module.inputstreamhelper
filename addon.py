@@ -36,5 +36,14 @@ def widevine_remove():
     Helper('mpd', drm='widevine').remove_widevine()
 
 
+@plugin.route('/widevine/reinstall')
+@plugin.route('/widevine/reinstall/latest')
+def widevine_reinstall():
+    ''' The API interface to reinstall Widevine CDM '''
+    is_helper = Helper('mpd', drm='widevine')
+    is_helper.remove_widevine()
+    is_helper.install_widevine()
+
+
 if __name__ == '__main__':
     plugin.run(sys.argv)

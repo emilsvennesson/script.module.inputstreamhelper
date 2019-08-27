@@ -28,7 +28,6 @@ ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 ADDON_ID = ADDON.getAddonInfo('id')
 ADDON_VERSION = ADDON.getAddonInfo('version')
-LANGUAGE = ADDON.getLocalizedString
 
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -41,9 +40,25 @@ class InputStreamException(Exception):
     ''' Stub Exception '''
 
 
-def log(string):
+class SafeDict(dict):
+    ''' A safe dictionary implementation that does not break down on missing keys '''
+    def __missing__(self, key):
+        ''' Replace missing keys with the original placeholder '''
+        return '{' + key + '}'
+
+
+def log(msg, **kwargs):
     ''' InputStream Helper log method '''
-    xbmc.log(msg='[{0}-{1}]: {2}'.format(ADDON_ID, ADDON_VERSION, string), level=xbmc.LOGDEBUG)
+    xbmc.log(msg='[{addon}-{version}]: {msg}'.format(addon=ADDON_ID, version=ADDON_VERSION, msg=msg.format(**kwargs)), level=xbmc.LOGDEBUG)
+
+
+def localize(string_id, **kwargs):
+    ''' Return the translated string from the .po language files, optionally translating variables '''
+    if kwargs:
+        import string
+        return string.Formatter().vformat(ADDON.getLocalizedString(string_id), (), SafeDict(**kwargs))
+
+    return ADDON.getLocalizedString(string_id)
 
 
 def has_socks():
@@ -90,7 +105,7 @@ class Helper:
         self.protocol = protocol
         self.drm = drm
 
-        log('Platform information: {0}'.format(platform.uname()))
+        log('Platform information: {platform}', platform=platform.uname())
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise InputStreamException('UnsupportedProtocol')
@@ -107,7 +122,7 @@ class Helper:
         install_opener(build_opener(ProxyHandler(self._get_proxies())))
 
     def __repr__(self):
-        return 'Helper({0}, drm={1})'.format(self.protocol, self.drm)
+        return 'Helper({protocol}, drm={drm})'.format(protocol=self.protocol, drm=self.drm)
 
     @classmethod
     def _diskspace(cls):
@@ -254,17 +269,17 @@ class Helper:
         try:
             output = subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT)
             success = True
-            log('{0} cmd executed successfully.'.format(cmd))
+            log('{cmd} cmd executed successfully.', cmd=cmd)
         except subprocess.CalledProcessError as error:
             output = error.output
             success = False
-            log('{0} cmd failed.'.format(cmd))
+            log('{cmd} cmd failed.', cmd=cmd)
         except OSError as error:
             output = ''
             success = False
-            log('{0} cmd doesn\'t exist. {1}'.format(cmd, error))
+            log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
         if output.rstrip():
-            log('{0} cmd output: \n{1}'.format(cmd, output))
+            log('{cmd} cmd output:\n{output}', cmd=cmd, output=output)
         if 'sudo' in cmd:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
@@ -290,7 +305,7 @@ class Helper:
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
             self._loop_dev = output['output'].strip()
-            log('Found free loop device: {0}'.format(self._loop_dev))
+            log('Found free loop device: {device}', device=self._loop_dev)
             return True
 
         log('Failed to find free loop device.')
@@ -322,7 +337,7 @@ class Helper:
             return True
 
         if self._widevine_path():
-            log('Found Widevine binary at {0}'.format(self._widevine_path().encode('utf-8')))
+            log('Found Widevine binary at {path}', path=self._widevine_path().encode('utf-8'))
             return True
 
         log('Widevine is not installed.')
@@ -331,48 +346,48 @@ class Helper:
     @staticmethod
     def _json_rpc_request(payload):
         """Kodi JSON-RPC request. Return the response in a dictionary."""
-        log('jsonrpc payload: {0}'.format(payload))
+        log('jsonrpc payload: {payload}', payload=payload)
         response = xbmc.executeJSONRPC(json.dumps(payload))
-        log('jsonrpc response: {0}'.format(response))
+        log('jsonrpc response: {response}', response=response)
 
         return json.loads(response)
 
     @staticmethod
     def _http_get(url):
         ''' Perform an HTTP GET request and return content '''
-        log('Request URL: {0}'.format(url))
+        log('Request URL: {url}', url=url)
         try:
             req = urlopen(url)
-            log('Response code: {0}'.format(req.getcode()))
+            log('Response code: {code}', code=req.getcode())
             if 400 <= req.getcode() < 600:
                 raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(url.split('/')[-1]))  # Failed to retrieve file
+            xbmcgui.Dialog().ok(localize(30004), localize(30013, filename=url.split('/')[-1]))  # Failed to retrieve file
             return None
         content = req.read()
-        log('Response: {0}'.format(content))
+        log('Response: {response}', response=content)
         return content
 
     def _http_download(self, url, message=None):
         """Makes HTTP request and displays a progress dialog on download."""
-        log('Request URL: {0}'.format(url))
+        log('Request URL: {url}', url=url)
         filename = url.split('/')[-1]
         try:
             req = urlopen(url)
-            log('Response code: {0}'.format(req.getcode()))
+            log('Response code: {code}', code=req.getcode())
             if 400 <= req.getcode() < 600:
                 raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30013).format(filename))  # Failed to retrieve file
+            xbmcgui.Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
             return False
 
         if not message:  # display "downloading [filename]"
-            message = LANGUAGE(30015).format(filename)  # Downloading file
+            message = localize(30015, filename=filename)  # Downloading file
 
         self._download_path = os.path.join(self._temp_path(), filename)
         total_length = float(req.info().get('content-length'))
         progress_dialog = xbmcgui.DialogProgress()
-        progress_dialog.create(LANGUAGE(30014), message)  # Download in progress
+        progress_dialog.create(localize(30014), message)  # Download in progress
 
         chunk_size = 32 * 1024
         with open(self._download_path, 'wb') as f:
@@ -405,10 +420,10 @@ class Helper:
         }
         data = self._json_rpc_request(payload)
         if 'error' in data:
-            log('{0} is not installed.'.format(self.inputstream_addon))
+            log('{addon} is not installed.', addon=self.inputstream_addon)
             return False
 
-        log('{0} is installed.'.format(self.inputstream_addon))
+        log('{addon} is installed.', addon=self.inputstream_addon)
         return True
 
     def _inputstream_enabled(self):
@@ -424,10 +439,10 @@ class Helper:
         }
         data = self._json_rpc_request(payload)
         if data['result']['addon']['enabled']:
-            log('{0} {1} is enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+            log('{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
             return True
 
-        log('{0} is disabled.'.format(self.inputstream_addon))
+        log('{addon} is disabled.', addon=self.inputstream_addon)
         return False
 
     def _enable_inputstream(self):
@@ -450,23 +465,23 @@ class Helper:
     def _supports_widevine(self):
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
-            log('Unsupported Widevine architecture found: {0}'.format(self._arch()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30007))  # Widevine not available on this architecture
+            log('Unsupported Widevine architecture found: {arch}', arch=self._arch())
+            xbmcgui.Dialog().ok(localize(30004), localize(30007))  # Widevine not available on this architecture
             return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:
-            log('Unsupported Widevine OS found: {0}'.format(system_os()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30011).format(system_os()))  # Operating system not supported by Widevine
+            log('Unsupported Widevine OS found: {os}', os=system_os())
+            xbmcgui.Dialog().ok(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
         if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
-            log('Unsupported Kodi version for Widevine: {0}'.format(self._kodi_version()))
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30010).format(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
+            log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
+            xbmcgui.Dialog().ok(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
 
         if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
             log('Unsupported UWP Kodi version detected.')
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30012))  # Windows Store Kodi falls short
+            xbmcgui.Dialog().ok(localize(30004), localize(30012))  # Windows Store Kodi falls short
             return False
 
         return True
@@ -498,13 +513,13 @@ class Helper:
 
             # Select the newest version
             if LooseVersion(device['version']) > LooseVersion(best['version']):
-                log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})'.format(device=device, best=best))  # pylint: disable=invalid-format-index
+                log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})', device=device, best=best)  # pylint: disable=invalid-format-index
                 best = device
 
             # Select the smallest image (disk space requirement)
             elif LooseVersion(device['version']) == LooseVersion(best['version']):
                 if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
-                    log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})'.format(device=device, best=best, device_size=int(device['filesize']) + int(device['zipfilesize']), best_size=int(best['filesize']) + int(best['zipfilesize'])))  # pylint: disable=invalid-format-index
+                    log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})', device=device, best=best, device_size=int(device['filesize']) + int(device['zipfilesize']), best_size=int(best['filesize']) + int(best['zipfilesize']))  # pylint: disable=invalid-format-index
                     best = device
 
         return best
@@ -526,7 +541,7 @@ class Helper:
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
             log('We could not find an ARM device in recovery.conf')
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))
+            xbmcgui.Dialog().ok(localize(30004), localize(30005))
             return ''
         return arm_device['version']
 
@@ -560,7 +575,7 @@ class Helper:
         downloaded = self._http_download(url)
         if downloaded:
             progress_dialog = xbmcgui.DialogProgress()
-            progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
+            progress_dialog.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
             self._unzip(self._ia_cdm_path())
 
             if not self._widevine_eula():
@@ -575,12 +590,12 @@ class Helper:
                 os.rename(os.path.join(self._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
-                    xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30051))  # Success! Widevine successfully installed.
+                    xbmcgui.Dialog().notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
                 progress_dialog.close()
                 return wv_check
 
             progress_dialog.close()
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))  # An error occurred
+            xbmcgui.Dialog().ok(localize(30004), localize(30005))  # An error occurred
 
         return False
 
@@ -591,71 +606,71 @@ class Helper:
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
             log('We could not find an ARM device in recovery.conf')
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))
+            xbmcgui.Dialog().ok(localize(30004), localize(30005))
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
-        if xbmcgui.Dialog().yesno(LANGUAGE(30001),  # Due to distributing issues, this takes a long time
-                                  LANGUAGE(30006).format(self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
+        if xbmcgui.Dialog().yesno(localize(30001),  # Due to distributing issues, this takes a long time
+                                  localize(30006, diskspace=self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if system_os() != 'Linux':
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30019).format(system_os()))
+                xbmcgui.Dialog().ok(localize(30004), localize(30019, os=system_os()))
                 return False
 
             if required_diskspace >= self._diskspace():
-                xbmcgui.Dialog().ok(LANGUAGE(30004),  # Not enough free disk space
-                                    LANGUAGE(30018).format(self._sizeof_fmt(required_diskspace)))
+                xbmcgui.Dialog().ok(localize(30004),  # Not enough free disk space
+                                    localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
                 return False
 
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30020).format('fdisk', 'parted'))  # Commands are missing
+                xbmcgui.Dialog().ok(localize(30004), localize(30020, command1='fdisk', command2='parted'))  # Commands are missing
                 return False
 
             if not self._cmd_exists('mount'):
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30021).format('mount'))  # Mount command is missing
+                xbmcgui.Dialog().ok(localize(30004), localize(30021, command='mount'))  # Mount command is missing
                 return False
 
             if not self._cmd_exists('losetup'):
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30021).format('losetup'))  # Losetup command is missing
+                xbmcgui.Dialog().ok(localize(30004), localize(30021, command='losetup'))  # Losetup command is missing
                 return False
 
             if os.getuid() != 0:  # ask for permissions to run cmds as root
-                if not xbmcgui.Dialog().yesno(LANGUAGE(30001), LANGUAGE(30030).format(', '.join(root_cmds)), yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028)):
+                if not xbmcgui.Dialog().yesno(localize(30001), localize(30030, cmds=', '.join(root_cmds)), yeslabel=localize(30027), nolabel=localize(30028)):
                     return False
 
             url = arm_device['url']
-            downloaded = self._http_download(url, message=LANGUAGE(30022))  # Downloading the recovery image
+            downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
             if downloaded:
                 progress_dialog = xbmcgui.DialogProgress()
-                progress_dialog.create(heading=LANGUAGE(30043), line1=LANGUAGE(30044))  # Extracting Widevine CDM
+                progress_dialog.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
                 bin_filename = url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
 
-                progress_dialog.update(5, line1=LANGUAGE(30045), line2=LANGUAGE(30046), line3=LANGUAGE(30047))  # Uncompressing image
+                progress_dialog.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
                     self._check_loop(), self._set_loop_dev(),
                     self._losetup(bin_path), self._mnt_loop_dev()
                 ]
                 if all(success):
-                    progress_dialog.update(91, line1=LANGUAGE(30048))  # Extracting Widevine CDM
+                    progress_dialog.update(91, line1=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img()
-                    progress_dialog.update(94, line1=LANGUAGE(30049))  # Installing Widevine CDM
-                    progress_dialog.update(97, line1=LANGUAGE(30050))  # Finishing
+                    progress_dialog.update(94, line1=localize(30049))  # Installing Widevine CDM
+                    progress_dialog.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         with open(self._widevine_config_path(), 'w') as config_file:
                             config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
                         if wv_check:
-                            progress_dialog.update(100, line1=LANGUAGE(30051))  # Widevine CDM successfully installed.
-                            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30051))  # Success! Widevine CDM successfully installed.
+                            progress_dialog.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
+                            xbmcgui.Dialog().notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
                         progress_dialog.close()
                         return wv_check
                 else:
-                    progress_dialog.update(100, line1=LANGUAGE(30050))  # Finishing
+                    progress_dialog.update(100, line1=localize(30050))  # Finishing
                     self._cleanup()
 
                 progress_dialog.close()
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30005))  # An error occurred
+                xbmcgui.Dialog().ok(localize(30004), localize(30005))  # An error occurred
 
         return False
 
@@ -673,11 +688,11 @@ class Helper:
         """Removes Widevine CDM"""
         widevinecdm = self._widevine_path()
         if widevinecdm and xbmcvfs.exists(widevinecdm):
-            log('Remove Widevine CDM at {0}'.format(widevinecdm))
+            log('Remove Widevine CDM at {path}', path=widevinecdm)
             xbmcvfs.delete(widevinecdm)
-            xbmcgui.Dialog().notification(LANGUAGE(30037), LANGUAGE(30052))  # Success! Widevine successfully removed.
+            xbmcgui.Dialog().notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
             return True
-        xbmcgui.Dialog().notification(LANGUAGE(30004), LANGUAGE(30053))  # Error. Widevine CDM not found.
+        xbmcgui.Dialog().notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
         return False
 
     @staticmethod
@@ -694,7 +709,7 @@ class Helper:
         if LooseVersion(addon_version) > LooseVersion(settings_version):
             # New version found, save addon_version to settings
             ADDON.setSetting('version', addon_version)
-            log('inputstreamhelper version %s is running for the first time' % addon_version)
+            log('inputstreamhelper version {version} is running for the first time', version=addon_version)
             return True
         return False
 
@@ -704,7 +719,7 @@ class Helper:
         if last_update and not self._first_run():
             last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
             if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
-                log('Widevine update check was made on {0}'.format(last_update_dt.isoformat()))
+                log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
                 return
 
         wv_config = self._load_widevine_config()
@@ -715,17 +730,17 @@ class Helper:
         else:
             component = 'Chrome OS'
             current_version = self._select_best_chromeos_image(wv_config)['version']
-        log('Latest {0} version is {1}'.format(component, latest_version))
-        log('Current {0} version installed is {1}'.format(component, current_version))
+        log('Latest {component} version is {version}', component=component, version=latest_version)
+        log('Current {component} version installed is {version}', component=component, version=current_version)
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
-            log('There is an update available for {0}'.format(component))
-            if xbmcgui.Dialog().yesno(LANGUAGE(30040), LANGUAGE(30033), yeslabel=LANGUAGE(30034), nolabel=LANGUAGE(30028)):
+            log('There is an update available for {component}', component=component)
+            if xbmcgui.Dialog().yesno(localize(30040), localize(30033), yeslabel=localize(30034), nolabel=localize(30028)):
                 self.install_widevine()
             else:
-                log('User declined to update {0}.'.format(component))
+                log('User declined to update {component}.', component=component)
         else:
-            log('User is on the latest available {0} version.'.format(component))
+            log('User is on the latest available {component} version.', component=component)
 
     def _widevine_eula(self):
         """Displays the Widevine EULA and prompts user to accept it."""
@@ -736,7 +751,7 @@ class Helper:
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded = self._http_download(url, message=LANGUAGE(30025))  # Acquiring EULA
+            downloaded = self._http_download(url, message=localize(30025))  # Acquiring EULA
             if not downloaded:
                 return False
 
@@ -744,7 +759,7 @@ class Helper:
                 with z.open(config.WIDEVINE_LICENSE_FILE) as f:
                     eula = f.read().strip().replace('\n', ' ')
 
-        return xbmcgui.Dialog().yesno(LANGUAGE(30026), eula, yeslabel=LANGUAGE(30027), nolabel=LANGUAGE(30028))  # Widevine CDM EULA
+        return xbmcgui.Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
 
     def _extract_widevine_from_img(self):
         """Extracts the Widevine CDM binary from the mounted Chrome OS image."""
@@ -752,7 +767,7 @@ class Helper:
             for filename in files:
                 if filename == str('libwidevinecdm.so'):
                     cdm_path = os.path.join(root, filename)
-                    log('Found libwidevinecdm.so in {0}'.format(cdm_path))
+                    log('Found libwidevinecdm.so in {path}', path=cdm_path)
                     shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), filename))
                     return True
 
@@ -766,7 +781,7 @@ class Helper:
 
         if self._cmd_exists('ldd'):
             if not os.access(self._widevine_path(), os.X_OK):
-                log('Changing {0} permissions to 744.'.format(self._widevine_path()))
+                log('Changing {path} permissions to 744.', path=self._widevine_path())
                 os.chmod(self._widevine_path(), 0o744)
 
             missing_libs = []
@@ -783,7 +798,7 @@ class Helper:
                         missing_libs.append(lib)
 
                 if missing_libs:
-                    log('Widevine is missing the following libraries: {0}'.format(missing_libs))
+                    log('Widevine is missing the following libraries: {libs}', libs=missing_libs)
                     return missing_libs
 
                 log('There are no missing Widevine libraries! :-)')
@@ -791,7 +806,7 @@ class Helper:
 
         if self._arch() == 'arm64' and (struct.calcsize('P') * 8) == 64:
             log('ARM64 ldd check failed. User needs 32-bit userspace.')
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30039))  # Widevine not available on ARM64
+            xbmcgui.Dialog().ok(localize(30004), localize(30039))  # Widevine not available on ARM64
 
         log('Failed to check for missing Widevine libraries.')
         return None
@@ -803,18 +818,18 @@ class Helper:
 
         if not os.path.exists(self._widevine_config_path()):
             log('Widevine config is missing. Reinstall is required.')
-            xbmcgui.Dialog().ok(LANGUAGE(30001), LANGUAGE(30031))  # An update of Widevine is required
+            xbmcgui.Dialog().ok(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
             if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
                 log('Widevine/system arch mismatch. Reinstall is required.')
-                xbmcgui.Dialog().ok(LANGUAGE(30001), LANGUAGE(30031))  # An update of Widevine is required
+                xbmcgui.Dialog().ok(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()
 
         if self._missing_widevine_libs():
-            xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30032).format(', '.join(self._missing_widevine_libs())))  # Missing libraries
+            xbmcgui.Dialog().ok(localize(30004), localize(30032, libs=', '.join(self._missing_widevine_libs())))  # Missing libraries
             return False
 
         self._update_widevine()
@@ -847,7 +862,7 @@ class Helper:
             if unattach_output['success']:
                 self._loop_dev = False
         if self._modprobe_loop:
-            xbmcgui.Dialog().notification(LANGUAGE(30035), LANGUAGE(30036))  # Unload by hand in CLI
+            xbmcgui.Dialog().notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not self._has_widevine():
             shutil.rmtree(self._ia_cdm_path())
 
@@ -859,7 +874,7 @@ class Helper:
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
 
-        log('HLS is unsupported on {0} version {1}'.format(self.inputstream_addon, self._inputstream_version()))
+        log('HLS is unsupported on {addon} version {version}', addon=self.inputstream_addon, version=self._inputstream_version())
         return False
 
     def _check_drm(self):
@@ -869,7 +884,7 @@ class Helper:
 
         if self.drm == 'widevine':
             if not self._has_widevine():
-                if xbmcgui.Dialog().yesno(LANGUAGE(30041), LANGUAGE(30002), yeslabel=LANGUAGE(30038), nolabel=LANGUAGE(30028)):  # Widevine required
+                if xbmcgui.Dialog().yesno(localize(30041), localize(30002), yeslabel=localize(30038), nolabel=localize(30028)):  # Widevine required
                     return self.install_widevine()
 
                 return False
@@ -902,18 +917,18 @@ class Helper:
         if not self._has_inputstream():
             # Try to install InputStream add-on
             if not self._install_inputstream():
-                xbmcgui.Dialog().ok(LANGUAGE(30004), LANGUAGE(30008).format(self.inputstream_addon))  # inputstream is missing on system
+                xbmcgui.Dialog().ok(localize(30004), localize(30008, addon=self.inputstream_addon))  # inputstream is missing on system
                 return False
         elif not self._inputstream_enabled():
-            ok = xbmcgui.Dialog().yesno(LANGUAGE(30001), LANGUAGE(30009).format(self.inputstream_addon, self.inputstream_addon))  # inputstream is disabled
+            ok = xbmcgui.Dialog().yesno(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
             if ok:
                 self._enable_inputstream()
             return False
-        log('{0} {1} is installed and enabled.'.format(self.inputstream_addon, self._inputstream_version()))
+        log('{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
 
         if self.protocol == 'hls' and not self._supports_hls():
-            xbmcgui.Dialog().ok(LANGUAGE(30004),  # HLS Minimum version is needed
-                                LANGUAGE(30017).format(self.inputstream_addon, config.HLS_MINIMUM_IA_VERSION))
+            xbmcgui.Dialog().ok(localize(30004),  # HLS Minimum version is needed
+                                localize(30017, addon=self.inputstream_addon, version=config.HLS_MINIMUM_IA_VERSION))
             return False
 
         return self._check_drm()
@@ -934,7 +949,7 @@ class Helper:
         if httpproxytype != 0 and not socks_supported:
             # Only open the dialog the first time (to avoid multiple popups)
             if socks_supported is None:
-                xbmcgui.Dialog().ok('', LANGUAGE(30042))  # Requires PySocks
+                xbmcgui.Dialog().ok('', localize(30042))  # Requires PySocks
             return None
 
         proxy_types = ['http', 'socks4', 'socks4a', 'socks5', 'socks5h']

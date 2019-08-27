@@ -30,7 +30,7 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "Προέκυψε ένα σφάλμα κατά την εγκατάσταση του [B]Widevine CDM[/B]. Παρακαλώ ενεργοποιήστε την αποσφαλμάτωση και κάντε αίτημα αναφοράς σφάλματος σε: [CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distributing issues, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{0}[/B] of free disk space. Do you wish to continue?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{0}[/B] of free disk space. Do you wish to continue?"
 msgstr "Λόγω ενοχλητικών προβλημάτων, το [B]Widevine CDM[/B] πρέπει να εξαχθεί από μία εικόνα επαναφοράς του Chrome OS. Για τον λόγο αυτόν απαιτείται τουλάχιστον [B]{0}[/B] ελεύθερου χώρου. Επιθυμείτε να συνεχίσετε;"
 
 msgctxt "#30007"

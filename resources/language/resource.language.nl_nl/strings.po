@@ -103,7 +103,7 @@ msgstr "Klaar met downloaden!"
 
 msgctxt "#30024"
 msgid "The installation now needs to unzip, mount and extract [B]Widevine CDM[/B] from the recovery image.[CR][CR]This process may take up to ten minutes to complete."
-msgstr "Voor de installatie moet het recovery-image worden gemount en gedecomprimeerd en moet [B]Widevine CDM[/B] worden uitgepakt.[CR][CR]Dit proces kan wel tien minuten duren."
+msgstr "Voor de installatie moet het recovery-image worden gedecomprimeerd en gemount en moet [B]Widevine CDM[/B] worden uitgepakt.[CR][CR]Dit proces kan wel tien minuten duren."
 
 msgctxt "#30025"
 msgid "Acquiring EULA."
@@ -173,6 +173,70 @@ msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr "Widevine CDM is nodig"
 
+msgctxt "#30042"
+msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+
+msgctxt "#30043"
+msgid "Extracting Widevine CDM"
+msgstr "Widevine CDM wordt uitgepakt"
+
+msgctxt "#30044"
+msgid "Preparing downloaded image..."
+msgstr "Het recovery image wordt voorbereid..."
+
+msgctxt "#30045"
+msgid "Uncompressing image..."
+msgstr "Het recovery image wordt uitgepakt..."
+
+msgctxt "#30046"
+msgid "This may take several minutes."
+msgstr "Dit kan enkele minuten duren."
+
+msgctxt "#30047"
+msgid "[I]Please do not interrupt this process.[/I]"
+msgstr "[I]Graag dit proces niet onderbreken.[/I]"
+
+msgctxt "#30048"
+msgid "Extracting Widevine CDM from image..."
+msgstr "Het Widevine CDM wordt van het recovery image gehaald..."
+
+msgctxt "#30049"
+msgid "Installing Widevine CDM..."
+msgstr "Widevine CDM wordt geïnstalleerd..."
+
+msgctxt "#30050"
+msgid "Finishing..."
+msgstr "Beëindigen..."
+
 msgctxt "#30051"
 msgid "[B]Widevine CDM[/B] successfully installed."
 msgstr "[B]Widevine CDM[/B] met succes geïnstalleerd."
+
+msgctxt "#30052"
+msgid "[B]Widevine CDM[/B] successfully removed."
+msgstr "[B]Widevine CDM[/B] werd succesvol verwijderd."
+
+msgctxt "#30053"
+msgid "[B]Widevine CDM[/B] not found."
+msgstr "[B]Widevine CDM[/B] werd niet gevonden."
+
+msgctxt "#30900"
+msgid "Troubleshooting"
+msgstr "Foutopsporing"
+
+msgctxt "#30903"
+msgid "Disable InputStream Helper"
+msgstr "InputStream Helper afzetten"
+
+msgctxt "#30904"
+msgid "When disabled, DRM playback may fail!"
+msgstr "Indien niet actief kan het afspelen van DRM content falen!"
+
+msgctxt "#30905"
+msgid "Install Widevine CDM library..."
+msgstr "Widevine CDM installeren..."
+
+msgctxt "#30907"
+msgid "Remove Widevine CDM library..."
+msgstr "Widevine CDM verwijderen..."

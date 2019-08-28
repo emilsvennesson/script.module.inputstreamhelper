@@ -30,8 +30,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "При установке [B]Widevine CDM[/B] возникла ошибка. Включите журнал отладки и опубликуйте отчет об ошибке на:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "Из-за проблем с распространением, [B]Widevine CDM[/B] необходимо извлечь из образа восстановления Chrome OS. Для этого процесса требуется минимум [B]{diskspace}[/B] свободного дискового пространства. Вы хотите продолжить?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "Из-за проблем с распространением, [B]Widevine CDM[/B] необходимо извлечь из образа восстановления ChromeOS. Для этого процесса требуется минимум [B]{diskspace}[/B] свободного дискового пространства. Вы хотите продолжить?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -94,8 +94,8 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "В системе нужна команда [B]'{command}'[/B] для извлечения [B]Widevine CDM[/B]."
 
 msgctxt "#30022"
-msgid "Downloading the Chrome OS recovery image."
-msgstr "Загружается образ восстановления Chrome OS."
+msgid "Downloading the ChromeOS recovery image..."
+msgstr "Загружается образ восстановления ChromeOS..."
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -173,6 +173,70 @@ msgctxt "#30041"
 msgid "Widevine CDM is required"
 msgstr "Требуется Widevine CDM"
 
+msgctxt "#30042"
+msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr ""
+
+msgctxt "#30043"
+msgid "Extracting Widevine CDM"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Preparing downloaded image..."
+msgstr ""
+
+msgctxt "#30045"
+msgid "Uncompressing image..."
+msgstr ""
+
+msgctxt "#30046"
+msgid "This may take several minutes."
+msgstr ""
+
+msgctxt "#30047"
+msgid "[I]Please do not interrupt this process.[/I]"
+msgstr ""
+
+msgctxt "#30048"
+msgid "Extracting Widevine CDM from image..."
+msgstr ""
+
+msgctxt "#30049"
+msgid "Installing Widevine CDM..."
+msgstr ""
+
+msgctxt "#30050"
+msgid "Finishing..."
+msgstr ""
+
 msgctxt "#30051"
 msgid "[B]Widevine CDM[/B] successfully installed."
 msgstr "[B]Widevine CDM[/B] был успешно установлен."
+
+msgctxt "#30052"
+msgid "[B]Widevine CDM[/B] successfully removed."
+msgstr ""
+
+msgctxt "#30053"
+msgid "[B]Widevine CDM[/B] not found."
+msgstr ""
+
+msgctxt "#30900"
+msgid "Troubleshooting"
+msgstr ""
+
+msgctxt "#30903"
+msgid "Disable InputStream Helper"
+msgstr ""
+
+msgctxt "#30904"
+msgid "When disabled, DRM playback may fail!"
+msgstr ""
+
+msgctxt "#30905"
+msgid "Install Widevine CDM library..."
+msgstr ""
+
+msgctxt "#30907"
+msgid "Remove Widevine CDM library..."
+msgstr ""

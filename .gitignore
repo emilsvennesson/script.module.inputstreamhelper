@@ -5,3 +5,5 @@ __pycache__/
 test/cdm/
 test/userdata/addon_settings.json
 test/userdata/cdm/
+
+*.zip

@@ -30,7 +30,7 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr ""
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
 msgstr ""
 
 msgctxt "#30007"
@@ -94,7 +94,7 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr ""
 
 msgctxt "#30022"
-msgid "Downloading the Chrome OS recovery image."
+msgid "Downloading the ChromeOS recovery image..."
 msgstr ""
 
 msgctxt "#30023"
@@ -175,7 +175,7 @@ msgstr ""
 
 msgctxt "#30042"
 msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr ""
 
 msgctxt "#30043"
 msgid "Extracting Widevine CDM"
@@ -230,7 +230,7 @@ msgid "Disable InputStream Helper"
 msgstr ""
 
 msgctxt "#30904"
-msgid "When disabled, DRM updates are suspended and DRM playback may fail!"
+msgid "When disabled, DRM playback may fail!"
 msgstr ""
 
 msgctxt "#30905"

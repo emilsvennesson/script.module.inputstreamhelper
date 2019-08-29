@@ -19,7 +19,7 @@ msgstr "Informationen"
 
 msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
-msgstr "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
+msgstr "Dieses Add-on benötigt das proprietäre Entschlüsselungsmodul [B]Widevine CDM[/B] für die Wiedergabe."
 
 msgctxt "#30004"
 msgid "Error"
@@ -47,7 +47,7 @@ msgstr "[B]{addon}[/B] ist nicht aktiviert. Das Add-on wird benötigt um den Inh
 
 msgctxt "#30010"
 msgid "[B]Kodi {version}[/B] or higher is required for [B]Widevine CDM[/B] content playback."
-msgstr "[B]Kodi in der Version {version}[/B] oder höher wird benötigt um [B]Widevine CDM[/B] geschützte Inhalte wiederzugeben."
+msgstr "[B]Kodi in der Version {version}[/B] oder höher wird benötigt, um [B]Widevine CDM[/B] geschützte Inhalte wiederzugeben."
 
 msgctxt "#30011"
 msgid "This operating system ([B]{0}[/B]) is not supported by [B]Widevine CDM[/B]."
@@ -75,7 +75,7 @@ msgstr "Fehler beim Entpacken der [B]Widevine CDM[/B] Bibliothek."
 
 msgctxt "#30017"
 msgid "[B]{addon}[/B] {version} or later is required to play this content."
-msgstr "[B]{addon}[/B] {version} oder höher ist notwendig um den Inhalt wiederzugeben."
+msgstr "[B]{addon}[/B] {version} oder höher ist notwendig, um den Inhalt wiederzugeben."
 
 msgctxt "#30018"
 msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{diskspace}[/B] and try again."
@@ -87,7 +87,7 @@ msgstr "Das Betriebssystem ([B]{os}[/B]) wird auf ARM Systemarchitekturen nicht 
 
 msgctxt "#30020"
 msgid "[B]'{command1}'[/B] or [B]'{command2}'[/B] command needs to exist on system to extract the [B]Widevine CDM[/B]."
-msgstr "Die Systembefehle [B]'{command1}'[/B] oder [B]'{command2}'[/B] müssen verfügbar sein um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
+msgstr "Die Systembefehle [B]'{command1}'[/B] oder [B]'{command2}'[/B] müssen verfügbar sein, um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
 
 msgctxt "#30021"
 msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Widevine CDM[/B]."
@@ -103,7 +103,7 @@ msgstr "Download erfolgreich abgeschlossen!"
 
 msgctxt "#30024"
 msgid "The installation now needs to unzip, mount and extract [B]Widevine CDM[/B] from the recovery image.[CR][CR]This process may take up to ten minutes to complete."
-msgstr "Das ChromeOS Recovery Image wird nun extrahiert und gemountet um die [B]Widevine CDM[/B] Bibliothek zu extrahieren.[CR][CR]Dieser Prozess kann bis zu zehn Minuten dauern."
+msgstr "Das ChromeOS Recovery Image wird nun extrahiert und gemountet, um die [B]Widevine CDM[/B] Bibliothek zu extrahieren.[CR][CR]Dieser Prozess kann bis zu zehn Minuten dauern."
 
 msgctxt "#30025"
 msgid "Acquiring EULA."
@@ -123,19 +123,19 @@ msgstr "Abbrechen"
 
 msgctxt "#30029"
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgctxt "#30030"
 msgid "The installation may need to run the following commands with root permissions: [B]{cmds}[/B]."
-msgstr "The installation may need to run the following commands with root permissions: [B]{cmds}[/B]."
+msgstr "Für den Installationsvorgang müssen folgende Befehle mit root-Berechtigung ausgeführt werden: [B]{cmds}[/B]."
 
 msgctxt "#30031"
 msgid "An update of [B]Widevine CDM[/B] is required to play this content."
-msgstr "Ein Update der [B]Widevine CDM[/B] Bibliothek ist notwendig um diesen Inhalt abzuspielen."
+msgstr "Ein Update der [B]Widevine CDM[/B] Bibliothek ist notwendig, um diesen Inhalt abzuspielen."
 
 msgctxt "#30032"
 msgid "Your system is missing the following libraries required by Widevine CDM: [B]{libs}[/B]. Install the libraries to play this content."
-msgstr "Ihrem System fehlen die folgenden Bibliotheken, welche von der Widevine CDM Bibliothek benötigt werden: [B]{libs}[/B]. Installieren sie diese um den Inhalt abzuspielen."
+msgstr "Dem System fehlen die folgenden Bibliotheken, welche von der Widevine CDM Bibliothek benötigt werden: [B]{libs}[/B]. Installiere diese, um den Inhalt abzuspielen."
 
 msgctxt "#30033"
 msgid "There is an update available for [B]Widevine CDM[/B]."
@@ -143,71 +143,71 @@ msgstr "Es gibt ein Update für die [B]Widevine CDM[/B]."
 
 msgctxt "#30034"
 msgid "Update"
-msgstr ""
+msgstr "Update"
 
 msgctxt "#30035"
 msgid "[B]loop[/B] is still loaded"
-msgstr ""
+msgstr "[B]loop[/B] ist noch geladen"
 
 msgctxt "#30036"
 msgid "Unload it by running [B]modprobe -r loop[/B] in the terminal."
-msgstr ""
+msgstr "Führe zum Auswerfen [B]modprobe -r loop[/B] im Terminal aus."
 
 msgctxt "#30037"
 msgid "Success!"
-msgstr ""
+msgstr "Erfolgreich!"
 
 msgctxt "#30038"
 msgid "Install Widevine"
-msgstr ""
+msgstr "Installiere Widevine"
 
 msgctxt "#30039"
 msgid "[B]Widevine CDM[/B] is currently not available natively on ARM64. Please switch to a 32-bit userspace for [B]Widevine CDM[/B] support."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] ist aktuell nicht nativ für ARM64 verfügbar. Für [B]Widevine CDM[/B] Unterstützung, bitte zum 32-Bit Userspace wechseln."
 
 msgctxt "#30040"
 msgid "Update available"
-msgstr ""
+msgstr "Update verfügbar"
 
 msgctxt "#30041"
 msgid "Widevine CDM is required"
-msgstr ""
+msgstr "Widevine CDM ist erforderlich"
 
 msgctxt "#30042"
 msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr ""
+msgstr "Um einen SOCKS Proxy zu verwenden muss die PySocks Bibliothek (script.module.pysocks) installiert werden."
 
 msgctxt "#30043"
 msgid "Extracting Widevine CDM"
-msgstr ""
+msgstr "Extrahiere Widevine CDM"
 
 msgctxt "#30044"
 msgid "Preparing downloaded image..."
-msgstr ""
+msgstr "Bereite das heruntergeladene Image vor..."
 
 msgctxt "#30045"
 msgid "Uncompressing image..."
-msgstr ""
+msgstr "Entpacke das Image..."
 
 msgctxt "#30046"
 msgid "This may take several minutes."
-msgstr ""
+msgstr "Dies kann einige Minuten in Anspruch nehmen."
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"
-msgstr ""
+msgstr "[I]Bitte unterbreche diesen Prozess nicht.[/I]"
 
 msgctxt "#30048"
 msgid "Extracting Widevine CDM from image..."
-msgstr ""
+msgstr "Extrahiere Widevine CDM aus dem Image..."
 
 msgctxt "#30049"
 msgid "Installing Widevine CDM..."
-msgstr ""
+msgstr "Installiere Widevine CDM..."
 
 msgctxt "#30050"
 msgid "Finishing..."
-msgstr ""
+msgstr "Fertigstellen..."
 
 msgctxt "#30051"
 msgid "[B]Widevine CDM[/B] successfully installed."
@@ -215,28 +215,28 @@ msgstr "[B]Widevine CDM[/B] Bibliothek wurde erfolgreich installiert."
 
 msgctxt "#30052"
 msgid "[B]Widevine CDM[/B] successfully removed."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] wurde erfolgreich entfernt."
 
 msgctxt "#30053"
 msgid "[B]Widevine CDM[/B] not found."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] wurde nicht gefunden."
 
 msgctxt "#30900"
 msgid "Troubleshooting"
-msgstr ""
+msgstr "Fehlerbehebung"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"
-msgstr ""
+msgstr "InputStream Helper deaktivieren"
 
 msgctxt "#30904"
 msgid "When disabled, DRM playback may fail!"
-msgstr ""
+msgstr "Bei Deaktivierung ist keine DRM Wiedergabe möglich!"
 
 msgctxt "#30905"
 msgid "(Re)install Widevine CDM library..."
-msgstr ""
+msgstr "Widevine CDM Bibliothek erneut installieren..."
 
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
-msgstr ""
+msgstr "Entferne die Widevine CDM Bibliothek..."

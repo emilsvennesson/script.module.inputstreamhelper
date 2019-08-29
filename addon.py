@@ -6,6 +6,13 @@ import sys
 from routing import Plugin
 from inputstreamhelper import ADDON, Helper
 
+# NOTE: Work around an issue in script.module.routing
+#       https://github.com/tamland/kodi-plugin-routing/pull/16
+if len(sys.argv) < 1:
+    sys.argv.append('addon.py')
+if len(sys.argv) < 2:
+    sys.argv.append('-1')
+
 plugin = Plugin()
 
 

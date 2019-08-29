@@ -31,7 +31,7 @@ msgstr "Er is een fout opgetreden bij het installeren van [B]Widevine CDM[/B].[C
 
 msgctxt "#30006"
 msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "Vanwege distributierechten moet [B]Widevine CDM[/B] worden uitgepakt uit een recovery-image van ChromeOS. Voor dit process is minimaal [B]{diskspace}[/B] vrije schijfruimte nodig. Wil je doorgaan?"
+msgstr "Wegens distributierechten moet [B]Widevine CDM[/B] worden uitgepakt uit een recovery-image van ChromeOS. Voor dit process is minimaal [B]{diskspace}[/B] vrije schijfruimte nodig. Wil je doorgaan?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -55,7 +55,7 @@ msgstr "Dit besturingssysteem ([B]{0}[/B] wordt niet ondersteund door [B]Widevin
 
 msgctxt "#30012"
 msgid "The Windows Store version of Kodi does not support [B]Widevine CDM[/B].[CR][CR]Please use the installer from kodi.tv instead."
-msgstr "De Windows Store versie van Kodi ondersteund [B]Widevine CDM[/B] niet.[CR][CR]Gebruik de Windows installer van kodi.tv."
+msgstr "De Windows Store versie van Kodi ondersteunt [B]Widevine CDM[/B] niet.[CR][CR]Gebruik de Windows-installer van kodi.tv."
 
 msgctxt "#30013"
 msgid "Failed to retrieve [B]{filename}[/B]."
@@ -79,7 +79,7 @@ msgstr "[B]{addon}[/B] {version} of later is nodig om deze informatie af te spel
 
 msgctxt "#30018"
 msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{diskspace}[/B] and try again."
-msgstr "Er is niet voldoende vrije schijfruimte om [B]Widevine CDM[/B] te installeren. Maak minstens [B]{diskspace}[/B] vrij en probeer het opnieuw."
+msgstr "Er is onvoldoende vrije schijfruimte om [B]Widevine CDM[/B] te installeren. Maak minstens [B]{diskspace}[/B] vrij en probeer het opnieuw."
 
 msgctxt "#30019"
 msgid "This operating system ([B]{os}[/B]) is not supported by [B]Widevine CDM[/B] for ARM devices."
@@ -135,7 +135,7 @@ msgstr "Een update van [B]Widevine CDM[/B] is nodig voor het afspelen van deze v
 
 msgctxt "#30032"
 msgid "Your system is missing the following libraries required by Widevine CDM: [B]{libs}[/B]. Install the libraries to play this content."
-msgstr "Aan het systeem ontbreken de volgende libraries die nodig zijn voor Widevine CDM: [B]{libs}[/B]. Installeer deze libraries om deze informatie af te spelen."
+msgstr "Aan het systeem ontbreken de volgende libraries die nodig zijn voor Widevine CDM: [B]{libs}[/B]. Installeer deze libraries om deze video af te spelen."
 
 msgctxt "#30033"
 msgid "There is an update available for [B]Widevine CDM[/B]."
@@ -171,11 +171,11 @@ msgstr "Update beschikbaar"
 
 msgctxt "#30041"
 msgid "Widevine CDM is required"
-msgstr "Widevine CDM is nodig"
+msgstr "Widevine CDM is vereist"
 
 msgctxt "#30042"
 msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
+msgstr "Als u een SOCKS-proxy gebruikt, moet de PySocks-bibliotheek (script.module.pysocks) geïnstalleerd zijn."
 
 msgctxt "#30043"
 msgid "Extracting Widevine CDM"
@@ -199,7 +199,7 @@ msgstr "[I]Graag dit proces niet onderbreken.[/I]"
 
 msgctxt "#30048"
 msgid "Extracting Widevine CDM from image..."
-msgstr "Het Widevine CDM wordt van het recovery image gehaald..."
+msgstr "Widevine CDM wordt van het recovery image gehaald..."
 
 msgctxt "#30049"
 msgid "Installing Widevine CDM..."
@@ -227,11 +227,11 @@ msgstr "Foutopsporing"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"
-msgstr "InputStream Helper afzetten"
+msgstr "InputStream Helper uitschakelen"
 
 msgctxt "#30904"
 msgid "[I]When disabled, DRM playback may fail![/I]"
-msgstr "[I]Indien niet actief kan het afspelen van DRM content falen![/I]"
+msgstr "[I]Indien uitgeschakeld, kan weergave van DRM-content mislukken![/I]"
 
 msgctxt "#30905"
 msgid "(Re)install Widevine CDM library..."

@@ -100,7 +100,6 @@ class Helper:
         self._loop_dev = None
         self._modprobe_loop = False
         self._attached_loop_dev = False
-        self._mounted = False
 
         self.protocol = protocol
         self.drm = drm
@@ -326,7 +325,6 @@ class Helper:
         cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
-            self._mounted = True
             return True
 
         return False
@@ -636,6 +634,9 @@ class Helper:
                 if not xbmcgui.Dialog().yesno(localize(30001), localize(30030, cmds=', '.join(root_cmds)), yeslabel=localize(30027), nolabel=localize(30028)):
                     return False
 
+            # Clean up any remaining mounts
+            self._unmount()
+
             url = arm_device['url']
             downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
             if downloaded:
@@ -849,13 +850,17 @@ class Helper:
         zip_obj.extractall(unzip_dir)
         return True
 
+    def _unmount(self):
+        ''' Unmount mountpoint if mounted '''
+        while os.path.ismount(self._mnt_path()):
+            log('Unmount {mountpoint}', mountpoint=self._mnt_path())
+            umount_output = self._run_cmd(['umount', self._mnt_path()], sudo=True)
+            if not umount_output['success']:
+                break
+
     def _cleanup(self):
-        """Clean up function after Widevine CDM installation."""
-        if self._mounted:
-            cmd = ['umount', self._mnt_path()]
-            umount_output = self._run_cmd(cmd, sudo=True)
-            if umount_output['success']:
-                self._mounted = False
+        ''' Clean up function after Widevine CDM installation '''
+        self._unmount()
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
             unattach_output = self._run_cmd(cmd, sudo=True)

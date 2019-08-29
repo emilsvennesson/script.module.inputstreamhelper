@@ -230,7 +230,7 @@ msgid "Disable InputStream Helper"
 msgstr ""
 
 msgctxt "#30904"
-msgid "When disabled, DRM playback may fail!"
+msgid "[I]When disabled, DRM playback may fail![/I]"
 msgstr ""
 
 msgctxt "#30905"

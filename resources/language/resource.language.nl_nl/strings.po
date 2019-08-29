@@ -230,8 +230,8 @@ msgid "Disable InputStream Helper"
 msgstr "InputStream Helper afzetten"
 
 msgctxt "#30904"
-msgid "When disabled, DRM playback may fail!"
-msgstr "Indien niet actief kan het afspelen van DRM content falen!"
+msgid "[I]When disabled, DRM playback may fail![/I]"
+msgstr "[I]Indien niet actief kan het afspelen van DRM content falen![/I]"
 
 msgctxt "#30905"
 msgid "Install Widevine CDM library..."

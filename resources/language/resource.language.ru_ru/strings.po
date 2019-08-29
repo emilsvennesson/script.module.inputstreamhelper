@@ -79,7 +79,7 @@ msgstr "Для воспроизведения этого контента тре
 
 msgctxt "#30018"
 msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{diskspace}[/B] and try again."
-msgstr "У Вас не достаточно дискового пространства для установки [B]Widevine CDM[/B]. Освободите минимум [B]{diskspace}[/B] и повторите еще установку."
+msgstr "У Вас не достаточно дискового пространства для установки [B]Widevine CDM[/B]. Освободите минимум [B]{diskspace}[/B] и повторите установку."
 
 msgctxt "#30019"
 msgid "This operating system ([B]{os}[/B]) is not supported by [B]Widevine CDM[/B] for ARM devices."
@@ -163,7 +163,7 @@ msgstr "Установить Widevine"
 
 msgctxt "#30039"
 msgid "[B]Widevine CDM[/B] is currently not available natively on ARM64. Please switch to a 32-bit userspace for [B]Widevine CDM[/B] support."
-msgstr "В настоящее время [B]Widevine CDM[/B] не доступна на ARM64. Перейдите в 32-разрядное пользовательское пространство для поддержки [B]Widevine CDM[/B]."
+msgstr "В настоящее время [B]Widevine CDM[/B] не доступен для ARM64. Перейдите в 32-разрядное пользовательское пространство для поддержки [B]Widevine CDM[/B]."
 
 msgctxt "#30040"
 msgid "Update available"
@@ -175,39 +175,39 @@ msgstr "Требуется Widevine CDM"
 
 msgctxt "#30042"
 msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr ""
+msgstr "Для использования SOCKS-прокси необходим установить модуль PySocks (script.module.pysocks)."
 
 msgctxt "#30043"
 msgid "Extracting Widevine CDM"
-msgstr ""
+msgstr "Извлечение Widevine CDM"
 
 msgctxt "#30044"
 msgid "Preparing downloaded image..."
-msgstr ""
+msgstr "Подготовка загруженного образа..."
 
 msgctxt "#30045"
 msgid "Uncompressing image..."
-msgstr ""
+msgstr "Распаковка образа..."
 
 msgctxt "#30046"
 msgid "This may take several minutes."
-msgstr ""
+msgstr "Это может занять несколько минут."
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"
-msgstr ""
+msgstr "[I]Пожалуйста, не прерывайте этот процесс.[/I]"
 
 msgctxt "#30048"
 msgid "Extracting Widevine CDM from image..."
-msgstr ""
+msgstr "Извлечение Widevine CDM из образа..."
 
 msgctxt "#30049"
 msgid "Installing Widevine CDM..."
-msgstr ""
+msgstr "Установка Widevine CDM..."
 
 msgctxt "#30050"
 msgid "Finishing..."
-msgstr ""
+msgstr "Завершение..."
 
 msgctxt "#30051"
 msgid "[B]Widevine CDM[/B] successfully installed."
@@ -215,28 +215,28 @@ msgstr "[B]Widevine CDM[/B] был успешно установлен."
 
 msgctxt "#30052"
 msgid "[B]Widevine CDM[/B] successfully removed."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] успешно удален."
 
 msgctxt "#30053"
 msgid "[B]Widevine CDM[/B] not found."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] не найден."
 
 msgctxt "#30900"
 msgid "Troubleshooting"
-msgstr ""
+msgstr "Исправление проблем"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"
-msgstr ""
+msgstr "Отключить InputStream Helper"
 
 msgctxt "#30904"
 msgid "[I]When disabled, DRM playback may fail![/I]"
-msgstr ""
+msgstr "[I]Если отключить, возможны проблемы с воспроизведением DRM контента![/I]"
 
 msgctxt "#30905"
 msgid "(Re)install Widevine CDM library..."
-msgstr ""
+msgstr "(Пере)установить модуль Widevine CDM..."
 
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
-msgstr ""
+msgstr "Удалить модуль Widevine CDM..."

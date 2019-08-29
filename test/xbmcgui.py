@@ -60,9 +60,11 @@ class DialogProgress:
     def iscanceled():
         ''' A stub implementation for the xbmcgui DialogProgress class iscanceled() method '''
 
-    @staticmethod
     def update(percentage, line1=None, line2=None, line3=None):
         ''' A stub implementation for the xbmcgui DialogProgress class update() method '''
+        if percentage <= self._percentage - 5:
+            return
+        self._percentage = percentage
         line1 = kodi_to_ansi(line1)
         line2 = kodi_to_ansi(line2)
         line3 = kodi_to_ansi(line3)

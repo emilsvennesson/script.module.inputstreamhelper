@@ -251,7 +251,7 @@ class Helper:
 
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
-            for line in output['output'].splitlines():
+            for line in output['output'].decode().splitlines():
                 partition_data = line.split()
                 if partition_data:
                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
@@ -760,7 +760,7 @@ class Helper:
 
             with zipfile.ZipFile(self._download_path) as z:
                 with z.open(config.WIDEVINE_LICENSE_FILE) as f:
-                    eula = f.read().strip().replace('\n', ' ')
+                    eula = f.read().decode().strip().replace('\n', ' ')
 
         return xbmcgui.Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
 

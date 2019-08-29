@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,protected-access
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest

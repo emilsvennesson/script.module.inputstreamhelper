@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring,protected-access
+# pylint: disable=duplicate-code,missing-docstring,protected-access
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import unittest
@@ -12,10 +12,9 @@ xbmcvfs = __import__('xbmcvfs')
 
 
 class LinuxARMTests(unittest.TestCase):
-    inputstreamhelper.system_os = lambda: 'Linux'
 
-    # NOTE: Only run once as it is a large download
     def test_check_inputstream_mpd(self):
+        inputstreamhelper.system_os = lambda: 'Linux'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
         is_helper._arch = lambda: 'arm'
         is_helper.remove_widevine()
@@ -23,12 +22,14 @@ class LinuxARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_mpd_again(self):
+        inputstreamhelper.system_os = lambda: 'Linux'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
         is_helper._arch = lambda: 'arm'
         is_installed = is_helper.check_inputstream()
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
+        inputstreamhelper.system_os = lambda: 'Linux'
         is_helper = inputstreamhelper.Helper('rtmp', drm='com.widevine.alpha')
         is_helper._arch = lambda: 'arm'
         is_installed = is_helper.check_inputstream()

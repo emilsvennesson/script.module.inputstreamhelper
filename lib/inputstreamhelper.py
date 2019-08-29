@@ -251,7 +251,7 @@ class Helper:
 
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
-            for line in output['output'].splitlines():
+            for line in output['output'].decode().splitlines():
                 partition_data = line.split()
                 if partition_data:
                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
@@ -363,7 +363,8 @@ class Helper:
             xbmcgui.Dialog().ok(localize(30004), localize(30013, filename=url.split('/')[-1]))  # Failed to retrieve file
             return None
         content = req.read()
-        log('Response: {response}', response=content)
+        # NOTE: Do not log reponse (as could be large)
+        # log('Response: {response}', response=content)
         return content
 
     def _http_download(self, url, message=None):
@@ -759,7 +760,7 @@ class Helper:
 
             with zipfile.ZipFile(self._download_path) as z:
                 with z.open(config.WIDEVINE_LICENSE_FILE) as f:
-                    eula = f.read().strip().replace('\n', ' ')
+                    eula = f.read().decode().strip().replace('\n', ' ')
 
         return xbmcgui.Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
 

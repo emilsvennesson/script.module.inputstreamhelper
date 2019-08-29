@@ -56,4 +56,3 @@ clean:
 	find resources/ test/ -name '*.pyc' -type f -delete
 	find resources/ test/ -name '__pycache__' -type d -delete
 	rm -rf .pytest_cache/ .tox/ *.log
-	rm -f test/cdm/libwidevinecdm.so

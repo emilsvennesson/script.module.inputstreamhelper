@@ -234,8 +234,8 @@ msgid "[I]When disabled, DRM playback may fail![/I]"
 msgstr "[I]Indien niet actief kan het afspelen van DRM content falen![/I]"
 
 msgctxt "#30905"
-msgid "Install Widevine CDM library..."
-msgstr "Widevine CDM installeren..."
+msgid "(Re)install Widevine CDM library..."
+msgstr "Widevine CDM (her)installeren..."
 
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."

@@ -234,7 +234,7 @@ msgid "When disabled, DRM playback may fail!"
 msgstr ""
 
 msgctxt "#30905"
-msgid "Install Widevine CDM library..."
+msgid "(Re)install Widevine CDM library..."
 msgstr ""
 
 msgctxt "#30907"

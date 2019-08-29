@@ -363,7 +363,8 @@ class Helper:
             xbmcgui.Dialog().ok(localize(30004), localize(30013, filename=url.split('/')[-1]))  # Failed to retrieve file
             return None
         content = req.read()
-        log('Response: {response}', response=content)
+        # NOTE: Do not log reponse (as could be large)
+        # log('Response: {response}', response=content)
         return content
 
     def _http_download(self, url, message=None):

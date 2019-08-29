@@ -574,13 +574,13 @@ class Helper:
         if downloaded:
             progress_dialog = xbmcgui.DialogProgress()
             progress_dialog.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+            progress_dialog.update(94, line1=localize(30049))  # Installing Widevine CDM
             self._unzip(self._ia_cdm_path())
 
-            if not self._widevine_eula():
-                self._cleanup()
-                return False
-
+            progress_dialog.update(97, line1=localize(30050))  # Finishing
             self._cleanup()
+            if not self._widevine_eula():
+                return False
 
             if self._has_widevine():
                 if os.path.lexists(self._widevine_config_path()):
@@ -588,6 +588,7 @@ class Helper:
                 os.rename(os.path.join(self._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
+                    progress_dialog.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
                     xbmcgui.Dialog().notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
                 progress_dialog.close()
                 return wv_check
@@ -837,18 +838,24 @@ class Helper:
         return True
 
     def _unzip(self, unzip_dir, file_to_unzip=None):
-        """Unzips files to specified path."""
-        zip_obj = zipfile.ZipFile(self._download_path)
-        if file_to_unzip:
-            for filename in zip_obj.namelist():
-                if filename == file_to_unzip:
-                    zip_obj.extract(filename, unzip_dir)
-                    return True
-            return False
+        ''' Unzip files to specified path '''
+        ret = False
 
-        # extract all files
-        zip_obj.extractall(unzip_dir)
-        return True
+        zip_obj = zipfile.ZipFile(self._download_path)
+        for filename in zip_obj.namelist():
+            if file_to_unzip and filename != file_to_unzip:
+                continue
+
+            # Detect and remove (dangling) symlinks before extraction
+            fullname = os.path.join(unzip_dir, filename)
+            if os.path.islink(fullname):
+                log('Remove (dangling) symlink at {symlink}', symlink=fullname)
+                os.unlink(fullname)
+
+            zip_obj.extract(filename, unzip_dir)
+            ret = True
+
+        return ret
 
     def _unmount(self):
         ''' Unmount mountpoint if mounted '''

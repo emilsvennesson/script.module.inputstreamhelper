@@ -19,7 +19,7 @@ msgstr "Πληροφορίες"
 
 msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
-msgstr "Το πρόσθετο αυτό εξαρτάται από την ιδιοταγή μονάδα αποκρυπτογράφισης [B]Widevine CDM[/B] για αναπαραγωγή."
+msgstr "Το πρόσθετο αυτό εξαρτάται από την ιδιοταγή μονάδα αποκρυπτογράφησης [B]Widevine CDM[/B] για αναπαραγωγή."
 
 msgctxt "#30004"
 msgid "Error"

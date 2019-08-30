@@ -175,39 +175,39 @@ msgstr "Απαιτείται το Widevine CDM"
 
 msgctxt "#30042"
 msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr ""
+msgstr "Η χρήση διαμεσολαβητή SOCKS απαιτεί την εγκατάσταση της βιβλιοθήκης PySocks (script.module.pysocks)."
 
 msgctxt "#30043"
 msgid "Extracting Widevine CDM"
-msgstr ""
+msgstr "Εξαγωγή του Widevine CDM"
 
 msgctxt "#30044"
 msgid "Preparing downloaded image..."
-msgstr ""
+msgstr "Προετοιμασία μεταφορτωμένης εικόνας..."
 
 msgctxt "#30045"
 msgid "Uncompressing image..."
-msgstr ""
+msgstr "Εξαγωγή εικόνας..."
 
 msgctxt "#30046"
 msgid "This may take several minutes."
-msgstr ""
+msgstr "Αυτό μπορεί να διαρκέσει μερικά λεπτά."
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"
-msgstr ""
+msgstr "[I]Σας παρακαλώ να μην διακόψετε αυτήν την διαδικασία.[/I]"
 
 msgctxt "#30048"
 msgid "Extracting Widevine CDM from image..."
-msgstr ""
+msgstr "Εξαγωγή του Widevine CDM από εικόνα..."
 
 msgctxt "#30049"
 msgid "Installing Widevine CDM..."
-msgstr ""
+msgstr "Εγκατάσταση του Widevine CDM..."
 
 msgctxt "#30050"
 msgid "Finishing..."
-msgstr ""
+msgstr "Ολοκληρώνεται..."
 
 msgctxt "#30051"
 msgid "[B]Widevine CDM[/B] successfully installed."
@@ -215,28 +215,28 @@ msgstr "Το [B]Widevine CDM[/B] έχει επιτυχώς εγκατασταθ�
 
 msgctxt "#30052"
 msgid "[B]Widevine CDM[/B] successfully removed."
-msgstr ""
+msgstr "Επιτυχής αφαίρεση του [B]Widevine CDM[/B]"
 
 msgctxt "#30053"
 msgid "[B]Widevine CDM[/B] not found."
-msgstr ""
+msgstr "Το [B]Widevine CDM[/B] δεν βρέθηκε"
 
 msgctxt "#30900"
 msgid "Troubleshooting"
-msgstr ""
+msgstr "Αντιμετώπιση προβλημάτων"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"
-msgstr ""
+msgstr "Απενεργοποίηση του βοηθού Inputstream"
 
 msgctxt "#30904"
 msgid "[I]When disabled, DRM playback may fail![/I]"
-msgstr ""
+msgstr "[I]Όταν απενεργοποιηθεί, η αναπαραγωγή ροών με DRM μπορεί να αποτύχει![/I]"
 
 msgctxt "#30905"
 msgid "(Re)install Widevine CDM library..."
-msgstr ""
+msgstr "(Επαν)εγκατάσταση της βιβλιοθήκης CDM..."
 
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
-msgstr ""
+msgstr "Αφαίρεση της βιβλιοθήκης CDM..."

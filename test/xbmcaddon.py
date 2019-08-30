@@ -65,7 +65,7 @@ class Addon:
 
     def getAddonInfo(self, key):
         ''' A working implementation for the xbmcaddon Addon class getAddonInfo() method '''
-        STUB_INFO = dict(id=self.id, name=self.id, version='1.2.3', type='kodi.inputstream', profile='special://userdata')
+        STUB_INFO = dict(id=self.id, name=self.id, version='2.3.4', type='kodi.inputstream', profile='special://userdata')
         return ADDON_INFO.get(self.id, STUB_INFO).get(key)
 
     @staticmethod

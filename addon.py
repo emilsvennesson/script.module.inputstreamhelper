@@ -24,6 +24,7 @@ def settings():
     ADDON.openSettings()
 
 
+@plugin.route('/check/<protocol>')
 @plugin.route('/check/<protocol>/<drm>')
 def check_inputstream(protocol, drm=None):
     ''' The API interface to check inputstream '''

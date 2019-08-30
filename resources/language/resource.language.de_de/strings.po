@@ -27,7 +27,7 @@ msgstr "Fehler"
 
 msgctxt "#30005"
 msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable debug logging and file a bug report at:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
-msgstr "Während der Installation der [B]Widevine CDM[/B] Bibliothek ist ein Fehler aufgetreten. Bitte debug logging aktivieren und den Fehler melden:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
+msgstr "Während der Installation der [B]Widevine CDM[/B] Bibliothek ist ein Fehler aufgetreten. Bitte Debug-Logging aktivieren und den Fehler melden:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
 msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
@@ -87,11 +87,11 @@ msgstr "Das Betriebssystem ([B]{os}[/B]) wird auf ARM Systemarchitekturen nicht 
 
 msgctxt "#30020"
 msgid "[B]'{command1}'[/B] or [B]'{command2}'[/B] command needs to exist on system to extract the [B]Widevine CDM[/B]."
-msgstr "Die Systembefehle [B]'{command1}'[/B] oder [B]'{command2}'[/B] müssen verfügbar sein, um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
+msgstr "Einer der Befehle [B]'{command1}'[/B] oder [B]'{command2}'[/B] muss verfügbar sein, um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
 
 msgctxt "#30021"
 msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Widevine CDM[/B]."
-msgstr "Der Systembefehl [B]'{command}'[/B] muss verfügbar sein um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
+msgstr "Der Befehl [B]'{command}'[/B] muss verfügbar sein, um die [B]Widevine CDM[/B] Bibliothek zu extrahieren."
 
 msgctxt "#30022"
 msgid "Downloading the ChromeOS recovery image..."
@@ -107,7 +107,7 @@ msgstr "Das ChromeOS Recovery Image wird nun extrahiert und gemountet, um die [B
 
 msgctxt "#30025"
 msgid "Acquiring EULA."
-msgstr "Laden der EULA"
+msgstr "Laden der EULA."
 
 msgctxt "#30026"
 msgid "Widevine CDM EULA"
@@ -135,7 +135,7 @@ msgstr "Ein Update der [B]Widevine CDM[/B] Bibliothek ist notwendig, um diesen I
 
 msgctxt "#30032"
 msgid "Your system is missing the following libraries required by Widevine CDM: [B]{libs}[/B]. Install the libraries to play this content."
-msgstr "Dem System fehlen die folgenden Bibliotheken, welche von der Widevine CDM Bibliothek benötigt werden: [B]{libs}[/B]. Installiere diese, um den Inhalt abzuspielen."
+msgstr "Dem System fehlen die folgenden Bibliotheken, welche von der Widevine CDM Bibliothek benötigt werden: [B]{libs}[/B]. Diese installieren, um den Inhalt abzuspielen."
 
 msgctxt "#30033"
 msgid "There is an update available for [B]Widevine CDM[/B]."
@@ -163,7 +163,7 @@ msgstr "Installiere Widevine"
 
 msgctxt "#30039"
 msgid "[B]Widevine CDM[/B] is currently not available natively on ARM64. Please switch to a 32-bit userspace for [B]Widevine CDM[/B] support."
-msgstr "[B]Widevine CDM[/B] ist aktuell nicht nativ für ARM64 verfügbar. Für [B]Widevine CDM[/B] Unterstützung, bitte zum 32-Bit Userspace wechseln."
+msgstr "[B]Widevine CDM[/B] ist aktuell nicht nativ für ARM64 verfügbar. Für [B]Widevine CDM[/B] Unterstützung, bitte zu 32-Bit Userspace wechseln."
 
 msgctxt "#30040"
 msgid "Update available"
@@ -195,7 +195,7 @@ msgstr "Dies kann einige Minuten in Anspruch nehmen."
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"
-msgstr "[I]Bitte unterbreche diesen Prozess nicht.[/I]"
+msgstr "[I]Bitte diesen Prozess nicht unterbrechen.[/I]"
 
 msgctxt "#30048"
 msgid "Extracting Widevine CDM from image..."
@@ -231,11 +231,11 @@ msgstr "InputStream Helper deaktivieren"
 
 msgctxt "#30904"
 msgid "When disabled, DRM playback may fail!"
-msgstr "Bei Deaktivierung ist keine DRM Wiedergabe möglich!"
+msgstr "Bei Deaktivierung könnte DRM Wiedergabe fehlschlagen!"
 
 msgctxt "#30905"
 msgid "(Re)install Widevine CDM library..."
-msgstr "Widevine CDM Bibliothek erneut installieren..."
+msgstr "Widevine CDM Bibliothek (erneut) installieren..."
 
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."

@@ -1,10 +1,11 @@
 # Byte-compiled / optimized / DLL files
-.coverage/
+.coverage
 .tox/
 __pycache__/
 *.py[cod]
 test/cdm/
 test/userdata/addon_settings.json
 test/userdata/cdm/
+test/userdata/tmp/
 
 *.zip

@@ -121,6 +121,7 @@ class Helper:
         install_opener(build_opener(ProxyHandler(self._get_proxies())))
 
     def __repr__(self):
+        ''' String representation of Helper class '''
         return 'Helper({protocol}, drm={drm})'.format(protocol=self.protocol, drm=self.drm)
 
     @classmethod
@@ -131,6 +132,7 @@ class Helper:
 
     @classmethod
     def _temp_path(cls):
+        ''' Return temporary path, usually ~/.kodi/userdata/addon_data/tmp '''
         temp_path = os.path.join(ADDON_PROFILE, 'tmp')
         if not xbmcvfs.exists(temp_path):
             xbmcvfs.mkdir(temp_path)
@@ -139,6 +141,7 @@ class Helper:
 
     @classmethod
     def _mnt_path(cls):
+        ''' Return mount path, usually ~/.kodi/userdata/addon_data/tmp/mnt '''
         mnt_path = os.path.join(cls._temp_path(), 'mnt')
         if not xbmcvfs.exists(mnt_path):
             xbmcvfs.mkdir(mnt_path)
@@ -146,16 +149,8 @@ class Helper:
         return mnt_path
 
     @classmethod
-    def _addon_cdm_path(cls):
-        cdm_path = os.path.join(ADDON_PROFILE, 'cdm')
-        if not xbmcvfs.exists(cdm_path):
-            xbmcvfs.mkdir(cdm_path)
-
-        return cdm_path
-
-    @classmethod
     def _ia_cdm_path(cls):
-        """Return the specified CDM path for inputstream.adaptive."""
+        ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
         addon = xbmcaddon.Addon('inputstream.adaptive')
         cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
         if not xbmcvfs.exists(cdm_path):
@@ -165,17 +160,25 @@ class Helper:
 
     @classmethod
     def _widevine_config_path(cls):
-        return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
+        ''' Return the full path to the widevine or recovery config file '''
+        if 'x86' in cls._arch():
+            return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
+        return os.path.join(cls._ia_cdm_path(), os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
 
     @classmethod
     def _load_widevine_config(cls):
+        ''' Load the widevine or recovery config in JSON format '''
         with open(cls._widevine_config_path(), 'r') as config_file:
             return json.loads(config_file.read())
 
     @classmethod
     def _widevine_path(cls):
         ''' Get full widevine path '''
-        widevine_path = os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CDM_FILENAME[system_os()])
+        widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
+        if widevine_cdm_filename is None:
+            return False
+
+        widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
         if xbmcvfs.exists(widevine_path):
             return widevine_path
 
@@ -183,6 +186,7 @@ class Helper:
 
     @classmethod
     def _kodi_version(cls):
+        ''' Return the current Kodi version '''
         version = xbmc.getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
 
@@ -239,6 +243,7 @@ class Helper:
         return False
 
     def _inputstream_version(self):
+        ''' Return the requested inputstream version '''
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')
 
@@ -251,7 +256,7 @@ class Helper:
 
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
-            for line in output['output'].decode().splitlines():
+            for line in output['output'].splitlines():
                 partition_data = line.split()
                 if partition_data:
                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
@@ -262,7 +267,7 @@ class Helper:
         return False
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
-        """Run subprocess command and return if it succeeds as a bool."""
+        ''' Run subprocess command and return if it succeeds as a bool '''
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
         try:
@@ -283,7 +288,7 @@ class Helper:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
         return {
-            'output': output,
+            'output': output.decode(),
             'success': success
         }
 
@@ -295,7 +300,7 @@ class Helper:
 
         self._modprobe_loop = True
         cmd = ['modprobe', '-q', 'loop']
-        output = self._run_cmd(cmd, sudo=True, shell=True)
+        output = self._run_cmd(cmd, sudo=True)
         return output['success']
 
     def _set_loop_dev(self):
@@ -312,7 +317,7 @@ class Helper:
 
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', self._loop_dev, bin_path, '-o', self._chromeos_offset(bin_path)]
+        cmd = ['losetup', '-o', self._chromeos_offset(bin_path), self._loop_dev, bin_path]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             self._attached_loop_dev = True
@@ -322,7 +327,7 @@ class Helper:
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
-        cmd = ['mount', '-t', 'ext2', self._loop_dev, '-o', 'ro', self._mnt_path()]
+        cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path()]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             return True
@@ -365,7 +370,7 @@ class Helper:
         content = req.read()
         # NOTE: Do not log reponse (as could be large)
         # log('Response: {response}', response=content)
-        return content
+        return content.decode()
 
     def _http_download(self, url, message=None):
         """Makes HTTP request and displays a progress dialog on download."""
@@ -527,13 +532,13 @@ class Helper:
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
             url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get(url).decode()
+            versions = self._http_get(url)
             return versions.split()[-1]
 
         ADDON.setSetting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get(url).decode()
+            versions = self._http_get(url)
             return versions.split()[-1]
 
         devices = self._chromeos_config()
@@ -545,9 +550,9 @@ class Helper:
         return arm_device['version']
 
     def _chromeos_config(self):
-        """Parses the Chrome OS recovery configuration and put it in a dictionary."""
+        ''' Parse the Chrome OS recovery configuration and put it in a dictionary '''
         url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_get(url).decode().split('\n\n') if 'hwidmatch=' in x]
+        conf = [x for x in self._http_get(url).split('\n\n') if 'hwidmatch=' in x]
 
         devices = []
         for device in conf:
@@ -650,8 +655,10 @@ class Helper:
                 progress_dialog.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
-                    self._check_loop(), self._set_loop_dev(),
-                    self._losetup(bin_path), self._mnt_loop_dev()
+                    self._check_loop(),
+                    self._set_loop_dev(),
+                    self._losetup(bin_path),
+                    self._mnt_loop_dev(),
                 ]
                 if all(success):
                     progress_dialog.update(91, line1=localize(30048))  # Extracting Widevine CDM
@@ -678,14 +685,14 @@ class Helper:
         return False
 
     def install_widevine(self):
-        """Wrapper function that calls Widevine installer method depending on architecture."""
-        if self._supports_widevine():
-            if 'x86' in self._arch():
-                return self._install_widevine_x86()
+        ''' Wrapper function that calls Widevine installer method depending on architecture '''
+        if not self._supports_widevine():
+            return False
 
-            return self._install_widevine_arm()
+        if 'x86' in self._arch():
+            return self._install_widevine_x86()
 
-        return False
+        return self._install_widevine_arm()
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
@@ -765,14 +772,14 @@ class Helper:
         return xbmcgui.Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
 
     def _extract_widevine_from_img(self):
-        """Extracts the Widevine CDM binary from the mounted Chrome OS image."""
+        ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
         for root, dirs, files in os.walk(str(self._mnt_path())):  # pylint: disable=unused-variable
-            for filename in files:
-                if filename == str('libwidevinecdm.so'):
-                    cdm_path = os.path.join(root, filename)
-                    log('Found libwidevinecdm.so in {path}', path=cdm_path)
-                    shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), filename))
-                    return True
+            if 'libwidevinecdm.so' not in files:
+                continue
+            cdm_path = os.path.join(root, 'libwidevinecdm.so')
+            log('Found libwidevinecdm.so in {path}', path=cdm_path)
+            shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), 'libwidevinecdm.so'))
+            return True
 
         log('Failed to find Widevine CDM binary in Chrome OS image.')
         return False
@@ -820,7 +827,7 @@ class Helper:
             return True
 
         if not os.path.exists(self._widevine_config_path()):
-            log('Widevine config is missing. Reinstall is required.')
+            log('Widevine or recovery config is missing. Reinstall is required.')
             xbmcgui.Dialog().ok(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
@@ -895,16 +902,16 @@ class Helper:
         if not self.drm or self.inputstream_addon != 'inputstream.adaptive':
             return True
 
-        if self.drm == 'widevine':
-            if not self._has_widevine():
-                if xbmcgui.Dialog().yesno(localize(30041), localize(30002), yeslabel=localize(30038), nolabel=localize(30028)):  # Widevine required
-                    return self.install_widevine()
+        if self.drm != 'widevine':
+            return True
 
-                return False
-
+        if self._has_widevine():
             return self._check_widevine()
 
-        return True
+        if xbmcgui.Dialog().yesno(localize(30041), localize(30002), yeslabel=localize(30038), nolabel=localize(30028)):  # Widevine required
+            return self.install_widevine()
+
+        return False
 
     def _install_inputstream(self):
         """Install inputstream addon."""

@@ -22,7 +22,10 @@ except ImportError:  # Python 2
 
 import config
 
-from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcvfs
 
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))

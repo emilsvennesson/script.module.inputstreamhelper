@@ -1,3 +1,4 @@
+codecov
 kodi-addon-checker
 polib
 pylint

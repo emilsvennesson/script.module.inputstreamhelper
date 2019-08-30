@@ -97,10 +97,6 @@ class Helper:
     def __init__(self, protocol, drm=None):
         ''' Initialize InputStream Helper class '''
         self._download_path = None
-        self._loop_dev = None
-        self._modprobe_loop = False
-        self._attached_loop_dev = False
-
         self.protocol = protocol
         self.drm = drm
 
@@ -259,7 +255,7 @@ class Helper:
             for line in output['output'].splitlines():
                 partition_data = line.split()
                 if partition_data:
-                    if partition_data[0] == '3' or '.bin3' in partition_data[0]:
+                     if partition_data[0] == '3' or '.bin3' in partition_data[0]:
                         offset = int(partition_data[1].replace('s', ''))
                         return str(offset * config.CHROMEOS_BLOCK_SIZE)
 
@@ -292,42 +288,9 @@ class Helper:
             'success': success
         }
 
-    def _check_loop(self):
-        """Check if loop module needs to be loaded into system."""
-        if not self._run_cmd(['modinfo', 'loop'])['success']:
-            log('loop is built in the kernel.')
-            return True  # assume loop is built in the kernel
-
-        self._modprobe_loop = True
-        cmd = ['modprobe', '-q', 'loop']
-        output = self._run_cmd(cmd, sudo=True)
-        return output['success']
-
-    def _set_loop_dev(self):
-        """Set an unused loop device that's available for use."""
-        cmd = ['losetup', '-f']
-        output = self._run_cmd(cmd, sudo=False)
-        if output['success']:
-            self._loop_dev = output['output'].strip()
-            log('Found free loop device: {device}', device=self._loop_dev)
-            return True
-
-        log('Failed to find free loop device.')
-        return False
-
-    def _losetup(self, bin_path):
-        """Setup Chrome OS loop device."""
-        cmd = ['losetup', '-o', self._chromeos_offset(bin_path), self._loop_dev, bin_path]
-        output = self._run_cmd(cmd, sudo=True)
-        if output['success']:
-            self._attached_loop_dev = True
-            return True
-
-        return False
-
-    def _mnt_loop_dev(self):
-        """Mount loop device to self._mnt_path()"""
-        cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path()]
+    def _mount_recovery_image(self, bin_path):
+        ''' Mount recovery image to self._mnt_path() '''
+        cmd = ['mount', '-t', 'ext2', '-o', 'loop,ro,offset=%s' % self._chromeos_offset(bin_path), bin_path, self._mnt_path()]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             return True
@@ -606,7 +569,7 @@ class Helper:
 
     def _install_widevine_arm(self):
         """Installs Widevine CDM on ARM-based architectures."""
-        root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
+        root_cmds = ['mount', 'umount']
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
@@ -633,10 +596,6 @@ class Helper:
                 xbmcgui.Dialog().ok(localize(30004), localize(30021, command='mount'))  # Mount command is missing
                 return False
 
-            if not self._cmd_exists('losetup'):
-                xbmcgui.Dialog().ok(localize(30004), localize(30021, command='losetup'))  # Losetup command is missing
-                return False
-
             if os.getuid() != 0:  # ask for permissions to run cmds as root
                 if not xbmcgui.Dialog().yesno(localize(30001), localize(30030, cmds=', '.join(root_cmds)), yeslabel=localize(30027), nolabel=localize(30028)):
                     return False
@@ -655,10 +614,7 @@ class Helper:
                 progress_dialog.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
-                    self._check_loop(),
-                    self._set_loop_dev(),
-                    self._losetup(bin_path),
-                    self._mnt_loop_dev(),
+                    self._mount_recovery_image(bin_path),
                 ]
                 if all(success):
                     progress_dialog.update(91, line1=localize(30048))  # Extracting Widevine CDM
@@ -876,13 +832,6 @@ class Helper:
     def _cleanup(self):
         ''' Clean up function after Widevine CDM installation '''
         self._unmount()
-        if self._attached_loop_dev:
-            cmd = ['losetup', '-d', self._loop_dev]
-            unattach_output = self._run_cmd(cmd, sudo=True)
-            if unattach_output['success']:
-                self._loop_dev = False
-        if self._modprobe_loop:
-            xbmcgui.Dialog().notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not self._has_widevine():
             shutil.rmtree(self._ia_cdm_path())
 

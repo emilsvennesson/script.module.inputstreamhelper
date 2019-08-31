@@ -44,7 +44,7 @@ addon: clean
 unit: clean
 	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
 	python -m unittest discover
-	#coverage run -m unittest discover
+#	coverage run -m unittest discover
 
 zip: clean
 	@echo -e "$(white)=$(blue) Building new package$(reset)"

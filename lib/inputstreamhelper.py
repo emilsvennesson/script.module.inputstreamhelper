@@ -226,21 +226,30 @@ class Helper:
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
-    @staticmethod
-    def _helper_disabled():
+    def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""
         disabled = ADDON.getSetting('disabled')
-        if not disabled:
-            ADDON.setSetting('disabled', 'false')  # create default entry
-            disabled = 'false'
+        if disabled is None:
+            self.disable()  # Create default entry
+            disabled = 'true'
 
         if disabled == 'true':
             log('inputstreamhelper is disabled in settings.xml.')
             return True
 
-        log('inputstreamhelper is enabled. You can disable inputstreamhelper by setting \"disabled\" to \"true\" in settings.xml \
-        (Note: only recommended for developers knowing what they\'re doing!)')
         return False
+
+    @staticmethod
+    def disable():
+        ''' Disable plugin '''
+        if ADDON.getSetting('disabled') == 'false':
+            ADDON.setSetting('disabled', 'true')
+
+    @staticmethod
+    def enable():
+        ''' Enable plugin '''
+        if ADDON.getSetting('disabled') == 'true':
+            ADDON.setSetting('disabled', 'false')
 
     def _inputstream_version(self):
         ''' Return the requested inputstream version '''

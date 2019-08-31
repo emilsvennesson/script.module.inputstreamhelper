@@ -16,6 +16,7 @@
 - Dutch translation (@mediaminister, @basrieter)
 - German translation (@flubshi)
 - Greek translation (@Twilight0)
+- Italian translation (@pinoelefante)
 - Russion translation (@vlmaksime)
 - Swedish translation (@emilsvennesson)
 

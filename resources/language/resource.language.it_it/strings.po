@@ -31,7 +31,7 @@ msgstr "Si e' verificato un errore durante l'installazione di [B]Widevine CDM[/B
 
 msgctxt "#30006"
 msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "A causa di problemi di distribuzione, [B]Widevine CDM[/B] deve essere estratto dall'immagine di recovery di ChromeOS. Questo processo richiede almeno [B]{diskspace}[/B] di spazio libero. Vuoi continuare?"
+msgstr "A causa di diritti di distribuzione, [B]Widevine CDM[/B] deve essere estratto dall'immagine di recovery di ChromeOS. Questo processo richiede almeno [B]{diskspace}[/B] di spazio libero. Vuoi continuare?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."

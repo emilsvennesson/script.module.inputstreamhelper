@@ -28,7 +28,7 @@ class TestRouter(unittest.TestCase):
         self.assertEqual(plugin.url_for(addon.widevine_install), 'plugin://script.module.inputstreamhelper/widevine/install/latest')
 
     def test_widevine_remove(self):
-        plugin.run(['plugin://script.module.inputstreamhelper', '0', ''])
+        plugin.run(['plugin://script.module.inputstreamhelper/widevine/remove', '0', ''])
         self.assertEqual(plugin.url_for(addon.widevine_remove), 'plugin://script.module.inputstreamhelper/widevine/remove')
 
     def test_check_inputstream(self):

@@ -19,7 +19,9 @@ script:
 - pylint lib/ test/
 #- kodi-addon-checker . --branch=krypton
 #- kodi-addon-checker . --branch=leia
+#- python addon.py
 #- python -m unittest discover
+- coverage run addon.py
 - coverage run -m unittest discover
 
 after_success:

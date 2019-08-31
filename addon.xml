@@ -38,6 +38,8 @@ v0.4.0 (2019-09-01)
         <platform>all</platform>
         <license>MIT License</license>
         <source>https://github.com/emilsvennesson/script.module.inputstreamhelper</source>
+        <website>https://github.com/emilsvennesson/script.module.inputstreamhelper/wiki</website>
+        <forum>https://github.com/emilsvennesson/script.module.inputstreamhelper/issues</forum>
         <assets>
             <icon>resources/icon.png</icon>
         </assets>

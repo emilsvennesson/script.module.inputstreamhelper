@@ -33,7 +33,7 @@ v0.4.0 (2019-09-01)
 - Add setting to disable inputstreamhelper
 - Check Widevine support before all checks
 - Support 64-bit kernel with 32-bit userspace
-- Dutch, German, Greek, Russian and Swedish translations
+- Dutch, German, Greek, Italian, Russian and Swedish translations
         </news>
         <platform>all</platform>
         <license>MIT License</license>

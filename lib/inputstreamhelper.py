@@ -257,23 +257,64 @@ class Helper:
         return addon.getAddonInfo('version')
 
     def _chromeos_offset(self, bin_path):
-        """Calculate the Chrome OS losetup start offset using fdisk/parted."""
-        if self._cmd_exists('fdisk'):
-            cmd = ['fdisk', bin_path, '-l']
-        else:  # parted
+        ''' Calculate the Chrome OS start offset using fdisk or parted '''
+        # Prefer parted over fdisk because it is more reliable
+        if self._cmd_exists('parted'):
             cmd = ['parted', '-s', bin_path, 'unit s print']
+        else:
+            cmd = ['fdisk', '-l', bin_path]
 
+        header = None
+        best_size = 0
+        best_offset = 0
         output = self._run_cmd(cmd, sudo=False)
-        if output['success']:
-            for line in output['output'].splitlines():
-                partition_data = line.split()
-                if partition_data:
-                    if partition_data[0] == '3' or '.bin3' in partition_data[0]:
-                        offset = int(partition_data[1].replace('s', ''))
-                        return str(offset * config.CHROMEOS_BLOCK_SIZE)
+        if not output['success']:
+            log('Failed to run: %s' % cmd)
+            return False
 
-        log('Failed to calculate losetup offset.')
-        return False
+        # Routine that works for both fdisk and parted
+        for line in output['output'].splitlines():
+            # Split by whitespace is not sufficient, some header titles use whitespace
+            partition_data = list(filter(None, re.split(r'\s{2,}', line)))
+            if not partition_data:
+                continue
+
+            # Find the Size and Start columns
+            if 'Size' in partition_data and 'Start' in partition_data:
+                header = partition_data
+                continue
+            elif 'Blocks' in partition_data and 'Start' in partition_data:
+                header = partition_data
+                continue
+
+            # Discard data if we did not find a header
+            if header is None:
+                continue
+
+            # Create a dictionary from header and data
+            partition = dict(zip(header, partition_data))
+            if partition.get('Size') is None and partition.get('Blocks') is None or partition.get('Start') is None:
+                continue
+
+            # Find the largest partition, and store the offset
+            # NOTE: For parted we need to remove the 's' unit
+            partition_size = int((partition.get('Size') or partition.get('Blocks')).replace('s', ''))
+            if partition.get('Name') == 'ROOT-A' or partition_size > best_size:
+                # The name or id is always stored in the first column
+                partition_name = partition_data[0]
+                best_size = partition_size
+                best_offset = int(partition.get('Start').replace('s', ''))
+                if partition.get('Name') == 'ROOT-A':
+                    log('Partition {partition} is named {name}, using offset {offset}', partition=partition_name, name='ROOT-A', offset=best_offset)
+                    break
+                else:
+                    log('Partition {partition} is larger ({size}), using offset {offset}', partition=partition_name, size=best_size, offset=best_offset)
+
+        if best_offset == 0:
+            log('Failed to calculate partition offset.')
+            return False
+
+        return str(best_offset * config.CHROMEOS_BLOCK_SIZE)
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
         ''' Run subprocess command and return if it succeeds as a bool '''

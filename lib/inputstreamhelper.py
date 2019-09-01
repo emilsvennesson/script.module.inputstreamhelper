@@ -275,7 +275,7 @@ class Helper:
         # Routine that works for both fdisk and parted
         for line in output['output'].splitlines():
             # Split by whitespace is not sufficient, some header titles use whitespace
-            partition_data = list(filter(None, re.split(r'\s{2,}', line)))
+            partition_data = list([_f for _f in re.split(r'\s{2,}', line) if _f])
             if not partition_data:
                 continue
 
@@ -292,7 +292,7 @@ class Helper:
                 continue
 
             # Create a dictionary from header and data
-            partition = dict(zip(header, partition_data))
+            partition = dict(list(zip(header, partition_data)))
             if partition.get('Size') is None and partition.get('Blocks') is None or partition.get('Start') is None:
                 continue
 

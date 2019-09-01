@@ -6,11 +6,8 @@
         <import addon="script.module.inputstreamhelper" optional="true"/>
         <import addon="script.module.kodi-six" version="0.0.4"/>
         <import addon="script.module.pysocks" version="1.6.8" optional="true"/>
-        <import addon="script.module.routing" version="0.2.0"/>
     </requires>
     <extension point="xbmc.python.module" library="lib"/>
-    <!-- This is needed for running from RunPlugin() -->
-    <extension point="xbmc.python.pluginsource" library="addon.py"/>
     <!-- This is needed to get an addon icon -->
     <extension point="xbmc.python.script" library="addon.py"/>
     <extension point="xbmc.addon.metadata">

@@ -89,7 +89,7 @@ This module is licensed under the **The MIT License**. Please see the [LICENSE.t
 - German translation (@flubshi)
 - Greek translation (@Twilight0)
 - Italian translation (@pinoelefante)
-- Russion translation (@vlmaksime)
+- Russian translation (@vlmaksime)
 - Swedish translation (@emilsvennesson)
 
 ## v0.3.5 (2019-08-15)

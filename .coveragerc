@@ -1,6 +1,0 @@
-[report]
-omit = test/
-
-[run]
-branch = true
-omit = test/

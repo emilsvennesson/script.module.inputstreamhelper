@@ -27,6 +27,10 @@ class TestApi(unittest.TestCase):
         addon.run(['addon.py', 'widevine_remove'])
 
     @staticmethod
+    def test_about():
+        addon.run(['addon.py', 'about'])
+
+    @staticmethod
     def test_check_inputstream():
         if os.path.exists('test/cdm/widevine_config.json'):
             os.remove('test/cdm/widevine_config.json')

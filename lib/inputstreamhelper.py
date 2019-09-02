@@ -262,7 +262,7 @@ class Helper:
         if self._cmd_exists('parted'):
             cmd = ['parted', '-s', bin_path, 'unit s print']
         else:
-            cmd = ['fdisk', '-l', bin_path]
+            cmd = ['fdisk', '-l', bin_path, '--bytes']
 
         header = None
         best_size = 0
@@ -275,7 +275,7 @@ class Helper:
         # Routine that works for both fdisk and parted
         for line in output['output'].splitlines():
             # Split by whitespace is not sufficient, some header titles use whitespace
-            partition_data = list([_f for _f in re.split(r'\s{2,}', line) if _f])
+            partition_data = list([_f for _f in re.split(r'\s{1,}', line) if _f])
             if not partition_data:
                 continue
 
@@ -298,7 +298,13 @@ class Helper:
 
             # Find the largest partition, and store the offset
             # NOTE: For parted we need to remove the 's' unit
-            partition_size = int((partition.get('Size') or partition.get('Blocks')).replace('s', ''))
+            try:
+                partition_size = int((partition.get('Size') or partition.get('Blocks')).replace('s', ''))
+            except ValueError:
+                # maybe it's another warning message at the end of fdisk, like:
+                # Partition tables entries are not in disk order
+                continue
+
             if partition.get('Name') == 'ROOT-A' or partition_size > best_size:
                 # The name or id is always stored in the first column
                 partition_name = partition_data[0]

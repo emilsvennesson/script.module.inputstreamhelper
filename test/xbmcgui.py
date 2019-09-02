@@ -37,6 +37,13 @@ class Dialog:
         print('[37;100mYESNO:[35;0m [%s] [35;0m%s[0m' % (heading, line1))
         return True
 
+    @staticmethod
+    def textviewer(heading, text=None, usemono=None):
+        ''' A stub implementation for the xbmcgui Dialog class textviewer() method '''
+        heading = kodi_to_ansi(heading)
+        text = kodi_to_ansi(text)
+        print('[37;100mTEXTVIEWER:[35;0m [%s] [35;0m%s[0m' % (heading, text))
+
 
 class DialogProgress:
     ''' A reimplementation of the xbmcgui DialogProgress '''

@@ -18,6 +18,8 @@ def run(params):
                 check_inputstream(params[2])
             elif len(params) == 4:
                 check_inputstream(params[2], drm=params[3])
+        elif params[1] == 'about':
+            about_dialog()
     elif len(params) > 4:
         log('invalid API call, too many parameters')
     else:
@@ -37,6 +39,11 @@ def widevine_install():
 def widevine_remove():
     ''' The API interface to remove Widevine CDMs '''
     Helper('mpd', drm='widevine').remove_widevine()
+
+
+def about_dialog():
+    ''' The API interface to show an about Dialog '''
+    Helper('mpd', drm='widevine').about_dialog()
 
 
 if __name__ == '__main__':

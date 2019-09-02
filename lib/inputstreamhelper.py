@@ -256,6 +256,14 @@ class Helper:
         addon = xbmcaddon.Addon(self.inputstream_addon)
         return addon.getAddonInfo('version')
 
+    @staticmethod
+    def _get_lib_version(lib):
+        if lib:
+            with open(lib, 'rb') as f:
+                x = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(f.read()))
+            return x.group(0).lstrip('0')
+        return 'Not found'
+
     def _chromeos_offset(self, bin_path):
         ''' Calculate the Chrome OS start offset using fdisk or parted '''
         # Prefer parted over fdisk because it is more reliable
@@ -654,7 +662,7 @@ class Helper:
 
         return False
 
-    def _install_widevine_arm(self):
+    def _install_widevine_arm(self):  # pylint: disable=too-many-statements
         """Installs Widevine CDM on ARM-based architectures."""
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         devices = self._chromeos_config()
@@ -717,6 +725,7 @@ class Helper:
                     progress_dialog.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
+                        ADDON.setSetting('chromeos_version', arm_device['version'])
                         with open(self._widevine_config_path(), 'w') as config_file:
                             config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
@@ -1045,3 +1054,34 @@ class Helper:
             return None
 
         return dict(http=proxy_address, https=proxy_address)
+
+    def about_dialog(self):
+        """ Show an About box with useful info e.g. for bug reports"""
+        ishelper = [ADDON.getAddonInfo('version'), '(disabled)' if not ADDON.getSetting('disabled') == 'false' else '']
+        istream = [self._inputstream_version(), '(disabled)' if not self._inputstream_enabled() else '']
+        kodi_version = self._kodi_version()
+        wv_version = self._get_lib_version(self._widevine_path())
+        wv_updated = datetime.fromtimestamp(float(ADDON.getSetting('last_update'))).strftime("%Y-%m-%d %H:%M") if ADDON.getSetting('last_update') else 'Never'
+        kodi_platform = system_os()
+        arch = self._arch()
+        cdm_dir = self._ia_cdm_path()
+        issue_url = config.ISSUE_URL
+
+        kodi_info = [localize(30921, version=kodi_version),
+                     localize(30922, kodi_platform=kodi_platform, arch=arch)]
+        is_info = [localize(30931, version=ishelper[0], enabled=ishelper[1]),
+                   localize(30932, version=istream[0], enabled=istream[1])]
+        wv_info = [localize(30941, version=wv_version, updated=wv_updated),
+                   localize(30942, cdm_dir=cdm_dir)]
+        if platform == 'arm':
+            wv_info.append(localize(30943, version=ADDON.getSetting('chromeos_version')))
+
+        text = (localize(30920) + "\n - "
+                + "\n - ".join(kodi_info) + "\n\n"
+                + localize(30930) + "\n - "
+                + "\n - ".join(is_info) + "\n\n"
+                + localize(30940) + "\n - "
+                + "\n - ".join(wv_info) + "\n\n"
+                + localize(30950, issue_url=issue_url))
+
+        xbmcgui.Dialog().textviewer(localize(30909), text)

@@ -8,4 +8,5 @@ test/userdata/addon_settings.json
 test/userdata/cdm/
 test/userdata/tmp/
 
+experiment/
 *.zip

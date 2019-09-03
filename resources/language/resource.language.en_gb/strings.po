@@ -221,8 +221,64 @@ msgctxt "#30053"
 msgid "[B]Widevine CDM[/B] not found."
 msgstr ""
 
+msgctxt "#30054"
+msgid "disabled"
+msgstr ""
+
+
+### INFORMATION DIALOG
+msgctxt "#30800"
+msgid "[B]Kodi information[/B]"
+msgstr ""
+
+msgctxt "#30801"
+msgid "Kodi version: [B]{version}[/B]"
+msgstr ""
+
+msgctxt "#30802"
+msgid "Kodi platform/architecture: [B]{platform}[/B]/[B]{arch}[/B]"
+msgstr ""
+
+msgctxt "#30810"
+msgid "[B]InputStream information[/B]"
+msgstr ""
+
+msgctxt "#30811"
+msgid "InputStream Helper version: [B]{version}[/B] {state}"
+msgstr ""
+
+msgctxt "#30812"
+msgid "InputStream Adaptive version: [B]{version}[/B] {state}"
+msgstr ""
+
+msgctxt "#30820"
+msgid "[B]Widevine information[/B]"
+msgstr ""
+
+msgctxt "#30821"
+msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
+msgstr ""
+
+msgctxt "#30822"
+msgid "Widevine CDM path: [B]{path}[/B]"
+msgstr ""
+
+msgctxt "#30823"
+msgid "ChromeOS version: [B]{version}[/B]"
+msgstr ""
+
+msgctxt "#30830"
+msgid "Please report issues to:\n - [B]{url}[/B]"
+msgstr ""
+
+
+### SETTINGS
 msgctxt "#30900"
 msgid "Troubleshooting"
+msgstr ""
+
+msgctxt "#30901"
+msgid "InputStream Helper information"
 msgstr ""
 
 msgctxt "#30903"
@@ -241,50 +297,3 @@ msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
 msgstr ""
 
-msgctxt "#30909"
-msgid "About"
-msgstr ""
-
-msgctxt "#30920"
-msgid "[B]Kodi information[/B]"
-msgstr ""
-
-msgctxt "#30921"
-msgid "Kodi version: [B]{version}[/B]"
-msgstr ""
-
-msgctxt "#30922"
-msgid "Kodi platform/architecture: [B]{kodi_platform}/{arch}[/B]"
-msgstr ""
-
-msgctxt "#30930"
-msgid "[B]InputStream information[/B]"
-msgstr ""
-
-msgctxt "#30931"
-msgid "InputStream Helper version: [B]{version}[/B] {enabled}"
-msgstr ""
-
-msgctxt "#30932"
-msgid "InputStream Adaptive version: [B]{version}[/B] {enabled}"
-msgstr ""
-
-msgctxt "#30940"
-msgid "[B]Widevine information[/B]"
-msgstr ""
-
-msgctxt "#30941"
-msgid "Widevine version: [B]{version}[/B] (last update on [B]{updated}[/B])"
-msgstr ""
-
-msgctxt "#30942"
-msgid "Widevine CDM path: [B]{cdm_dir}[/B]"
-msgstr ""
-
-msgctxt "#30943"
-msgid "ChromeOS version: [B]{version}[/B]"
-msgstr ""
-
-msgctxt "#30950"
-msgid "Please report issues to: \n - [B]{issue_url}[/B]"
-msgstr ""

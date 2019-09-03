@@ -10,22 +10,15 @@ def kodi_to_ansi(string):
     ''' Convert Kodi format tags to ANSI codes '''
     if string is None:
         return None
-    string = string.replace('[B]', '[1m')
-    string = string.replace('[/B]', '[0m')
-    string = string.replace('[I]', '[3m')
-    string = string.replace('[/I]', '[0m')
-    string = string.replace('[COLOR gray]', '[30;1m')
-    string = string.replace('[COLOR red]', '[31m')
-    string = string.replace('[COLOR green]', '[32m')
-    string = string.replace('[COLOR yellow]', '[33m')
-    string = string.replace('[COLOR blue]', '[34m')
-    string = string.replace('[COLOR purple]', '[35m')
-    string = string.replace('[/COLOR]', '[0m')
+    string = string.replace('[B]', '\033[1m')
+    string = string.replace('[/B]', '\033[21m')
+    string = string.replace('[I]', '\033[3m')
+    string = string.replace('[/I]', '\033[23m')
+    string = string.replace('[COLOR gray]', '\033[30;1m')
+    string = string.replace('[COLOR red]', '\033[31m')
+    string = string.replace('[COLOR green]', '\033[32m')
+    string = string.replace('[COLOR yellow]', '\033[33m')
+    string = string.replace('[COLOR blue]', '\033[34m')
+    string = string.replace('[COLOR purple]', '\033[35m')
+    string = string.replace('[/COLOR]', '\033[39;0m')
     return string
-
-
-def uri_to_path(uri):
-    ''' Shorten a plugin URI to just the path '''
-    if uri is None:
-        return None
-    return ' [33m→ [34m%s[0m' % uri.replace('plugin://plugin.video.vrt.nu', '')

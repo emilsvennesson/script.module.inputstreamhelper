@@ -1014,33 +1014,30 @@ class Helper:
 
         return dict(http=proxy_address, https=proxy_address)
 
-    def about_dialog(self):
-        """ Show an About box with useful info e.g. for bug reports"""
-        ishelper = [ADDON.getAddonInfo('version'), '(disabled)' if not ADDON.getSetting('disabled') == 'false' else '']
-        istream = [self._inputstream_version(), '(disabled)' if not self._inputstream_enabled() else '']
-        kodi_version = self._kodi_version()
-        wv_version = self._get_lib_version(self._widevine_path())
+    def info_dialog(self):
+        """ Show an Info box with useful info e.g. for bug reports"""
+        disabled_str = ' ({disabled}'.format(disabled=localize(30054))
+
+        kodi_info = [localize(30801, version=self._kodi_version()),
+                     localize(30802, platform=system_os(), arch=self._arch())]
+
+        ishelper_state = disabled_str if not ADDON.getSetting('disabled') == 'false' else ''
+        istream_state = disabled_str if not self._inputstream_enabled() else ''
+        is_info = [localize(30811, version=ADDON.getAddonInfo('version'), state=ishelper_state),
+                   localize(30812, version=self._inputstream_version(), state=istream_state)]
+
         wv_updated = datetime.fromtimestamp(float(ADDON.getSetting('last_update'))).strftime("%Y-%m-%d %H:%M") if ADDON.getSetting('last_update') else 'Never'
-        kodi_platform = system_os()
-        arch = self._arch()
-        cdm_dir = self._ia_cdm_path()
-        issue_url = config.ISSUE_URL
-
-        kodi_info = [localize(30921, version=kodi_version),
-                     localize(30922, kodi_platform=kodi_platform, arch=arch)]
-        is_info = [localize(30931, version=ishelper[0], enabled=ishelper[1]),
-                   localize(30932, version=istream[0], enabled=istream[1])]
-        wv_info = [localize(30941, version=wv_version, updated=wv_updated),
-                   localize(30942, cdm_dir=cdm_dir)]
+        wv_info = [localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated),
+                   localize(30822, path=self._ia_cdm_path())]
         if platform == 'arm':
-            wv_info.append(localize(30943, version=ADDON.getSetting('chromeos_version')))
+            wv_info.append(localize(30823, version=ADDON.getSetting('chromeos_version')))
 
-        text = (localize(30920) + "\n - "
+        text = (localize(30800) + "\n - "
                 + "\n - ".join(kodi_info) + "\n\n"
-                + localize(30930) + "\n - "
+                + localize(30810) + "\n - "
                 + "\n - ".join(is_info) + "\n\n"
-                + localize(30940) + "\n - "
+                + localize(30820) + "\n - "
                 + "\n - ".join(wv_info) + "\n\n"
-                + localize(30950, issue_url=issue_url))
+                + localize(30830, url=config.ISSUE_URL))
 
-        xbmcgui.Dialog().textviewer(localize(30909), text)
+        xbmcgui.Dialog().textviewer(localize(30901), text)

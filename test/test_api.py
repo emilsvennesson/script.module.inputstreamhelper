@@ -28,7 +28,7 @@ class TestApi(unittest.TestCase):
 
     @staticmethod
     def test_about():
-        default.run(['default.py', 'about'])
+        default.run(['default.py', 'info'])
 
     @staticmethod
     def test_check_inputstream():

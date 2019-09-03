@@ -63,6 +63,17 @@ Please report any issues or bug reports on the [GitHub Issues](https://github.co
 This module is licensed under the **The MIT License**. Please see the [LICENSE.txt](LICENSE.txt) file for details.
 
 ## Releases
+## v0.4.2 (2019-09-03)
+- Move release history to readme file (@mediaminister)
+- Clean up coverage/codecov config (@dagwieers)
+- Add InputStream Helper Information to settings page (@horstle, @dagwieers)
+- Make sure addon.xml meets all requirements (@mediaminister)
+- Simplify add-on entry point to speed up loading time (@mediaminister)
+- Unicode fix for os.walk (@mediaminister)
+- Revert "Fix ARM processing in unittest locally" (@mediaminister)
+- Fix unresponsive Kodi when opening add-on information pane (@dagwieers, @mediaminister)
+- Add-on structure improvements (@dagwieers)
+
 ## v0.4.1 (2019-09-01)
 - Follow kodi-addon-checker recommended code changes (@mediaminister)
 - Implement api using runscript (@mediaminister)

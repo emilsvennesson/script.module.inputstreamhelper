@@ -20,7 +20,7 @@ try:  # Python 3
 except ImportError:  # Python 2
     from urllib2 import build_opener, HTTPError, install_opener, ProxyHandler, urlopen
 
-import config
+from inputstreamhelper import config
 
 from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
 

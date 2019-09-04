@@ -8,8 +8,7 @@ import sys
 import json
 import xml.etree.ElementTree as ET
 import polib
-
-PO = polib.pofile('resources/language/resource.language.en_gb/strings.po')
+from xbmc import GLOBAL_SETTINGS
 
 # Use the addon_settings file
 try:
@@ -54,6 +53,7 @@ def __read_addon_xml(path):
 
 ADDON_INFO = __read_addon_xml('addon.xml')
 ADDON_ID = list(ADDON_INFO)[0]
+PO = polib.pofile('resources/language/{language}/strings.po'.format(language=GLOBAL_SETTINGS.get('locale.language')))
 
 
 class Addon:

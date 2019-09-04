@@ -8,7 +8,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import sys
 import os
 import json
-import polib
 
 
 LOGDEBUG = 'Debug'
@@ -18,8 +17,6 @@ LOGNOTICE = 'Notice'
 INFO_LABELS = {
     'System.BuildVersion': '18.2',
 }
-
-PO = polib.pofile('resources/language/resource.language.en_gb/strings.po')
 
 # Use the global_settings file
 try:

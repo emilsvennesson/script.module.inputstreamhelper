@@ -98,8 +98,8 @@ msgid "Downloading the ChromeOS recovery image..."
 msgstr "Téléchargement de l'image de récupération de ChromeOS"
 
 msgctxt "#30023"
-msgid "Téléchargement terminé !"
-msgstr ""
+msgid "Download completed!"
+msgstr "Téléchargement terminé !"
 
 msgctxt "#30024"
 msgid "The installation now needs to unzip, mount and extract [B]Widevine CDM[/B] from the recovery image.[CR][CR]This process may take up to ten minutes to complete."
@@ -223,53 +223,53 @@ msgstr "[B]Widevine CDM[/B] non trouvé"
 
 msgctxt "#30054"
 msgid "disabled"
-msgstr ""
+msgstr "désactivé"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi information[/B]"
-msgstr ""
+msgstr "[B]Informations Kodi[/B]"
 
 msgctxt "#30801"
 msgid "Kodi version: [B]{version}[/B]"
-msgstr ""
+msgstr "Version de Kodi : [B]{version}[/B]"
 
 msgctxt "#30802"
 msgid "Kodi platform/architecture: [B]{platform}[/B]/[B]{arch}[/B]"
-msgstr ""
+msgstr "Platforme/architecture de Kodi : [B]{platform}[/B]/[B]{arch}[/B]"
 
 msgctxt "#30810"
 msgid "[B]InputStream information[/B]"
-msgstr ""
+msgstr "[B]Informations InputStream[/B]"
 
 msgctxt "#30811"
 msgid "InputStream Helper version: [B]{version}[/B] {state}"
-msgstr ""
+msgstr "Version InputStream Helper : [B]{version}[/B] {state}"
 
 msgctxt "#30812"
 msgid "InputStream Adaptive version: [B]{version}[/B] {state}"
-msgstr ""
+msgstr "Version InputStream Adaptive : [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine information[/B]"
-msgstr ""
+msgstr "[B]Information Widevine[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
-msgstr ""
+msgstr "Version Widevine : [B]{version}[/B] [COLOR gray](mise à jour le [B]{date}[/B])[/COLOR]"
 
 msgctxt "#30822"
 msgid "Widevine CDM path: [B]{path}[/B]"
-msgstr ""
+msgstr "Emplacement de Widevine CDM : [B]{path}[/B]"
 
 msgctxt "#30823"
 msgid "ChromeOS version: [B]{version}[/B]"
-msgstr ""
+msgstr "Version de ChromeOS : [B]{version}[/B]"
 
 msgctxt "#30830"
 msgid "Please report issues to:\n - [B]{url}[/B]"
-msgstr ""
+msgstr "Veuillez signaler les problèmes à :\n - [B]{url}[/B]"
 
 
 ### SETTINGS
@@ -279,7 +279,7 @@ msgstr "Dépannage"
 
 msgctxt "#30901"
 msgid "InputStream Helper information"
-msgstr ""
+msgstr "Informations InputStream Helper"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"

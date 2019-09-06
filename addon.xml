@@ -5,9 +5,11 @@
     <import addon="script.module.kodi-six" version="0.0.4"/>
     <import addon="script.module.pysocks" version="1.6.8" optional="true"/>
   </requires>
-  <extension point="xbmc.python.module" library="lib"/>
   <!-- This is needed to get an addon icon -->
-  <extension point="xbmc.python.script" library="default.py"/>
+  <extension point="xbmc.python.script" library="default.py">
+    <provides>executable</provides>
+  </extension>
+  <extension point="xbmc.python.module" library="lib"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">Kodi InputStream and DRM playback made easy</summary>
     <description lang="en_GB">A simple Kodi module that makes life easier for add-on developers relying on InputStream based add-ons and DRM playback.</description>

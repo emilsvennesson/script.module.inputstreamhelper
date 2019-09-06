@@ -3,57 +3,17 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' This file implements the Kodi xbmcaddon module, either using stubs or alternative functionality '''
 
+# pylint: disable=invalid-name
+
 from __future__ import absolute_import, division, print_function, unicode_literals
-import sys
 import json
-import xml.etree.ElementTree as ET
-import polib
-from xbmc import GLOBAL_SETTINGS
+from xbmcextra import addon_settings, global_settings, import_language, read_addon_xml
 
-# Use the addon_settings file
-try:
-    with open('test/userdata/addon_settings.json') as f:
-        ADDON_SETTINGS = json.load(f)
-except OSError as e:
-    print("Error using 'test/userdata/addon_settings.json': %s" % e, file=sys.stderr)
-    ADDON_SETTINGS = {}
-
-
-def __read_addon_xml(path):
-    ''' Parse the addon.xml and return an info dictionary '''
-    info = dict(
-        path='./',  # '/storage/.kodi/addons/plugin.video.vrt.nu',
-        profile='special://userdata',  # 'special://profile/addon_data/plugin.video.vrt.nu/',
-        type='xbmc.python.pluginsource',
-    )
-
-    tree = ET.parse(path)
-    root = tree.getroot()
-
-    info.update(root.attrib)  # Add 'id', 'name' and 'version'
-    info['author'] = info.pop('provider-name')
-
-    for child in root:
-        if child.attrib.get('point') != 'xbmc.addon.metadata':
-            continue
-        for grandchild in child:
-            # Handle assets differently
-            if grandchild.tag == 'assets':
-                for asset in grandchild:
-                    info[asset.tag] = asset.text
-                continue
-            # Not in English ?  Drop it
-            if grandchild.attrib.get('lang', 'en_GB') != 'en_GB':
-                continue
-            # Add metadata
-            info[grandchild.tag] = grandchild.text
-
-    return {info['name']: info}
-
-
-ADDON_INFO = __read_addon_xml('addon.xml')
+GLOBAL_SETTINGS = global_settings()
+ADDON_SETTINGS = addon_settings()
+ADDON_INFO = read_addon_xml('addon.xml')
 ADDON_ID = list(ADDON_INFO)[0]
-PO = polib.pofile('resources/language/{language}/strings.po'.format(language=GLOBAL_SETTINGS.get('locale.language')))
+PO = import_language(language=GLOBAL_SETTINGS.get('locale.language'))
 
 
 class Addon:

@@ -30,8 +30,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "Ett fel inträffade under installationen av [B]Widevine CDM[/B]. Vänligen aktivera debugloggning och skicka in en bugrapport på:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "På grund av distributionssvårigheter måste [B]Widevine CDM[/B] extraheras från en ChromeOS-återställningsbild. Denna process kräver minst [B]{diskspace}[/B] fritt diskutrymme. Vill du fortsätta?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "På grund av distributionssvårigheter måste [B]Widevine CDM[/B] extraheras från en Chrome OS-återställningsbild. Denna process kräver minst [B]{diskspace}[/B] fritt diskutrymme. Vill du fortsätta?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -94,8 +94,8 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "[B]'{command}'[/B] måste finnas på systemet för att kunna extrahera [B]Widevine CDM[/B]."
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
-msgstr "Laddar ner ChromeOS-återställningsbild..."
+msgid "Downloading the Chrome OS recovery image..."
+msgstr "Laddar ner Chrome OS-återställningsbild..."
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -264,11 +264,11 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr ""
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
 

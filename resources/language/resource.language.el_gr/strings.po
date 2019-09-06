@@ -30,8 +30,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "Προέκυψε ένα σφάλμα κατά την εγκατάσταση του [B]Widevine CDM[/B]. Παρακαλώ ενεργοποιήστε την αποσφαλμάτωση και κάντε αίτημα αναφοράς σφάλματος σε: [CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "Λόγω ενοχλητικών προβλημάτων, το [B]Widevine CDM[/B] πρέπει να εξαχθεί από μία εικόνα επαναφοράς του ChromeOS. Για τον λόγο αυτόν απαιτείται τουλάχιστον [B]{diskspace}[/B] ελεύθερου χώρου. Επιθυμείτε να συνεχίσετε;"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "Λόγω ενοχλητικών προβλημάτων, το [B]Widevine CDM[/B] πρέπει να εξαχθεί από μία εικόνα επαναφοράς του Chrome OS. Για τον λόγο αυτόν απαιτείται τουλάχιστον [B]{diskspace}[/B] ελεύθερου χώρου. Επιθυμείτε να συνεχίσετε;"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -94,8 +94,8 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "Η [B]'{command}'[/B] εντολή χρειάζεται να είναι παρούσα στο σύστημα ώστε για την εξαγωγή του [B]Widevine CDM[/B]."
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
-msgstr "Λήψη της εικόνας επαναφοράς του ChromeOS..."
+msgid "Downloading the Chrome OS recovery image..."
+msgstr "Λήψη της εικόνας επαναφοράς του Chrome OS..."
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -264,11 +264,11 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr ""
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
 

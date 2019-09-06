@@ -31,8 +31,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "Er is een fout opgetreden bij het installeren van [B]Widevine CDM[/B]. Schakel debug logging in en dien een bug-rapport in op:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "Wegens distributierechten moet [B]Widevine CDM[/B] worden uitgepakt uit een recovery-image van ChromeOS. Voor dit process is minimaal [B]{diskspace}[/B] vrije schijfruimte nodig. Wil je doorgaan?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "Wegens distributierechten moet [B]Widevine CDM[/B] worden uitgepakt uit een recovery-image van Chrome OS. Voor dit process is minimaal [B]{diskspace}[/B] vrije schijfruimte nodig. Wil je doorgaan?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -95,7 +95,7 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "Het commando [B]'{command}'[/B] moet op het systeem aanwezig zijn om [B]Widevine CDM[/B] uit te pakken."
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
+msgid "Downloading the Chrome OS recovery image..."
 msgstr "De recovery-image van Chrome OS wordt gedownload..."
 
 msgctxt "#30023"
@@ -265,12 +265,12 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Widevine CDM pad: [B]{path}[/B]"
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
-msgstr "ChromeOS versie: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
+msgstr "Chrome OS versie: [B]{version}[/B]"
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
-msgstr "Graag problemen melden op:\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
+msgstr "Graag problemen melden op:\n - [COLOR yellow]{url}[/COLOR]"
 
 
 ### SETTINGS

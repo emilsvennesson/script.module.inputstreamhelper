@@ -257,12 +257,12 @@ class Helper:
         return addon.getAddonInfo('version')
 
     @staticmethod
-    def _get_lib_version(lib):
-        if lib:
-            with open(lib, 'rb') as f:
-                x = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(f.read()))
-            return x.group(0).lstrip('0')
-        return 'Not found'
+    def _get_lib_version(path):
+        if path:
+            with open(path, 'rb') as library:
+                match = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(library.read()))
+            return match.group(0).lstrip('0')
+        return '(Not found)'
 
     def _chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""
@@ -411,15 +411,15 @@ class Helper:
         progress_dialog.create(localize(30014), message)  # Download in progress
 
         chunk_size = 32 * 1024
-        with open(self._download_path, 'wb') as f:
-            dl = 0
+        with open(self._download_path, 'wb') as image:
+            size = 0
             while True:
                 chunk = req.read(chunk_size)
                 if not chunk:
                     break
-                f.write(chunk)
-                dl += len(chunk)
-                percent = int(dl * 100 / total_length)
+                image.write(chunk)
+                size += len(chunk)
+                percent = int(size * 100 / total_length)
                 if progress_dialog.iscanceled():
                     progress_dialog.close()
                     req.close()
@@ -569,7 +569,7 @@ class Helper:
     def _chromeos_config(self):
         ''' Parse the Chrome OS recovery configuration and put it in a dictionary '''
         url = config.CHROMEOS_RECOVERY_URL
-        conf = [x for x in self._http_get(url).split('\n\n') if 'hwidmatch=' in x]
+        conf = [line for line in self._http_get(url).split('\n\n') if 'hwidmatch=' in line]
 
         devices = []
         for device in conf:
@@ -774,8 +774,8 @@ class Helper:
         """Displays the Widevine EULA and prompts user to accept it."""
         if os.path.exists(os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
             license_file = os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)
-            with open(license_file, 'r') as f:
-                eula = f.read().strip().replace('\n', ' ')
+            with open(license_file, 'r') as file_obj:
+                eula = file_obj.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
@@ -783,9 +783,9 @@ class Helper:
             if not downloaded:
                 return False
 
-            with zipfile.ZipFile(self._download_path) as z:
-                with z.open(config.WIDEVINE_LICENSE_FILE) as f:
-                    eula = f.read().decode().strip().replace('\n', ' ')
+            with zipfile.ZipFile(self._download_path) as archive:
+                with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
+                    eula = file_obj.read().decode().strip().replace('\n', ' ')
 
         return xbmcgui.Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
 
@@ -958,8 +958,8 @@ class Helper:
                 xbmcgui.Dialog().ok(localize(30004), localize(30008, addon=self.inputstream_addon))  # inputstream is missing on system
                 return False
         elif not self._inputstream_enabled():
-            ok = xbmcgui.Dialog().yesno(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
-            if ok:
+            ret = xbmcgui.Dialog().yesno(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
+            if ret:
                 self._enable_inputstream()
             return False
         log('{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())

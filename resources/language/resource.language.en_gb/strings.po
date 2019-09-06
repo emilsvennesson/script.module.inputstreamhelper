@@ -30,7 +30,7 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr ""
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
 msgstr ""
 
 msgctxt "#30007"
@@ -94,7 +94,7 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr ""
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
+msgid "Downloading the Chrome OS recovery image..."
 msgstr ""
 
 msgctxt "#30023"
@@ -264,11 +264,11 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr ""
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
 

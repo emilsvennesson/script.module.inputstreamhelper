@@ -3,12 +3,14 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' This file implements the Kodi xbmc module, either using stubs or alternative functionality '''
 
+# pylint: disable=invalid-name,unused-argument
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 import os
 import json
-
+from xbmcextra import global_settings, import_language
 
 LOGDEBUG = 'Debug'
 LOGERROR = 'Error'
@@ -18,19 +20,11 @@ INFO_LABELS = {
     'System.BuildVersion': '18.2',
 }
 
-# Use the global_settings file
-try:
-    with open('test/userdata/global_settings.json') as f:
-        GLOBAL_SETTINGS = json.load(f)
-except OSError as e:
-    print("Error using 'test/userdata/global_settings.json' : %s" % e, file=sys.stderr)
-    GLOBAL_SETTINGS = {
-        'locale.language': 'resource.language.en_gb',
-        'network.bandwidth': 0,
-    }
+GLOBAL_SETTINGS = global_settings()
+PO = import_language(language=GLOBAL_SETTINGS.get('locale.language'))
 
 
-def executebuiltin(function, wait=False):  # pylint: disable=unused-argument
+def executebuiltin(string, wait=False):  # pylint: disable=unused-argument
     ''' A stub implementation of the xbmc executebuiltin() function '''
     return
 
@@ -45,6 +39,7 @@ def executeJSONRPC(jsonrpccommand):
         if command.get('params', {}).get('addonid') == 'script.module.inputstreamhelper':
             return '{"id":1,"jsonrpc":"2.0","result":{"addon":{"enabled": "true", "version": "0.3.5"}}}'
         return '{"id":1,"jsonrpc":"2.0","result":{"addon":{"enabled": "true", "version": "1.2.3"}}}'
+    print("Error in executeJSONRPC, method '{method}' is not implemented".format(**command), file=sys.stderr)
     return '{"error":{"code":-1,"message":"Not implemented."},"id":1,"jsonrpc":"2.0"}'
 
 
@@ -68,9 +63,9 @@ def log(msg, level):
 def translatePath(path):
     ''' A stub implementation of the xbmc translatePath() function '''
     if path.startswith('special://home'):
-        return path.replace('special://home', os.path.join(os.getcwd(), 'test'))
+        return path.replace('special://home', os.path.join(os.getcwd(), 'test/'))
     if path.startswith('special://profile'):
-        return path.replace('special://profile', os.path.join(os.getcwd(), 'test/usedata'))
+        return path.replace('special://profile', os.path.join(os.getcwd(), 'test/usedata/'))
     if path.startswith('special://userdata'):
-        return path.replace('special://userdata', os.path.join(os.getcwd(), 'test/userdata'))
+        return path.replace('special://userdata', os.path.join(os.getcwd(), 'test/userdata/'))
     return path

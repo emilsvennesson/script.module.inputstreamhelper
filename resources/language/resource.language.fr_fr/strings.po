@@ -30,8 +30,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "Une erreur s'est produite lors de l'installation de [B]Widevine CDM [/B]. Veuillez activer la journalisation du débogage et envoyer un rapport de bogue à l'adresse:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "En raison des droits de distribution, [B]Widevine CDM[/B] doit être extrait d'une image de récupération ChromeOS. Ce processus nécessite au moins [B]{diskspace}[/B] d'espace disque disponible. Souhaitez-vous continuer ?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "En raison des droits de distribution, [B]Widevine CDM[/B] doit être extrait d'une image de récupération Chrome OS. Ce processus nécessite au moins [B]{diskspace}[/B] d'espace disque disponible. Souhaitez-vous continuer ?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -94,8 +94,8 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "La commande [B]'{command}'[/B] est nécessaire sur le système pour extraire [B]Widevine CDM[/B]."
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
-msgstr "Téléchargement de l'image de récupération de ChromeOS"
+msgid "Downloading the Chrome OS recovery image..."
+msgstr "Téléchargement de l'image de récupération de Chrome OS"
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -264,12 +264,12 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Emplacement de Widevine CDM : [B]{path}[/B]"
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Version de ChromeOS : [B]{version}[/B]"
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
-msgstr "Veuillez signaler les problèmes à :\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
+msgstr "Veuillez signaler les problèmes à :\n - [COLOR yellow]{url}[/COLOR]"
 
 
 ### SETTINGS

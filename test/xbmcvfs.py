@@ -3,6 +3,8 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' This file implements the Kodi xbmcvfs module, either using stubs or alternative functionality '''
 
+# pylint: disable=invalid-name
+
 from __future__ import absolute_import, division, print_function, unicode_literals
 import os
 
@@ -47,11 +49,11 @@ def listdir(path):
     ''' A reimplementation of the xbmcvfs listdir() function '''
     files = []
     dirs = []
-    for f in os.listdir(path):
-        if os.path.isfile(f):
-            files.append(f)
-        if os.path.isdir(f):
-            dirs.append(f)
+    for filename in os.listdir(path):
+        if os.path.isfile(filename):
+            files.append(filename)
+        if os.path.isdir(filename):
+            dirs.append(filename)
     return dirs, files
 
 

@@ -1,11 +1,8 @@
 [MESSAGES CONTROL]
 disable=
     duplicate-code,
-    invalid-name,
     line-too-long,
     old-style-class,
-    redundant-keyword-arg,
     too-many-branches,
-    too-many-instance-attributes,
     too-many-lines,
     too-many-return-statements,

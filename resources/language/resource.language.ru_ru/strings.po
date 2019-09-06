@@ -30,8 +30,8 @@ msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable deb
 msgstr "При установке [B]Widevine CDM[/B] возникла ошибка. Включите журнал отладки и опубликуйте отчет об ошибке на:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
-msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a ChromeOS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr "Из-за проблем с распространением, [B]Widevine CDM[/B] необходимо извлечь из образа восстановления ChromeOS. Для этого процесса требуется минимум [B]{diskspace}[/B] свободного дискового пространства. Вы хотите продолжить?"
+msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
+msgstr "Из-за проблем с распространением, [B]Widevine CDM[/B] необходимо извлечь из образа восстановления Chrome OS. Для этого процесса требуется минимум [B]{diskspace}[/B] свободного дискового пространства. Вы хотите продолжить?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
@@ -94,8 +94,8 @@ msgid "[B]'{command}'[/B] command needs to exist on system to extract the [B]Wid
 msgstr "В системе нужна команда [B]'{command}'[/B] для извлечения [B]Widevine CDM[/B]."
 
 msgctxt "#30022"
-msgid "Downloading the ChromeOS recovery image..."
-msgstr "Загружается образ восстановления ChromeOS..."
+msgid "Downloading the Chrome OS recovery image..."
+msgstr "Загружается образ восстановления Chrome OS..."
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -264,11 +264,11 @@ msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr ""
 
 msgctxt "#30823"
-msgid "ChromeOS version: [B]{version}[/B]"
+msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [B]{url}[/B]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
 

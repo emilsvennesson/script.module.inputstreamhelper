@@ -10,3 +10,7 @@ test/userdata/tmp/
 
 experiment/
 *.zip
+
+build/
+dist/
+lib/inputstreamhelper.egg-info/

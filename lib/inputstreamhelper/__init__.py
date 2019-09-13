@@ -22,13 +22,16 @@ except ImportError:  # Python 2
 
 from inputstreamhelper import config
 
-from kodi_six import xbmc, xbmcaddon, xbmcgui, xbmcvfs
+import xbmc
+import xbmcaddon
+import xbmcgui
+import xbmcvfs
+from .unicodehelper import to_unicode, from_unicode
 
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
-ADDON_PROFILE = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-ADDON_ID = ADDON.getAddonInfo('id')
-ADDON_VERSION = ADDON.getAddonInfo('version')
-
+ADDON_PROFILE = to_unicode(xbmc.translatePath(ADDON.getAddonInfo('profile')))
+ADDON_ID = to_unicode(ADDON.getAddonInfo('id'))
+ADDON_VERSION = to_unicode(ADDON.getAddonInfo('version'))
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -49,7 +52,7 @@ class SafeDict(dict):
 
 def log(msg, **kwargs):
     ''' InputStream Helper log method '''
-    xbmc.log(msg='[{addon}-{version}]: {msg}'.format(addon=ADDON_ID, version=ADDON_VERSION, msg=msg.format(**kwargs)), level=xbmc.LOGDEBUG)
+    xbmc.log(msg=from_unicode('[{addon}-{version}]: {msg}'.format(addon=ADDON_ID, version=ADDON_VERSION, msg=msg.format(**kwargs))), level=xbmc.LOGDEBUG)
 
 
 def localize(string_id, **kwargs):
@@ -152,7 +155,7 @@ class Helper:
     def _ia_cdm_path(cls):
         ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
         addon = xbmcaddon.Addon('inputstream.adaptive')
-        cdm_path = xbmc.translatePath(addon.getSetting('DECRYPTERPATH'))
+        cdm_path = to_unicode(xbmc.translatePath(addon.getSetting('DECRYPTERPATH')))
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
 
@@ -254,7 +257,7 @@ class Helper:
     def _inputstream_version(self):
         ''' Return the requested inputstream version '''
         addon = xbmcaddon.Addon(self.inputstream_addon)
-        return addon.getAddonInfo('version')
+        return to_unicode(addon.getAddonInfo('version'))
 
     @staticmethod
     def _get_lib_version(path):
@@ -357,7 +360,7 @@ class Helper:
             return True
 
         if self._widevine_path():
-            log('Found Widevine binary at {path}', path=self._widevine_path().encode('utf-8'))
+            log('Found Widevine binary at {path}', path=self._widevine_path())
             return True
 
         log('Widevine is not installed.')
@@ -731,13 +734,12 @@ class Helper:
         settings_version = ADDON.getSetting('version')
         if settings_version == '':
             settings_version = '0.3.4'  # settings_version didn't exist in version 0.3.4 and older
-        addon_version = ADDON.getAddonInfo('version')
 
         # Compare versions
-        if LooseVersion(addon_version) > LooseVersion(settings_version):
+        if LooseVersion(ADDON_VERSION) > LooseVersion(settings_version):
             # New version found, save addon_version to settings
-            ADDON.setSetting('version', addon_version)
-            log('inputstreamhelper version {version} is running for the first time', version=addon_version)
+            ADDON.setSetting('version', ADDON_VERSION)
+            log('inputstreamhelper version {version} is running for the first time', version=ADDON_VERSION)
             return True
         return False
 
@@ -1023,7 +1025,7 @@ class Helper:
 
         ishelper_state = disabled_str if not ADDON.getSetting('disabled') == 'false' else ''
         istream_state = disabled_str if not self._inputstream_enabled() else ''
-        is_info = [localize(30811, version=ADDON.getAddonInfo('version'), state=ishelper_state),
+        is_info = [localize(30811, version=ADDON_VERSION, state=ishelper_state),
                    localize(30812, version=self._inputstream_version(), state=istream_state)]
 
         wv_updated = datetime.fromtimestamp(float(ADDON.getSetting('last_update'))).strftime("%Y-%m-%d %H:%M") if ADDON.getSetting('last_update') else 'Never'

@@ -2,7 +2,6 @@
 <addon id="script.module.inputstreamhelper" name="InputStream Helper" version="0.4.2" provider-name="emilsvennesson, dagwieers">
   <requires>
     <import addon="xbmc.python" version="2.25.0"/>
-    <import addon="script.module.kodi-six" version="0.0.4"/>
     <import addon="script.module.pysocks" version="1.6.8" optional="true"/>
   </requires>
   <!-- This is needed to get an addon icon -->

@@ -225,6 +225,9 @@ msgctxt "#30054"
 msgid "disabled"
 msgstr ""
 
+msgctxt "#30055"
+msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
+msgstr ""
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
@@ -297,3 +300,6 @@ msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
 msgstr ""
 
+msgctxt "#30909"
+msgid "Temporary directory"
+msgstr ""

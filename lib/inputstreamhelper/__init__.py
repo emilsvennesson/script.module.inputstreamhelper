@@ -136,10 +136,7 @@ class Helper:
     @classmethod
     def _temp_path(cls):
         ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
-        temp_path = ADDON.getSetting('temp_dir')
-        if not temp_path.startswith('special://profile/addon_data/script.module.inputstreamhelper/temp'):
-            temp_path = os.path.join(temp_path, 'temp')
-        temp_path = xbmc.translatePath(temp_path)
+        temp_path = xbmc.translatePath(os.path.join(ADDON.getSetting('temp_dir'), 'temp'))
         if not xbmcvfs.exists(temp_path):
             xbmcvfs.mkdir(temp_path)
 

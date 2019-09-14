@@ -4,8 +4,9 @@
     }, 
     "inputstream.rtmp": {}, 
     "script.module.inputstreamhelper": {
-        "disabled": "false", 
-        "last_update": "", 
+        "disabled": "false",
+        "last_update": "",
+        "temp_dir": "special://masterprofile/addon_data/script.module.inputstreamhelper",
         "version": ""
     }
 }

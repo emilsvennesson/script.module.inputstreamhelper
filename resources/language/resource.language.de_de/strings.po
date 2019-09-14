@@ -296,3 +296,7 @@ msgstr "Widevine CDM Bibliothek (erneut) installieren..."
 msgctxt "#30907"
 msgid "Remove Widevine CDM library..."
 msgstr "Entferne die Widevine CDM Bibliothek..."
+
+msgctxt "#30909"
+msgid "Temporary download directory"
+msgstr ""

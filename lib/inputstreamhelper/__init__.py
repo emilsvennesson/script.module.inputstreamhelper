@@ -135,8 +135,8 @@ class Helper:
 
     @classmethod
     def _temp_path(cls):
-        ''' Return temporary path, usually ~/.kodi/userdata/addon_data/tmp '''
-        temp_path = os.path.join(ADDON_PROFILE, 'tmp')
+        ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
+        temp_path = xbmc.translatePath(os.path.join(ADDON.getSetting('temp_path'), 'temp'))
         if not xbmcvfs.exists(temp_path):
             xbmcvfs.mkdir(temp_path)
 
@@ -144,7 +144,7 @@ class Helper:
 
     @classmethod
     def _mnt_path(cls):
-        ''' Return mount path, usually ~/.kodi/userdata/addon_data/tmp/mnt '''
+        ''' Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt '''
         mnt_path = os.path.join(cls._temp_path(), 'mnt')
         if not xbmcvfs.exists(mnt_path):
             xbmcvfs.mkdir(mnt_path)
@@ -228,6 +228,13 @@ class Helper:
         """Check whether cmd exists on system."""
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
+    def _update_temp_path(self, new_temp_path):
+        """"Updates temp_path and merges files."""
+        old_temp_path = self._temp_path()
+
+        ADDON.setSetting('temp_path', new_temp_path)
+        shutil.move(old_temp_path, new_temp_path)
 
     def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""
@@ -640,10 +647,14 @@ class Helper:
                 xbmcgui.Dialog().ok(localize(30004), localize(30019, os=system_os()))
                 return False
 
-            if required_diskspace >= self._diskspace():
-                xbmcgui.Dialog().ok(localize(30004),  # Not enough free disk space
-                                    localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
-                return False
+            while required_diskspace >= self._diskspace():
+                if xbmcgui.Dialog().yesno(localize(30004), localize(30055)):  # not enough space, alternative path?
+                    self._update_temp_path(xbmcgui.Dialog().browseSingle(3, localize(30909), 'files'))  # temporary path
+                    continue
+                else:
+                    xbmcgui.Dialog().ok(localize(30004),  # Not enough free disk space
+                                        localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
+                    return False
 
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
                 xbmcgui.Dialog().ok(localize(30004), localize(30020, command1='fdisk', command2='parted'))  # Commands are missing

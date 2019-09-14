@@ -136,7 +136,7 @@ class Helper:
     @classmethod
     def _temp_path(cls):
         ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
-        temp_path = xbmc.translatePath(os.path.join(ADDON.getSetting('temp_dir'), 'temp'))
+        temp_path = xbmc.translatePath(os.path.join(ADDON.getSetting('temp_path'), 'temp'))
         if not xbmcvfs.exists(temp_path):
             xbmcvfs.mkdir(temp_path)
 
@@ -233,7 +233,7 @@ class Helper:
         """"Updates temp_path and merges files."""
         old_temp_path = self._temp_path()
 
-        ADDON.setSetting('temp_dir', new_temp_path)
+        ADDON.setSetting('temp_path', new_temp_path)
         shutil.move(old_temp_path, new_temp_path)
 
     def _helper_disabled(self):

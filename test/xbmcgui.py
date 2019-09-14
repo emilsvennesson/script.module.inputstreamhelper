@@ -49,10 +49,10 @@ class Dialog:
         print('\033[37;100mTEXTVIEWER:\033[35;0m [%s]\n\033[35;0m%s\033[39;0m' % (heading, text))
 
     @staticmethod
-    def browseSingle(atype, heading, shares, mask=None, useThumbs=None, treatAsFolder=None, default=None):
+    def browseSingle(type, heading, shares, mask=None, useThumbs=None, treatAsFolder=None, default=None):  # pylint: disable=redefined-builtin
         ''' A stub implementation for the xbmcgui Dialog class browseSingle() method '''
-        print('[37;100mBROWSESINGLE:[35;0m [%s] [35;0m%s[0m' % (atype, heading))
-        return '~/.kodi/userdata/addon_data/script.module.inputstreamhelper'
+        print('\033[37;100mBROWSESINGLE:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (type, heading))
+        return 'special://masterprofile/addon_data/script.module.inputstreamhelper/'
 
 
 class DialogProgress:

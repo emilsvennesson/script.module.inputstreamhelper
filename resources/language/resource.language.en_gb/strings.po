@@ -301,5 +301,5 @@ msgid "Remove Widevine CDM library..."
 msgstr ""
 
 msgctxt "#30909"
-msgid "Temporary directory"
+msgid "Temporary download directory"
 msgstr ""

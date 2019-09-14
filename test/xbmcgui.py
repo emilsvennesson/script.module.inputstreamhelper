@@ -3,7 +3,7 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' This file implements the Kodi xbmcgui module, either using stubs or alternative functionality '''
 
-# pylint: disable=invalid-name,unused-argument,too-many-arguments
+# pylint: disable=invalid-name,too-many-arguments,unused-argument
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 from xbmcextra import kodi_to_ansi
@@ -28,6 +28,10 @@ class Dialog:
         heading = kodi_to_ansi(heading)
         line1 = kodi_to_ansi(line1)
         print('\033[37;100mOK:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (heading, line1))
+
+    @staticmethod
+    def info(listitem):
+        ''' A stub implementation for the xbmcgui Dialog class info() method '''
 
     @staticmethod
     def yesno(heading, line1, line2=None, line3=None, nolabel=None, yeslabel=None, autoclose=0):
@@ -135,6 +139,10 @@ class ListItem:
     def setMimeType(mimetype):
         ''' A stub implementation for the xbmcgui ListItem class setMimeType() method '''
         return
+
+    def setPath(self, path):
+        ''' A stub implementation for the xbmcgui ListItem class setPath() method '''
+        self.path = path
 
     @staticmethod
     def setProperty(key, value):

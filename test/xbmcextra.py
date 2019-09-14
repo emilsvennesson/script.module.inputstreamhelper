@@ -3,10 +3,10 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' Extra functions for testing '''
 
+# pylint: disable=invalid-name
+
 from __future__ import absolute_import, division, print_function, unicode_literals
-import sys
 import os
-import json
 import xml.etree.ElementTree as ET
 import polib
 
@@ -72,11 +72,12 @@ def read_addon_xml(path):
 
 def global_settings():
     ''' Use the global_settings file '''
+    import json
     try:
-        with open('test/userdata/global_settings.json') as fdesc:
-            settings = json.load(fdesc)
-    except OSError as exc:
-        print("Error using 'test/userdata/global_settings.json' : %s" % exc, file=sys.stderr)
+        with open('test/userdata/global_settings.json') as f:
+            settings = json.load(f)
+    except OSError as e:
+        print("Error: Cannot use 'test/userdata/global_settings.json' : %s" % e)
         settings = {
             'locale.language': 'resource.language.en_gb',
             'network.bandwidth': 0,
@@ -101,24 +102,25 @@ def global_settings():
 
 def addon_settings():
     ''' Use the addon_settings file '''
+    import json
     try:
-        with open('test/userdata/addon_settings.json') as fdesc:
-            settings = json.load(fdesc)
-    except OSError as exc:
-        print("Error using 'test/userdata/addon_settings.json': %s" % exc, file=sys.stderr)
+        with open('test/userdata/addon_settings.json') as f:
+            settings = json.load(f)
+    except OSError as e:
+        print("Error: Cannot use 'test/userdata/addon_settings.json' : %s" % e)
         settings = {}
 
     # Read credentials from credentials.json
     try:
-        with open('test/userdata/credentials.json') as fdesc:
-            settings.update(json.load(fdesc))
-    except (IOError, OSError) as exc:
+        with open('test/userdata/credentials.json') as f:
+            settings.update(json.load(f))
+    except (IOError, OSError) as e:
         if 'VRTNU_USERNAME' in os.environ and 'VRTNU_PASSWORD' in os.environ:
             print('Using credentials from the environment variables VRTNU_USERNAME and VRTNU_PASSWORD')
             settings['username'] = os.environ.get('VRTNU_USERNAME')
             settings['password'] = os.environ.get('VRTNU_PASSWORD')
         else:
-            print("Error using 'test/userdata/credentials.json': %s" % exc, file=sys.stderr)
+            print("Error: Cannot use 'test/userdata/credentials.json' : %s" % e)
     return settings
 
 

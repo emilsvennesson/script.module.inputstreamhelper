@@ -759,7 +759,7 @@ class Helper:
         last_update = ADDON.getSetting('last_update')
         if last_update and not self._first_run():
             last_update_dt = datetime.fromtimestamp(float(ADDON.getSetting('last_update')))
-            if last_update_dt + timedelta(days=config.WIDEVINE_UPDATE_INTERVAL_DAYS) >= datetime.utcnow():
+            if last_update_dt + timedelta(days=int(ADDON.getSetting('update_frequency'))) >= datetime.utcnow():
                 log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
                 return
 

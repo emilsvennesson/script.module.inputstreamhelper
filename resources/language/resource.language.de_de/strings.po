@@ -300,3 +300,7 @@ msgstr "Entferne die Widevine CDM Bibliothek..."
 msgctxt "#30909"
 msgid "Temporary download directory"
 msgstr ""
+
+msgctxt "#30911"
+msgid "Update frequency in days"
+msgstr ""

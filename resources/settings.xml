@@ -10,5 +10,6 @@
         <setting label="30905" help="30906" type="action" id="install_widevine" action="RunScript(script.module.inputstreamhelper, widevine_install)" enable="eq(-2,false)" visible="!system.platform.android"/>
         <setting label="30907" help="30908" type="action" id="remove_widevine" action="RunScript(script.module.inputstreamhelper, widevine_remove)" enable="eq(-3,false)" visible="!system.platform.android"/>
         <setting label="30909" help="30910" type="folder" id="temp_path" source="" option="writeable" default="special://masterprofile/addon_data/script.module.inputstreamhelper"/>
+        <setting label="30911" help="30912" type="number" id="update_frequency" default="14"/>
     </category>
 </settings>

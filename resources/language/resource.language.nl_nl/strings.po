@@ -301,3 +301,7 @@ msgstr "Widevine CDM verwijderen..."
 msgctxt "#30909"
 msgid "Temporary download directory"
 msgstr "Tijdelijke download folder"
+
+msgctxt "#30911"
+msgid "Update frequency in days"
+msgstr ""

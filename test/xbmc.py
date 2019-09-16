@@ -100,6 +100,10 @@ def executeJSONRPC(jsonrpccommand):
         if command.get('params', {}).get('addonid') == 'script.module.inputstreamhelper':
             return json.dumps(dict(id=1, jsonrpc='2.0', result=dict(addon=dict(enabled='true', version='0.3.5'))))
         return json.dumps(dict(id=1, jsonrpc='2.0', result=dict(addon=dict(enabled='true', version='1.2.3'))))
+    if command.get('method') == 'Textures.GetTextures':
+        return json.dumps(dict(id=1, jsonrpc='2.0', result=dict(textures=[dict(cachedurl="", imagehash="", lasthashcheck="", textureid=4837, url="")])))
+    if command.get('method') == 'Textures.RemoveTexture':
+        return json.dumps(dict(id=1, jsonrpc='2.0', result="OK"))
     log("executeJSONRPC does not implement method '{method}'".format(**command), 'Error')
     return json.dumps(dict(error=dict(code=-1, message='Not implemented'), id=1, jsonrpc='2.0'))
 

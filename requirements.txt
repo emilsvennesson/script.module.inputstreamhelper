@@ -1,5 +1,6 @@
 codecov
 kodi-addon-checker
 polib
+proxy.py
 pylint
 tox-travis

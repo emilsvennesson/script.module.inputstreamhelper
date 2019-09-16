@@ -20,14 +20,14 @@ class Dialog:
         ''' A working implementation for the xbmcgui Dialog class notification() method '''
         heading = kodi_to_ansi(heading)
         message = kodi_to_ansi(message)
-        print('\033[37;100mNOTIFICATION:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (heading, message))
+        print('\033[37;44;1mNOTIFICATION:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, message))
 
     @staticmethod
     def ok(heading, line1, line2=None, line3=None):
         ''' A stub implementation for the xbmcgui Dialog class ok() method '''
         heading = kodi_to_ansi(heading)
         line1 = kodi_to_ansi(line1)
-        print('\033[37;100mOK:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (heading, line1))
+        print('\033[37;44;1mOK:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, line1))
 
     @staticmethod
     def info(listitem):
@@ -38,7 +38,7 @@ class Dialog:
         ''' A stub implementation for the xbmcgui Dialog class yesno() method '''
         heading = kodi_to_ansi(heading)
         line1 = kodi_to_ansi(line1)
-        print('\033[37;100mYESNO:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (heading, line1))
+        print('\033[37;44;1mYESNO:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, line1))
         return True
 
     @staticmethod
@@ -46,12 +46,12 @@ class Dialog:
         ''' A stub implementation for the xbmcgui Dialog class textviewer() method '''
         heading = kodi_to_ansi(heading)
         text = kodi_to_ansi(text)
-        print('\033[37;100mTEXTVIEWER:\033[35;0m [%s]\n\033[35;0m%s\033[39;0m' % (heading, text))
+        print('\033[37;44;1mTEXTVIEWER:\033[35;49;1m [%s]\n\033[37;1m%s\033[39;0m' % (heading, text))
 
     @staticmethod
     def browseSingle(type, heading, shares, mask=None, useThumbs=None, treatAsFolder=None, default=None):  # pylint: disable=redefined-builtin
         ''' A stub implementation for the xbmcgui Dialog class browseSingle() method '''
-        print('\033[37;100mBROWSESINGLE:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (type, heading))
+        print('\033[37;44;1mBROWSESINGLE:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (type, heading))
         return 'special://masterprofile/addon_data/script.module.inputstreamhelper/'
 
 
@@ -72,7 +72,7 @@ class DialogProgress:
         ''' A stub implementation for the xbmcgui DialogProgress class create() method '''
         heading = kodi_to_ansi(heading)
         line1 = kodi_to_ansi(line1)
-        print('\033[37;100mPROGRESS:\033[35;0m [%s] \033[35;0m%s\033[39;0m' % (heading, line1))
+        print('\033[37;44;1mPROGRESS:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, line1))
 
     @staticmethod
     def iscanceled():
@@ -87,9 +87,9 @@ class DialogProgress:
         line2 = kodi_to_ansi(line2)
         line3 = kodi_to_ansi(line3)
         if line1 or line2 or line3:
-            print('\033[37;100mPROGRESS:\033[35;0m [%d%%] \033[35;0m%s\033[39;0m' % (percentage, line1 or line2 or line3))
+            print('\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%] \033[37;1m%s\033[39;0m' % (percentage, line1 or line2 or line3))
         else:
-            print('\033[1G\033[37;100mPROGRESS:\033[35;0m [%d%%]\033[39;0m' % (percentage), end='')
+            print('\033[1G\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%]\033[39;0m' % (percentage), end='')
 
 
 class DialogBusy:

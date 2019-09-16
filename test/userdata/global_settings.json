@@ -1,3 +1,9 @@
 {
-    "locale.language": "resource.language.en_gb"
+    "locale.language": "resource.language.en_gb",
+    "network.usehttpproxy": false,
+    "network.httpproxytype": 0,
+    "network.httpproxyserver": "http://proxy.server/",
+    "network.httpproxyport": "8899",
+    "network.httpproxyusername": "",
+    "network.httpproxypassword": ""
 }

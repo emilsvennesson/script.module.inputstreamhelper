@@ -76,8 +76,6 @@ WIDEVINE_MANIFEST_FILE = 'manifest.json'
 
 WIDEVINE_CONFIG_NAME = 'widevine_config.json'
 
-WIDEVINE_UPDATE_INTERVAL_DAYS = 14
-
 CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 
 # Last updated: 2019-08-20 (version 12239.67.0)

@@ -24,7 +24,7 @@ import xbmc
 from xbmcaddon import Addon
 from xbmcgui import Dialog, DialogProgress
 import xbmcvfs
-from .kodiutils import execute_jsonrpc, get_addon_info, get_proxies, get_setting, localize, log, set_setting
+from .kodiutils import execute_jsonrpc, get_addon_info, get_proxies, get_setting, localize, log, set_setting, translate_path
 from .unicodehelper import to_unicode
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -93,7 +93,7 @@ class Helper:
     @classmethod
     def _temp_path(cls):
         ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
-        temp_path = xbmc.translatePath(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
+        temp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
         if not xbmcvfs.exists(temp_path):
             xbmcvfs.mkdir(temp_path)
 
@@ -112,7 +112,7 @@ class Helper:
     def _ia_cdm_path(cls):
         ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
         addon = Addon('inputstream.adaptive')
-        cdm_path = to_unicode(xbmc.translatePath(addon.getSetting('DECRYPTERPATH')))
+        cdm_path = translate_path(addon.getSetting('DECRYPTERPATH'))
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
 
@@ -443,7 +443,7 @@ class Helper:
             Dialog().ok(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
 
-        if 'WindowsApps' in xbmc.translatePath('special://xbmcbin/'):  # uwp is not supported
+        if 'WindowsApps' in translate_path('special://xbmcbin/'):  # uwp is not supported
             log('Unsupported UWP Kodi version detected.')
             Dialog().ok(localize(30004), localize(30012))  # Windows Store Kodi falls short
             return False

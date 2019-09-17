@@ -51,6 +51,11 @@ def get_setting(setting_id, default=None):
     return value
 
 
+def translate_path(path):
+    ''' Translate special xbmc paths '''
+    return to_unicode(xbmc.translatePath(path))
+
+
 def set_setting(setting_id, setting_value):
     ''' Set an add-on setting '''
     return ADDON.setSetting(setting_id, setting_value)
@@ -107,7 +112,7 @@ def get_proxies():
 
 def get_userdata_path():
     ''' Return the profile's userdata path '''
-    return to_unicode(xbmc.translatePath(ADDON.getAddonInfo('profile')))
+    return translate_path(ADDON.getAddonInfo('profile'))
 
 
 def get_addon_info(key):

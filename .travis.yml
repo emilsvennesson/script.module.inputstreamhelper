@@ -22,7 +22,6 @@ script:
 - coverage run -a default.py
 - proxy.py &
 - coverage run -m unittest discover
-- pkill -ef proxy.py
 
 after_success:
 - codecov

@@ -334,29 +334,8 @@ class Helper:
         return False
 
     @staticmethod
-    def _http_get(url):
-        ''' Perform an HTTP GET request and return content '''
-        log('Request URL: {url}', url=url)
-
-        for retry in (False, True):
-            try:
-                req = urlopen(url)
-                log('Response code: {code}', code=req.getcode())
-                if 400 <= req.getcode() < 600:
-                    raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
-                break
-            except HTTPError:
-                if retry:
-                    Dialog().ok(localize(30004), localize(30013, filename=url.split('/')[-1]))  # Failed to retrieve file
-                    return None
-
-        content = req.read()
-        # NOTE: Do not log reponse (as could be large)
-        # log('Response: {response}', response=content)
-        return content.decode()
-
-    def _http_download(self, url, message=None):
-        """Makes HTTP request and displays a progress dialog on download."""
+    def _http_request(url):
+        ''' Perform an HTTP request and return request '''
         log('Request URL: {url}', url=url)
         filename = url.split('/')[-1]
 
@@ -367,11 +346,33 @@ class Helper:
                 if 400 <= req.getcode() < 600:
                     raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
                 break
-            except (HTTPError, BadStatusLine):
+            except HTTPError:
+                Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
+                return None
+            except BadStatusLine:
                 if retry:
                     Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
-                    return False
+                    return None
+        return req
 
+    def _http_get(self, url):
+        ''' Perform an HTTP GET request and return content '''
+        req = self._http_request(url)
+        if req is None:
+            return None
+
+        content = req.read()
+        # NOTE: Do not log reponse (as could be large)
+        # log('Response: {response}', response=content)
+        return content.decode()
+
+    def _http_download(self, url, message=None):
+        """Makes HTTP request and displays a progress dialog on download."""
+        req = self._http_request(url)
+        if req is None:
+            return None
+
+        filename = url.split('/')[-1]
         if not message:  # display "downloading [filename]"
             message = localize(30015, filename=filename)  # Downloading file
 

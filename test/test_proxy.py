@@ -14,11 +14,16 @@ xbmcaddon = __import__('xbmcaddon')
 xbmcgui = __import__('xbmcgui')
 xbmcvfs = __import__('xbmcvfs')
 
+xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = True
+xbmc.GLOBAL_SETTINGS['network.httpproxytype'] = 0
+xbmc.GLOBAL_SETTINGS['network.httpproxyserver'] = '127.0.0.1'
+xbmc.GLOBAL_SETTINGS['network.httpproxyport'] = '8899'
 
-class DarwinX64Tests(unittest.TestCase):
+
+class LinuxProxyTests(unittest.TestCase):
 
     def test_check_inputstream_mpd(self):
-        inputstreamhelper.system_os = lambda: 'Darwin'
+        inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
         is_helper.remove_widevine()
@@ -26,7 +31,7 @@ class DarwinX64Tests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_hls_again(self):
-        inputstreamhelper.system_os = lambda: 'Darwin'
+        inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'AMD64'
         platform.architecture = lambda: ['64bit', '']
         is_helper = inputstreamhelper.Helper('hls', drm='com.widevine.alpha')
@@ -34,14 +39,14 @@ class DarwinX64Tests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
-        inputstreamhelper.system_os = lambda: 'Darwin'
+        inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('rtmp')
         is_installed = is_helper.check_inputstream()
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_disabled(self):
-        inputstreamhelper.system_os = lambda: 'Darwin'
+        inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
         is_helper.disable()

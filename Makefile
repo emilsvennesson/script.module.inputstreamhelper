@@ -16,7 +16,7 @@ zip_dir = $(name)/
 
 blue = \e[1;34m
 white = \e[1;37m
-reset = \e[0m
+reset = \e[0;39m
 
 .PHONY: test
 
@@ -43,9 +43,14 @@ addon: clean
 
 unit: clean
 	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
-	python default.py
+	-pkill -ef proxy.py
+	proxy.py &
 	python -m unittest discover
-#	coverage run -m unittest discover
+	pkill -ef proxy.py
+
+run:
+	@echo -e "$(white)=$(blue) Run CLI$(reset)"
+	python default.py
 
 zip: clean
 	@echo -e "$(white)=$(blue) Building new package$(reset)"

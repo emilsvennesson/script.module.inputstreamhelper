@@ -161,8 +161,6 @@ def translatePath(path):
     ''' A stub implementation of the xbmc translatePath() function '''
     if path.startswith('special://home'):
         return path.replace('special://home', os.path.join(os.getcwd(), 'test/'))
-    if path.startswith('special://masterprofile/addon_data/script.module.inputstreamhelper/'):
-        return path.replace('special://masterprofile/addon_data/script.module.inputstreamhelper/', os.path.join(os.getcwd(), 'test/userdata/'))
     if path.startswith('special://masterprofile'):
         return path.replace('special://masterprofile', os.path.join(os.getcwd(), 'test/userdata/'))
     if path.startswith('special://profile'):

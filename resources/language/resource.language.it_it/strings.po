@@ -225,6 +225,10 @@ msgctxt "#30054"
 msgid "disabled"
 msgstr ""
 
+msgctxt "#30055"
+msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
@@ -268,7 +272,7 @@ msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [COLOR]{url}[/COLOR yellow]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
 

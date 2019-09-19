@@ -111,7 +111,10 @@ class Helper:
     @classmethod
     def _ia_cdm_path(cls):
         ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
-        addon = Addon('inputstream.adaptive')
+        try:
+            addon = Addon('inputstream.adaptive')
+        except RuntimeError:
+            return None
         cdm_path = translate_path(addon.getSetting('DECRYPTERPATH'))
         if not xbmcvfs.exists(cdm_path):
             xbmcvfs.mkdir(cdm_path)
@@ -138,9 +141,10 @@ class Helper:
         if widevine_cdm_filename is None:
             return False
 
-        widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
-        if xbmcvfs.exists(widevine_path):
-            return widevine_path
+        if cls._ia_cdm_path():
+            widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
+            if xbmcvfs.exists(widevine_path):
+                return widevine_path
 
         return False
 
@@ -223,7 +227,11 @@ class Helper:
 
     def _inputstream_version(self):
         ''' Return the requested inputstream version '''
-        addon = Addon(self.inputstream_addon)
+        try:
+            addon = Addon(self.inputstream_addon)
+        except RuntimeError:
+            return None
+
         return to_unicode(addon.getAddonInfo('version'))
 
     @staticmethod
@@ -413,7 +421,7 @@ class Helper:
     def _inputstream_enabled(self):
         """Returns whether selected InputStream add-on is enabled.."""
         data = execute_jsonrpc(dict(jsonrpc='2.0', id=1, method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon, properties=['enabled'])))
-        if data['result']['addon']['enabled']:
+        if data.get('result', {}).get('addon', {}).get('enabled'):
             log('{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
             return True
 
@@ -930,7 +938,7 @@ class Helper:
 
     def info_dialog(self):
         """ Show an Info box with useful info e.g. for bug reports"""
-        disabled_str = ' ({disabled}'.format(disabled=localize(30054))
+        disabled_str = ' ({disabled})'.format(disabled=localize(30054))
 
         kodi_info = [localize(30801, version=self._kodi_version()),
                      localize(30802, platform=system_os(), arch=self._arch())]

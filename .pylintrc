@@ -1,5 +1,6 @@
 [MESSAGES CONTROL]
 disable=
+    bad-option-value,
     duplicate-code,
     line-too-long,
     old-style-class,

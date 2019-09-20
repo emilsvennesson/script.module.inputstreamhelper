@@ -198,7 +198,8 @@ class Helper:
         old_temp_path = self._temp_path()
 
         set_setting('temp_path', new_temp_path)
-        shutil.move(old_temp_path, new_temp_path)
+        if old_temp_path != self._temp_path():
+            shutil.move(old_temp_path, self._temp_path())
 
     def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""

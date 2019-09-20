@@ -35,7 +35,7 @@ def uri_to_path(uri):
     ''' Shorten a plugin URI to just the path '''
     if uri is None:
         return None
-    return ' \033[33m→ \033[34m%s\033[39;0m' % uri.replace('plugin://plugin.video.vrt.nu', '')
+    return ' \033[33m→ \033[34m%s\033[39;0m' % uri.replace('plugin://' + ADDON_ID, '')
 
 
 def read_addon_xml(path):
@@ -116,3 +116,7 @@ def addon_settings():
 def import_language(language):
     ''' Process the language.po file '''
     return polib.pofile('resources/language/{language}/strings.po'.format(language=language))
+
+
+ADDON_INFO = read_addon_xml('addon.xml')
+ADDON_ID = next(iter(ADDON_INFO.values())).get('id')

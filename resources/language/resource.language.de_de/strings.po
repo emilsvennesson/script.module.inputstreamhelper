@@ -223,67 +223,67 @@ msgstr "[B]Widevine CDM[/B] wurde nicht gefunden."
 
 msgctxt "#30054"
 msgid "disabled"
-msgstr ""
+msgstr "Deaktiviert"
 
 msgctxt "#30055"
 msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
-msgstr ""
+msgstr "Es ist nicht genügend Speicher im aktuellen temporären Verzeichnis vorhanden. Möchten Sie ein anderes angeben, welches temporär für das Chrome OS Recovery Image verwendet wird (z.B. auf einem USB Stick)?"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi information[/B]"
-msgstr ""
+msgstr "[B]Kodi Informationen[/B]"
 
 msgctxt "#30801"
 msgid "Kodi version: [B]{version}[/B]"
-msgstr ""
+msgstr "Kodi Version: [B]{version}[/B]"
 
 msgctxt "#30802"
 msgid "Kodi platform/architecture: [B]{platform}[/B]/[B]{arch}[/B]"
-msgstr ""
+msgstr "Kodi Plattform/Architektur: [B]{platform}[/B]/[B]{arch}[/B]"
 
 msgctxt "#30810"
 msgid "[B]InputStream information[/B]"
-msgstr ""
+msgstr "[B]InputStream Informationen[/B]"
 
 msgctxt "#30811"
 msgid "InputStream Helper version: [B]{version}[/B] {state}"
-msgstr ""
+msgstr "InputStream Helper Version: [B]{version}[/B] {state}"
 
 msgctxt "#30812"
 msgid "InputStream Adaptive version: [B]{version}[/B] {state}"
-msgstr ""
+msgstr "InputStream Adaptive Version: [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine information[/B]"
-msgstr ""
+msgstr "[B]Widevine Informationen[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
-msgstr ""
+msgstr "Widevine Version: [B]{version}[/B] [COLOR gray](zuletzt aktualisiert am [B]{date}[/B])[/COLOR]"
 
 msgctxt "#30822"
 msgid "Widevine CDM path: [B]{path}[/B]"
-msgstr ""
+msgstr "Widevine CDM Pfad: [B]{path}[/B]"
 
 msgctxt "#30823"
 msgid "Chrome OS version: [B]{version}[/B]"
-msgstr ""
+msgstr "Chrome OS Version: [B]{version}[/B]"
 
 msgctxt "#30830"
 msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
-msgstr ""
+msgstr "Bitte melden Sie Fehler hier:\n - [COLOR yellow]{url}[/COLOR]"
 
 
 ### SETTINGS
 msgctxt "#30900"
 msgid "Expert"
-msgstr ""
+msgstr "Experte"
 
 msgctxt "#30901"
 msgid "InputStream Helper information"
-msgstr ""
+msgstr "InputStream Helper Informationen"
 
 msgctxt "#30903"
 msgid "Disable InputStream Helper"
@@ -295,11 +295,11 @@ msgstr "[I]Bei Deaktivierung könnte DRM Wiedergabe fehlschlagen![/I]"
 
 msgctxt "#30905"
 msgid "Update frequency in days"
-msgstr ""
+msgstr "Updatefrequenz in Tagen"
 
 msgctxt "#30907"
 msgid "Temporary download directory"
-msgstr ""
+msgstr "Temporäres Downloadverzeichnis"
 
 msgctxt "#30909"
 msgid "(Re)install Widevine CDM library..."

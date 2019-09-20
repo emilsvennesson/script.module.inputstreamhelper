@@ -278,8 +278,8 @@ msgstr ""
 
 ### SETTINGS
 msgctxt "#30900"
-msgid "Troubleshooting"
-msgstr "Fehlerbehebung"
+msgid "Expert"
+msgstr ""
 
 msgctxt "#30901"
 msgid "InputStream Helper information"
@@ -294,17 +294,17 @@ msgid "[I]When disabled, DRM playback may fail![/I]"
 msgstr "[I]Bei Deaktivierung könnte DRM Wiedergabe fehlschlagen![/I]"
 
 msgctxt "#30905"
-msgid "(Re)install Widevine CDM library..."
-msgstr "Widevine CDM Bibliothek (erneut) installieren..."
+msgid "Update frequency in days"
+msgstr ""
 
 msgctxt "#30907"
-msgid "Remove Widevine CDM library..."
-msgstr "Entferne die Widevine CDM Bibliothek..."
-
-msgctxt "#30909"
 msgid "Temporary download directory"
 msgstr ""
 
+msgctxt "#30909"
+msgid "(Re)install Widevine CDM library..."
+msgstr "Widevine CDM Bibliothek (erneut) installieren..."
+
 msgctxt "#30911"
-msgid "Update frequency in days"
-msgstr ""
+msgid "Remove Widevine CDM library..."
+msgstr "Entferne die Widevine CDM Bibliothek..."

@@ -70,5 +70,5 @@ clean:
 	@echo -e "$(white)=$(blue) Cleaning up$(reset)"
 	find . test/ -name '*.pyc' -type f -delete
 	find . -name '__pycache__' -type d -delete
-	find test/userdata/ -mindepth 1 -type d -delete
+	find test/userdata/temp/ -mindepth 1 -type d -delete
 	rm -rf .pytest_cache/ .tox/ *.log

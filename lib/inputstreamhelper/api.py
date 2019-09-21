@@ -20,6 +20,9 @@ def run(params):
                 check_inputstream(params[2], drm=params[3])
         elif params[1] == 'info':
             info_dialog()
+        elif params[1] == 'rollback':
+            rollback()
+
     elif len(params) > 4:
         log('invalid API call, too many parameters')
     else:
@@ -44,3 +47,8 @@ def widevine_remove():
 def info_dialog():
     ''' The API interface to show an info Dialog '''
     Helper('mpd', drm='widevine').info_dialog()
+
+
+def rollback():
+    ''' The API interface to rollback Widevine CDM '''
+    Helper('mpd', drm='widevine').rollback_libwv()

@@ -57,6 +57,14 @@ def ok_dialog(heading='', message=''):
     return Dialog().ok(heading=heading, line1=message)
 
 
+def select_dialog(heading='', opt_list=None, autoclose=False, preselect=None, useDetails=False): # pylint: disable=invalid-name
+    ''' Show Kodi's Select dialog '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().select(heading=heading, opt_list=opt_list, autoclose=autoclose, preselect=preselect, useDetails=useDetails)
+
+
 def progress_dialog():
     ''' Show Kodi's Progress dialog '''
     from xbmcgui import DialogProgress
@@ -156,7 +164,7 @@ def get_proxies():
 
 
 def get_userdata_path():
-    ''' Return the profile's userdata path '''
+    ''' Return the addon's addon_data path '''
     return translate_path(ADDON.getAddonInfo('profile'))
 
 

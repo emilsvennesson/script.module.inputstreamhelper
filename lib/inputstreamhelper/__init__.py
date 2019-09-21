@@ -3,8 +3,8 @@
 from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
-from .kodiutils import (browsesingle, execute_jsonrpc, get_addon_info, get_proxies, get_setting, kodi_to_ascii, localize, log,
-                        notification, ok_dialog, progress_dialog, set_setting, textviewer, translate_path, yesno_dialog)
+from .kodiutils import (browsesingle, execute_jsonrpc, get_addon_info, get_proxies, get_setting, get_userdata_path, kodi_to_ascii, localize,
+                        log, notification, ok_dialog, progress_dialog, select_dialog, set_setting, textviewer, translate_path, yesno_dialog)
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -113,6 +113,17 @@ class Helper:
             mkdir(cdm_path)
 
         return cdm_path
+
+    @classmethod
+    def _backup_path(cls):
+        ''' Return the path to the cdm backups '''
+        import xbmcvfs
+
+        path = os.path.join(get_userdata_path(), 'backup')
+        if not xbmcvfs.exists(path):
+            xbmcvfs.mkdir(path)
+
+        return path
 
     @classmethod
     def _widevine_config_path(cls):
@@ -554,6 +565,51 @@ class Helper:
 
         return devices
 
+    def _remove_old_backups(self, backup_path):
+        """Removes old Widevine backups, if number of allowed backups is exceeded"""
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        import shutil
+
+        max_backups = int(get_setting('backups', '4'))
+        versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
+
+        if len(versions) < 2:
+            return
+
+        if 'x86' in self._arch():
+            installed_version = self._load_widevine_config()['version']
+        else:
+            installed_version = self._select_best_chromeos_image(self._load_widevine_config())['version']
+
+        while len(versions) > max_backups + 1:
+            remove_version = str(versions[1] if versions[0] == installed_version else versions[0])
+            log('removing oldest backup which is not installed: {version}', version=remove_version)
+            shutil.rmtree(os.path.join(backup_path, remove_version))
+            versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
+
+        return
+
+    def _install_cdm_from_backup(self, version):
+        """Copies files from specified backup version to cdm dir"""
+        import xbmcvfs
+
+        filenames = os.listdir(os.path.join(self._backup_path(), version))
+
+        for filename in filenames:
+            backup_fpath = os.path.join(self._backup_path(), version, filename)
+            install_fpath = os.path.join(self._ia_cdm_path(), filename)
+
+            if xbmcvfs.exists(install_fpath):
+                xbmcvfs.delete(install_fpath)
+
+            try:
+                os.link(backup_fpath, install_fpath)
+            except OSError:
+                xbmcvfs.copy(backup_fpath, install_fpath)
+
+        log('Installed CDM version {version} from backup', version=version)
+        self._remove_old_backups(self._backup_path())
+
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
         cdm_version = self._latest_widevine_version()
@@ -565,8 +621,10 @@ class Helper:
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+            self._unzip(os.path.join(self._backup_path(), cdm_version))
+
             progress.update(94, line1=localize(30049))  # Installing Widevine CDM
-            self._unzip(self._ia_cdm_path())
+            self._install_cdm_from_backup(cdm_version)
 
             progress.update(97, line1=localize(30050))  # Finishing
             self._cleanup()
@@ -574,9 +632,6 @@ class Helper:
                 return False
 
             if self._has_widevine():
-                if os.path.lexists(self._widevine_config_path()):
-                    os.remove(self._widevine_config_path())
-                os.rename(os.path.join(self._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
                     progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
@@ -651,16 +706,21 @@ class Helper:
                     self._mnt_loop_dev(),
                 ]
                 if all(success):
+                    import json
+
                     progress.update(91, line1=localize(30048))  # Extracting Widevine CDM
-                    self._extract_widevine_from_img()
+                    self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
+                    with open(os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json'), 'w') as config_file:
+                        config_file.write(json.dumps(devices, indent=4))
+
                     progress.update(94, line1=localize(30049))  # Installing Widevine CDM
+                    self._install_cdm_from_backup(arm_device['version'])
+
                     progress.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         import json
                         set_setting('chromeos_version', arm_device['version'])
-                        with open(self._widevine_config_path(), 'w') as config_file:
-                            config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
                         if wv_check:
                             progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
@@ -766,15 +826,19 @@ class Helper:
 
         return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
 
-    def _extract_widevine_from_img(self):
+    def _extract_widevine_from_img(self, backup_path):
         ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
         import shutil
-        for root, dirs, files in os.walk(str(self._mnt_path())):  # pylint: disable=unused-variable
+        import xbmcvfs
+
+        for root, _, files in os.walk(str(self._mnt_path())):
             if str('libwidevinecdm.so') not in files:
                 continue
             cdm_path = os.path.join(root, 'libwidevinecdm.so')
             log('Found libwidevinecdm.so in {path}', path=cdm_path)
-            shutil.copyfile(cdm_path, os.path.join(self._ia_cdm_path(), 'libwidevinecdm.so'))
+            if not xbmcvfs.exists(backup_path):
+                xbmcvfs.mkdir(backup_path)
+            shutil.copyfile(cdm_path, os.path.join(backup_path, 'libwidevinecdm.so'))
             return True
 
         log('Failed to find Widevine CDM binary in Chrome OS image.')
@@ -845,7 +909,12 @@ class Helper:
 
     def _unzip(self, unzip_dir, file_to_unzip=None):
         ''' Unzip files to specified path '''
+        import xbmcvfs
+
         ret = False
+
+        if not xbmcvfs.exists(unzip_dir):
+            xbmcvfs.mkdirs(unzip_dir)
 
         import zipfile
         zip_obj = zipfile.ZipFile(self._download_path)
@@ -987,3 +1056,35 @@ class Helper:
 
         log('\n{info}'.format(info=kodi_to_ascii(text)), level=2)
         textviewer(localize(30901), text)
+
+    def rollback_libwv(self):
+        """Rollback lib to a version specified by the user"""
+        backup_path = self._backup_path()
+        versions = os.listdir(backup_path)
+
+        if 'x86' in self._arch():
+            show_versions = versions
+        else:
+            show_versions = []
+
+            for version in versions:
+                lib_version = self._get_lib_version(os.path.join(backup_path, version, config.WIDEVINE_CDM_FILENAME[system_os()]))
+                show_versions.append('{}    ({})'.format(lib_version, version))
+
+        if not show_versions:
+            notification(localize(30004), localize(30056))
+            return
+
+        if 'x86' in self._arch():
+            installed_version = self._load_widevine_config()['version']
+        else:
+            installed_version = self._select_best_chromeos_image(self._load_widevine_config())['version']
+        del show_versions[show_versions.index(installed_version)]
+
+        version = select_dialog(localize(30057), show_versions)
+        if version != -1:
+            log('Rollback to version {version}', version=versions[version])
+            self._install_cdm_from_backup(versions[version])
+            notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
+
+        return

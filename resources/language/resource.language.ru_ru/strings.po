@@ -227,7 +227,7 @@ msgstr "отключен"
 
 msgctxt "#30055"
 msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
-msgstr ""
+msgstr "На разделе с временым каталогом недостаточно свободного места. Хотите выбрать другой раздел для работы с Chrome OS Recovery Image (например, USB)?"
 
 
 ### INFORMATION DIALOG
@@ -279,7 +279,7 @@ msgstr "Пожалуйста, о проблемах сообщайте сюда:
 ### SETTINGS
 msgctxt "#30900"
 msgid "Expert"
-msgstr ""
+msgstr "Эксперт"
 
 msgctxt "#30901"
 msgid "InputStream Helper information"
@@ -295,11 +295,11 @@ msgstr "[I]При отключении возможны проблемы с за
 
 msgctxt "#30905"
 msgid "Update frequency in days"
-msgstr ""
+msgstr "Частота обновления в днях"
 
 msgctxt "#30907"
 msgid "Temporary download directory"
-msgstr ""
+msgstr "Временный каталог загрузки"
 
 msgctxt "#30909"
 msgid "(Re)install Widevine CDM library..."

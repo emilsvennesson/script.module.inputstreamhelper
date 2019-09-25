@@ -586,7 +586,8 @@ class Helper:
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
         if yesno_dialog(localize(30001),  # Due to distributing issues, this takes a long time
-                        localize(30006, diskspace=self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
+                        localize(30006, diskspace=self._sizeof_fmt(required_diskspace)),
+                        autoanswer=True) and self._widevine_eula():
             if system_os() != 'Linux':
                 ok_dialog(localize(30004), localize(30019, os=system_os()))
                 return False
@@ -614,7 +615,7 @@ class Helper:
 
             if os.getuid() != 0 and not yesno_dialog(localize(30001),  # Ask for permission to run cmds as root
                                                      localize(30030, cmds=', '.join(root_cmds)),
-                                                     nolabel=localize(30028), yeslabel=localize(30027)):
+                                                     nolabel=localize(30028), yeslabel=localize(30027), autoanswer=True):
                 return False
 
             # Clean up any remaining mounts
@@ -720,7 +721,7 @@ class Helper:
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log('There is an update available for {component}', component=component)
-            if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
+            if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034), autoanswer=True):
                 self.install_widevine()
             else:
                 log('User declined to update {component}.', component=component)
@@ -745,7 +746,7 @@ class Helper:
                 with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
                     eula = file_obj.read().decode().strip().replace('\n', ' ')
 
-        return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
+        return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027), autoanswer=True)  # Widevine CDM EULA
 
     def _extract_widevine_from_img(self):
         ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
@@ -887,7 +888,7 @@ class Helper:
         if self._has_widevine():
             return self._check_widevine()
 
-        if yesno_dialog(localize(30041), localize(30002), nolabel=localize(30028), yeslabel=localize(30038)):  # Widevine required
+        if yesno_dialog(localize(30041), localize(30002), nolabel=localize(30028), yeslabel=localize(30038), autoanswer=True):  # Widevine required
             return self.install_widevine()
 
         return False

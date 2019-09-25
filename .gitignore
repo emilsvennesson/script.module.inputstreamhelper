@@ -5,6 +5,7 @@ __pycache__/
 *.py[cod]
 test/cdm/
 test/userdata/addon_settings.json
+test/userdata/addon_data/
 test/userdata/cdm/
 test/userdata/tmp/
 

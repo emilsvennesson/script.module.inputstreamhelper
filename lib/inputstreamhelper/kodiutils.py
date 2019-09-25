@@ -4,7 +4,6 @@
 ''' Implements Kodi Helper functions '''
 from __future__ import absolute_import, division, unicode_literals
 import xbmc
-from xbmcgui import Dialog
 from xbmcaddon import Addon
 from .unicodehelper import from_unicode, to_unicode
 
@@ -32,6 +31,52 @@ def has_socks():
 
     # Return the stored value
     return has_socks.installed
+
+
+def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):  # pylint: disable=invalid-name,redefined-builtin
+    ''' Show a Kodi browseSingle dialog '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().browseSingle(type=type, heading=heading, shares=shares, mask=mask, useThumbs=useThumbs, treatAsFolder=treatAsFolder, defaultt=defaultt)
+
+
+def notification(heading='', message='', icon='info', time=4000):
+    ''' Show a Kodi notification '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().notification(heading=heading, message=message, icon=icon, time=time)
+
+
+def ok_dialog(heading='', message=''):
+    ''' Show Kodi's OK dialog '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().ok(heading=heading, line1=message)
+
+
+def progress_dialog():
+    ''' Show Kodi's Progress dialog '''
+    from xbmcgui import DialogProgress
+    return DialogProgress()
+
+
+def textviewer(heading='', text='', usemono=False):
+    ''' Show a Kodi textviewer dialog '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().textviewer(heading=heading, text=text, usemono=usemono)
+
+
+def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=0):
+    ''' Show Kodi's Yes/No dialog '''
+    from xbmcgui import Dialog
+    if not heading:
+        heading = ADDON.getAddonInfo('name')
+    return Dialog().yesno(heading=heading, line1=message, nolabel=nolabel, yeslabel=yeslabel, autoclose=autoclose)
 
 
 def localize(string_id, **kwargs):
@@ -82,7 +127,7 @@ def get_proxies():
     if httpproxytype != 0 and not socks_supported:
         # Only open the dialog the first time (to avoid multiple popups)
         if socks_supported is None:
-            Dialog().ok('', localize(30042))  # Requires PySocks
+            ok_dialog('', localize(30042))  # Requires PySocks
         return None
 
     proxy_types = ['http', 'socks4', 'socks4a', 'socks5', 'socks5h']

@@ -5,6 +5,7 @@ disable=
     import-outside-toplevel,
     line-too-long,
     old-style-class,
+    too-many-arguments,
     too-many-branches,
     too-many-lines,
     too-many-return-statements,

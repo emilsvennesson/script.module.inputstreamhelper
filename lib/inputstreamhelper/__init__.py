@@ -952,7 +952,7 @@ class Helper:
         wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
         wv_info = [localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated),
                    localize(30822, path=self._ia_cdm_path())]
-        if platform == 'arm':
+        if self._arch() in ('arm', 'arm64'):
             wv_info.append(localize(30823, version=get_setting('chromeos_version')))
 
         text = (localize(30800) + "\n - "

@@ -68,7 +68,8 @@ zip: clean
 
 clean:
 	@echo -e "$(white)=$(blue) Cleaning up$(reset)"
-	find . test/ -name '*.pyc' -type f -delete
+	find . -name '*.pyc' -type f -delete
+	find . -name '*.pyo' -type f -delete
 	find . -name '__pycache__' -type d -delete
 	find test/userdata/ -mindepth 1 -not -name '*settings.json' -delete
-	rm -rf .pytest_cache/ .tox/ *.log
+	rm -rf .pytest_cache/ .tox/ *.log lib/inputstreamhelper.egg-info/

@@ -1,29 +1,10 @@
 # -*- coding: utf-8 -*-
 ''' Implements the main InputStream Helper class '''
 from __future__ import absolute_import, division, unicode_literals
-
 import os
-import platform
-import json
-import subprocess
-import shutil
-from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
-from datetime import datetime, timedelta
-
-try:  # Python 3
-    from urllib.error import HTTPError
-    from urllib.request import build_opener, install_opener, ProxyHandler, urlopen
-except ImportError:  # Python 2
-    from urllib2 import build_opener, HTTPError, install_opener, ProxyHandler, urlopen
-
 from inputstreamhelper import config
-
-import xbmc
-from xbmcaddon import Addon
-import xbmcvfs
 from .kodiutils import (browsesingle, execute_jsonrpc, get_addon_info, get_proxies, get_setting, kodi_to_ascii, localize, log,
                         notification, ok_dialog, progress_dialog, set_setting, textviewer, translate_path, yesno_dialog)
-from .unicodehelper import to_unicode
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -40,9 +21,11 @@ def system_os():
 
     # If it wasn't stored before, get the correct value
     if not hasattr(system_os, 'name'):
-        if xbmc.getCondVisibility('system.platform.android'):
+        from xbmc import getCondVisibility
+        if getCondVisibility('system.platform.android'):
             system_os.name = 'Android'
         else:
+            import platform
             system_os.name = platform.system()
 
     # Return the stored value
@@ -62,6 +45,7 @@ class Helper:
         self.protocol = protocol
         self.drm = drm
 
+        import platform
         log('Platform information: {platform}', platform=platform.uname())
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
@@ -76,7 +60,13 @@ class Helper:
             self.drm = config.DRM_SCHEMES[drm]
 
         # Add proxy support to HTTP requests
-        install_opener(build_opener(ProxyHandler(get_proxies())))
+        proxies = get_proxies()
+        if proxies:
+            try:  # Python 3
+                from urllib.request import build_opener, install_opener, ProxyHandler
+            except ImportError:  # Python 2
+                from urllib2 import build_opener, install_opener, ProxyHandler
+            install_opener(build_opener(ProxyHandler(proxies)))
 
     def __repr__(self):
         ''' String representation of Helper class '''
@@ -91,31 +81,36 @@ class Helper:
     @classmethod
     def _temp_path(cls):
         ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
+        from xbmcvfs import exists, mkdirs
         temp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
-        if not xbmcvfs.exists(temp_path):
-            xbmcvfs.mkdirs(temp_path)
+        if not exists(temp_path):
+            mkdirs(temp_path)
 
         return temp_path
 
     @classmethod
     def _mnt_path(cls):
         ''' Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt '''
+        from xbmcvfs import exists, mkdir
         mnt_path = os.path.join(cls._temp_path(), 'mnt')
-        if not xbmcvfs.exists(mnt_path):
-            xbmcvfs.mkdir(mnt_path)
+        if not exists(mnt_path):
+            mkdir(mnt_path)
 
         return mnt_path
 
     @classmethod
     def _ia_cdm_path(cls):
         ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
+        from xbmcaddon import Addon
         try:
             addon = Addon('inputstream.adaptive')
         except RuntimeError:
             return None
+
         cdm_path = translate_path(addon.getSetting('DECRYPTERPATH'))
-        if not xbmcvfs.exists(cdm_path):
-            xbmcvfs.mkdir(cdm_path)
+        from xbmcvfs import exists, mkdir
+        if not exists(cdm_path):
+            mkdir(cdm_path)
 
         return cdm_path
 
@@ -129,6 +124,7 @@ class Helper:
     @classmethod
     def _load_widevine_config(cls):
         ''' Load the widevine or recovery config in JSON format '''
+        import json
         with open(cls._widevine_config_path(), 'r') as config_file:
             return json.loads(config_file.read())
 
@@ -141,7 +137,8 @@ class Helper:
 
         if cls._ia_cdm_path():
             widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
-            if xbmcvfs.exists(widevine_path):
+            from xbmcvfs import exists
+            if exists(widevine_path):
                 return widevine_path
 
         return False
@@ -149,12 +146,14 @@ class Helper:
     @classmethod
     def _kodi_version(cls):
         ''' Return the current Kodi version '''
-        version = xbmc.getInfoLabel('System.BuildVersion')
+        from xbmc import getInfoLabel
+        version = getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
 
     @classmethod
     def _arch(cls):
         """Map together and return the system architecture."""
+        import platform
         arch = platform.machine()
         if arch == 'aarch64':
             import struct
@@ -189,6 +188,7 @@ class Helper:
     def _cmd_exists(cmd):
         """Check whether cmd exists on system."""
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+        import subprocess
         return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
     def _update_temp_path(self, new_temp_path):
@@ -197,6 +197,7 @@ class Helper:
 
         set_setting('temp_path', new_temp_path)
         if old_temp_path != self._temp_path():
+            import shutil
             shutil.move(old_temp_path, self._temp_path())
 
     def _helper_disabled(self):
@@ -226,11 +227,13 @@ class Helper:
 
     def _inputstream_version(self):
         ''' Return the requested inputstream version '''
+        from xbmcaddon import Addon
         try:
             addon = Addon(self.inputstream_addon)
         except RuntimeError:
             return None
 
+        from .unicodehelper import to_unicode
         return to_unicode(addon.getAddonInfo('version'))
 
     @staticmethod
@@ -265,6 +268,7 @@ class Helper:
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
         ''' Run subprocess command and return if it succeeds as a bool '''
+        import subprocess
         output = ''
         success = False
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
@@ -345,6 +349,13 @@ class Helper:
     @staticmethod
     def _http_request(url):
         ''' Perform an HTTP request and return request '''
+
+        try:  # Python 3
+            from urllib.error import HTTPError
+            from urllib.request import urlopen
+        except ImportError:  # Python 2
+            from urllib2 import HTTPError, urlopen
+
         log('Request URL: {url}', url=url)
         filename = url.split('/')[-1]
 
@@ -442,6 +453,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
             log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
             ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
@@ -480,6 +492,7 @@ class Helper:
                 continue
 
             # Select the newest version
+            from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
             if LooseVersion(device['version']) > LooseVersion(best['version']):
                 log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',  # pylint: disable=invalid-format-index
                     device=device,
@@ -505,6 +518,7 @@ class Helper:
             versions = self._http_get(url)
             return versions.split()[-1]
 
+        from datetime import datetime
         import time
         set_setting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
@@ -643,6 +657,7 @@ class Helper:
                     progress.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
+                        import json
                         set_setting('chromeos_version', arm_device['version'])
                         with open(self._widevine_config_path(), 'w') as config_file:
                             config_file.write(json.dumps(devices, indent=4))
@@ -673,10 +688,11 @@ class Helper:
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
+        from xbmcvfs import delete, exists
         widevinecdm = self._widevine_path()
-        if widevinecdm and xbmcvfs.exists(widevinecdm):
+        if widevinecdm and exists(widevinecdm):
             log('Remove Widevine CDM at {path}', path=widevinecdm)
-            xbmcvfs.delete(widevinecdm)
+            delete(widevinecdm)
             notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
             return True
         notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
@@ -691,6 +707,7 @@ class Helper:
         addon_version = get_addon_info('version')
 
         # Compare versions
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(addon_version) > LooseVersion(settings_version):
             # New version found, save addon_version to settings
             set_setting('version', addon_version)
@@ -702,6 +719,7 @@ class Helper:
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
         last_update = get_setting('last_update')
         if last_update and not self._first_run():
+            from datetime import datetime, timedelta
             last_update_dt = datetime.fromtimestamp(float(get_setting('last_update')))
             if last_update_dt + timedelta(days=int(get_setting('update_frequency', '14'))) >= datetime.utcnow():
                 log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
@@ -718,6 +736,7 @@ class Helper:
         log('Latest {component} version is {version}', component=component, version=latest_version)
         log('Current {component} version installed is {version}', component=component, version=current_version)
 
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log('There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
@@ -749,6 +768,7 @@ class Helper:
 
     def _extract_widevine_from_img(self):
         ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
+        import shutil
         for root, dirs, files in os.walk(str(self._mnt_path())):  # pylint: disable=unused-variable
             if str('libwidevinecdm.so') not in files:
                 continue
@@ -854,6 +874,7 @@ class Helper:
 
     def _cleanup(self):
         ''' Clean up function after Widevine CDM installation '''
+        import shutil
         self._unmount()
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
@@ -870,6 +891,7 @@ class Helper:
 
     def _supports_hls(self):
         """Return if HLS support is available in inputstream.adaptive."""
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
 
@@ -894,9 +916,11 @@ class Helper:
 
     def _install_inputstream(self):
         """Install inputstream addon."""
+        from xbmc import executebuiltin
+        from xbmcaddon import Addon
         try:
             # See if there's an installed repo that has it
-            xbmc.executebuiltin('InstallAddon({})'.format(self.inputstream_addon), wait=True)
+            executebuiltin('InstallAddon({})'.format(self.inputstream_addon), wait=True)
 
             # Check if InputStream add-on exists!
             Addon('{}'.format(self.inputstream_addon))
@@ -934,7 +958,6 @@ class Helper:
 
     def info_dialog(self):
         """ Show an Info box with useful info e.g. for bug reports"""
-
         text = localize(30800) + '\n'  # Kodi information
         text += ' - ' + localize(30801, version=self._kodi_version()) + '\n'
         text += ' - ' + localize(30802, platform=system_os(), arch=self._arch()) + '\n'
@@ -950,6 +973,7 @@ class Helper:
 
         if system_os() != 'Android':
             text += ' - ' + localize(30820) + '\n'  # Widevine information
+            from datetime import datetime
             wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
             text += ' - ' + localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
             text += ' - ' + localize(30822, path=self._ia_cdm_path()) + '\n'
@@ -961,5 +985,5 @@ class Helper:
 
         text += localize(30830, url=config.ISSUE_URL)  # Report issues
 
-        log('\n{info}'.format(info=kodi_to_ascii(text)), level=xbmc.LOGNOTICE)
+        log('\n{info}'.format(info=kodi_to_ascii(text)), level=2)
         textviewer(localize(30901), text)

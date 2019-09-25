@@ -20,9 +20,9 @@ from inputstreamhelper import config
 
 import xbmc
 from xbmcaddon import Addon
-from xbmcgui import Dialog, DialogProgress
 import xbmcvfs
-from .kodiutils import execute_jsonrpc, get_addon_info, get_proxies, get_setting, kodi_to_ascii, localize, log, set_setting, translate_path
+from .kodiutils import (browsesingle, execute_jsonrpc, get_addon_info, get_proxies, get_setting, kodi_to_ascii, localize, log,
+                        notification, ok_dialog, progress_dialog, set_setting, textviewer, translate_path, yesno_dialog)
 from .unicodehelper import to_unicode
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -354,7 +354,7 @@ class Helper:
             if 400 <= req.getcode() < 600:
                 raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
-            Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
+            ok_dialog(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
             return None
         return req
 
@@ -381,8 +381,8 @@ class Helper:
 
         self._download_path = os.path.join(self._temp_path(), filename)
         total_length = float(req.info().get('content-length'))
-        progress_dialog = DialogProgress()
-        progress_dialog.create(localize(30014), message)  # Download in progress
+        progress = progress_dialog()
+        progress.create(localize(30014), message)  # Download in progress
 
         chunk_size = 32 * 1024
         with open(self._download_path, 'wb') as image:
@@ -394,13 +394,13 @@ class Helper:
                 image.write(chunk)
                 size += len(chunk)
                 percent = int(size * 100 / total_length)
-                if progress_dialog.iscanceled():
-                    progress_dialog.close()
+                if progress.iscanceled():
+                    progress.close()
                     req.close()
                     return False
-                progress_dialog.update(percent)
+                progress.update(percent)
 
-        progress_dialog.close()
+        progress.close()
         return True
 
     def _has_inputstream(self):
@@ -434,22 +434,22 @@ class Helper:
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
             log('Unsupported Widevine architecture found: {arch}', arch=self._arch())
-            Dialog().ok(localize(30004), localize(30007))  # Widevine not available on this architecture
+            ok_dialog(localize(30004), localize(30007))  # Widevine not available on this architecture
             return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:
             log('Unsupported Widevine OS found: {os}', os=system_os())
-            Dialog().ok(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
+            ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
         if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
             log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
-            Dialog().ok(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
+            ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
 
         if 'WindowsApps' in translate_path('special://xbmcbin/'):  # uwp is not supported
             log('Unsupported UWP Kodi version detected.')
-            Dialog().ok(localize(30004), localize(30012))  # Windows Store Kodi falls short
+            ok_dialog(localize(30004), localize(30012))  # Windows Store Kodi falls short
             return False
 
         return True
@@ -516,7 +516,7 @@ class Helper:
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
             log('We could not find an ARM device in recovery.conf')
-            Dialog().ok(localize(30004), localize(30005))
+            ok_dialog(localize(30004), localize(30005))
             return ''
         return arm_device['version']
 
@@ -549,12 +549,12 @@ class Helper:
 
         downloaded = self._http_download(url)
         if downloaded:
-            progress_dialog = DialogProgress()
-            progress_dialog.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
-            progress_dialog.update(94, line1=localize(30049))  # Installing Widevine CDM
+            progress = progress_dialog()
+            progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+            progress.update(94, line1=localize(30049))  # Installing Widevine CDM
             self._unzip(self._ia_cdm_path())
 
-            progress_dialog.update(97, line1=localize(30050))  # Finishing
+            progress.update(97, line1=localize(30050))  # Finishing
             self._cleanup()
             if not self._widevine_eula():
                 return False
@@ -565,13 +565,13 @@ class Helper:
                 os.rename(os.path.join(self._ia_cdm_path(), config.WIDEVINE_MANIFEST_FILE), self._widevine_config_path())
                 wv_check = self._check_widevine()
                 if wv_check:
-                    progress_dialog.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
-                    Dialog().notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
-                progress_dialog.close()
+                    progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
+                    notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
+                progress.close()
                 return wv_check
 
-            progress_dialog.close()
-            Dialog().ok(localize(30004), localize(30005))  # An error occurred
+            progress.close()
+            ok_dialog(localize(30004), localize(30005))  # An error occurred
 
         return False
 
@@ -582,39 +582,40 @@ class Helper:
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
             log('We could not find an ARM device in recovery.conf')
-            Dialog().ok(localize(30004), localize(30005))
+            ok_dialog(localize(30004), localize(30005))
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
-        if Dialog().yesno(localize(30001),  # Due to distributing issues, this takes a long time
-                          localize(30006, diskspace=self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
+        if yesno_dialog(localize(30001),  # Due to distributing issues, this takes a long time
+                        localize(30006, diskspace=self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
             if system_os() != 'Linux':
-                Dialog().ok(localize(30004), localize(30019, os=system_os()))
+                ok_dialog(localize(30004), localize(30019, os=system_os()))
                 return False
 
             while required_diskspace >= self._diskspace():
-                if Dialog().yesno(localize(30004), localize(30055)):  # Not enough space, alternative path?
-                    self._update_temp_path(Dialog().browseSingle(3, localize(30909), 'files'))  # Temporary path
+                if yesno_dialog(localize(30004), localize(30055)):  # Not enough space, alternative path?
+                    self._update_temp_path(browsesingle(3, localize(30909), 'files'))  # Temporary path
                     continue
 
-                Dialog().ok(localize(30004),  # Not enough free disk space
-                            localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
+                ok_dialog(localize(30004),  # Not enough free disk space
+                          localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
                 return False
 
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
-                Dialog().ok(localize(30004), localize(30020, command1='fdisk', command2='parted'))  # Commands are missing
+                ok_dialog(localize(30004), localize(30020, command1='fdisk', command2='parted'))  # Commands are missing
                 return False
 
             if not self._cmd_exists('mount'):
-                Dialog().ok(localize(30004), localize(30021, command='mount'))  # Mount command is missing
+                ok_dialog(localize(30004), localize(30021, command='mount'))  # Mount command is missing
                 return False
 
             if not self._cmd_exists('losetup'):
-                Dialog().ok(localize(30004), localize(30021, command='losetup'))  # Losetup command is missing
+                ok_dialog(localize(30004), localize(30021, command='losetup'))  # Losetup command is missing
                 return False
 
-            if os.getuid() != 0:  # ask for permissions to run cmds as root
-                if not Dialog().yesno(localize(30001), localize(30030, cmds=', '.join(root_cmds)), yeslabel=localize(30027), nolabel=localize(30028)):
-                    return False
+            if os.getuid() != 0 and not yesno_dialog(localize(30001),  # Ask for permission to run cmds as root
+                                                     localize(30030, cmds=', '.join(root_cmds)),
+                                                     nolabel=localize(30028), yeslabel=localize(30027)):
+                return False
 
             # Clean up any remaining mounts
             self._unmount()
@@ -622,12 +623,12 @@ class Helper:
             url = arm_device['url']
             downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
             if downloaded:
-                progress_dialog = DialogProgress()
-                progress_dialog.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+                progress = progress_dialog()
+                progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
                 bin_filename = url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
 
-                progress_dialog.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
+                progress.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
                 success = [
                     self._unzip(self._temp_path(), bin_filename),
                     self._check_loop(),
@@ -636,10 +637,10 @@ class Helper:
                     self._mnt_loop_dev(),
                 ]
                 if all(success):
-                    progress_dialog.update(91, line1=localize(30048))  # Extracting Widevine CDM
+                    progress.update(91, line1=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img()
-                    progress_dialog.update(94, line1=localize(30049))  # Installing Widevine CDM
-                    progress_dialog.update(97, line1=localize(30050))  # Finishing
+                    progress.update(94, line1=localize(30049))  # Installing Widevine CDM
+                    progress.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         set_setting('chromeos_version', arm_device['version'])
@@ -647,16 +648,16 @@ class Helper:
                             config_file.write(json.dumps(devices, indent=4))
                         wv_check = self._check_widevine()
                         if wv_check:
-                            progress_dialog.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
-                            Dialog().notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
-                        progress_dialog.close()
+                            progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
+                            notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
+                        progress.close()
                         return wv_check
                 else:
-                    progress_dialog.update(100, line1=localize(30050))  # Finishing
+                    progress.update(100, line1=localize(30050))  # Finishing
                     self._cleanup()
 
-                progress_dialog.close()
-                Dialog().ok(localize(30004), localize(30005))  # An error occurred
+                progress.close()
+                ok_dialog(localize(30004), localize(30005))  # An error occurred
 
         return False
 
@@ -676,9 +677,9 @@ class Helper:
         if widevinecdm and xbmcvfs.exists(widevinecdm):
             log('Remove Widevine CDM at {path}', path=widevinecdm)
             xbmcvfs.delete(widevinecdm)
-            Dialog().notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
+            notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
             return True
-        Dialog().notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
+        notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
         return False
 
     @staticmethod
@@ -719,7 +720,7 @@ class Helper:
 
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log('There is an update available for {component}', component=component)
-            if Dialog().yesno(localize(30040), localize(30033), yeslabel=localize(30034), nolabel=localize(30028)):
+            if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
                 self.install_widevine()
             else:
                 log('User declined to update {component}.', component=component)
@@ -744,7 +745,7 @@ class Helper:
                 with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
                     eula = file_obj.read().decode().strip().replace('\n', ' ')
 
-        return Dialog().yesno(localize(30026), eula, yeslabel=localize(30027), nolabel=localize(30028))  # Widevine CDM EULA
+        return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
 
     def _extract_widevine_from_img(self):
         ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
@@ -793,7 +794,7 @@ class Helper:
             import struct
             if struct.calcsize('P') * 8 == 64:
                 log('ARM64 ldd check failed. User needs 32-bit userspace.')
-                Dialog().ok(localize(30004), localize(30039))  # Widevine not available on ARM64
+                ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
 
         log('Failed to check for missing Widevine libraries.')
         return None
@@ -805,18 +806,18 @@ class Helper:
 
         if not os.path.exists(self._widevine_config_path()):
             log('Widevine or recovery config is missing. Reinstall is required.')
-            Dialog().ok(localize(30001), localize(30031))  # An update of Widevine is required
+            ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
             if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
                 log('Widevine/system arch mismatch. Reinstall is required.')
-                Dialog().ok(localize(30001), localize(30031))  # An update of Widevine is required
+                ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()
 
         if self._missing_widevine_libs():
-            Dialog().ok(localize(30004), localize(30032, libs=', '.join(self._missing_widevine_libs())))  # Missing libraries
+            ok_dialog(localize(30004), localize(30032, libs=', '.join(self._missing_widevine_libs())))  # Missing libraries
             return False
 
         self._update_widevine()
@@ -860,7 +861,7 @@ class Helper:
             if unattach_output['success']:
                 self._loop_dev = False
         if self._modprobe_loop:
-            Dialog().notification(localize(30035), localize(30036))  # Unload by hand in CLI
+            notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not self._has_widevine():
             shutil.rmtree(self._ia_cdm_path())
 
@@ -886,7 +887,7 @@ class Helper:
         if self._has_widevine():
             return self._check_widevine()
 
-        if Dialog().yesno(localize(30041), localize(30002), yeslabel=localize(30038), nolabel=localize(30028)):  # Widevine required
+        if yesno_dialog(localize(30041), localize(30002), nolabel=localize(30028), yeslabel=localize(30038)):  # Widevine required
             return self.install_widevine()
 
         return False
@@ -915,18 +916,18 @@ class Helper:
         if not self._has_inputstream():
             # Try to install InputStream add-on
             if not self._install_inputstream():
-                Dialog().ok(localize(30004), localize(30008, addon=self.inputstream_addon))  # inputstream is missing on system
+                ok_dialog(localize(30004), localize(30008, addon=self.inputstream_addon))  # inputstream is missing on system
                 return False
         elif not self._inputstream_enabled():
-            ret = Dialog().yesno(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
+            ret = yesno_dialog(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
             if ret:
                 self._enable_inputstream()
             return False
         log('{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
 
         if self.protocol == 'hls' and not self._supports_hls():
-            Dialog().ok(localize(30004),  # HLS Minimum version is needed
-                        localize(30017, addon=self.inputstream_addon, version=config.HLS_MINIMUM_IA_VERSION))
+            ok_dialog(localize(30004),  # HLS Minimum version is needed
+                      localize(30017, addon=self.inputstream_addon, version=config.HLS_MINIMUM_IA_VERSION))
             return False
 
         return self._check_drm()
@@ -961,4 +962,4 @@ class Helper:
         text += localize(30830, url=config.ISSUE_URL)  # Report issues
 
         log('\n{info}'.format(info=kodi_to_ascii(text)), level=xbmc.LOGNOTICE)
-        Dialog().textviewer(localize(30901), text)
+        textviewer(localize(30901), text)

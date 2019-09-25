@@ -107,11 +107,11 @@ msgstr "Теперь установка должна распаковывать,
 
 msgctxt "#30025"
 msgid "Acquiring EULA."
-msgstr ""
+msgstr "Получение EULA."
 
 msgctxt "#30026"
 msgid "Widevine CDM EULA"
-msgstr ""
+msgstr "Widevine CDM EULA"
 
 msgctxt "#30027"
 msgid "I accept"

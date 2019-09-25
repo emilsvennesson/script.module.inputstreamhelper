@@ -2,6 +2,7 @@
 disable=
     bad-option-value,
     duplicate-code,
+    import-outside-toplevel,
     line-too-long,
     old-style-class,
     too-many-branches,

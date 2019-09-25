@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import xbmc
 from xbmcgui import Dialog
 from xbmcaddon import Addon
-from.unicodehelper import from_unicode, to_unicode
+from .unicodehelper import from_unicode, to_unicode
 
 ADDON = Addon('script.module.inputstreamhelper')
 

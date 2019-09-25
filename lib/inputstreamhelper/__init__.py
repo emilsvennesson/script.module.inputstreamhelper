@@ -601,10 +601,10 @@ class Helper:
                 if Dialog().yesno(localize(30004), localize(30055)):  # Not enough space, alternative path?
                     self._update_temp_path(Dialog().browseSingle(3, localize(30909), 'files'))  # Temporary path
                     continue
-                else:
-                    Dialog().ok(localize(30004),  # Not enough free disk space
-                                localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
-                    return False
+
+                Dialog().ok(localize(30004),  # Not enough free disk space
+                            localize(30018, diskspace=self._sizeof_fmt(required_diskspace)))
+                return False
 
             if not self._cmd_exists('fdisk') and not self._cmd_exists('parted'):
                 Dialog().ok(localize(30004), localize(30020, command1='fdisk', command2='parted'))  # Commands are missing

@@ -261,7 +261,7 @@ msgstr "[B]Widevine informatie[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
-msgstr "Widevine versie: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
+msgstr "Widevine versie: [B]{version}[/B] [COLOR gray](laatst geüpdate op [B]{date}[/B])[/COLOR]"
 
 msgctxt "#30822"
 msgid "Widevine CDM path: [B]{path}[/B]"

@@ -939,28 +939,31 @@ class Helper:
 
     def info_dialog(self):
         """ Show an Info box with useful info e.g. for bug reports"""
+
+        text = localize(30800) + '\n'  # Kodi information
+        text += ' - ' + localize(30801, version=self._kodi_version()) + '\n'
+        text += ' - ' + localize(30802, platform=system_os(), arch=self._arch()) + '\n'
+        text += '\n'
+
+        text += localize(30810) + '\n'  # InputStream information
         disabled_str = ' ({disabled})'.format(disabled=localize(30054))
-
-        kodi_info = [localize(30801, version=self._kodi_version()),
-                     localize(30802, platform=system_os(), arch=self._arch())]
-
         ishelper_state = disabled_str if get_setting('disabled', 'false') != 'false' else ''
         istream_state = disabled_str if not self._inputstream_enabled() else ''
-        is_info = [localize(30811, version=get_addon_info('version'), state=ishelper_state),
-                   localize(30812, version=self._inputstream_version(), state=istream_state)]
+        text += ' - ' + localize(30811, version=get_addon_info('version'), state=ishelper_state) + '\n'
+        text += ' - ' + localize(30812, version=self._inputstream_version(), state=istream_state) + '\n'
+        text += '\n'
 
-        wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
-        wv_info = [localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated),
-                   localize(30822, path=self._ia_cdm_path())]
-        if self._arch() in ('arm', 'arm64'):
-            wv_info.append(localize(30823, version=get_setting('chromeos_version')))
+        if system_os() != 'Android':
+            text += ' - ' + localize(30820) + '\n'  # Widevine information
+            wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
+            text += ' - ' + localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
+            text += ' - ' + localize(30822, path=self._ia_cdm_path()) + '\n'
 
-        text = (localize(30800) + "\n - "
-                + "\n - ".join(kodi_info) + "\n\n"
-                + localize(30810) + "\n - "
-                + "\n - ".join(is_info) + "\n\n"
-                + localize(30820) + "\n - "
-                + "\n - ".join(wv_info) + "\n\n"
-                + localize(30830, url=config.ISSUE_URL))
+            if self._arch() in ('arm', 'arm64'):  # Chrome OS version
+                text += ' - ' + localize(30823, version=get_setting('chromeos_version')) + '\n'
+
+            text += '\n'
+
+        text += localize(30830, url=config.ISSUE_URL)  # Report issues
 
         Dialog().textviewer(localize(30901), text)

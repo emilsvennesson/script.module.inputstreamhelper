@@ -24,7 +24,7 @@ import xbmc
 from xbmcaddon import Addon
 from xbmcgui import Dialog, DialogProgress
 import xbmcvfs
-from .kodiutils import execute_jsonrpc, get_addon_info, get_proxies, get_setting, localize, log, set_setting, translate_path
+from .kodiutils import execute_jsonrpc, get_addon_info, get_proxies, get_setting, kodi_to_ascii, localize, log, set_setting, translate_path
 from .unicodehelper import to_unicode
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -966,4 +966,5 @@ class Helper:
 
         text += localize(30830, url=config.ISSUE_URL)  # Report issues
 
+        log('\n{info}'.format(info=kodi_to_ascii(text)), level=xbmc.LOGNOTICE)
         Dialog().textviewer(localize(30901), text)

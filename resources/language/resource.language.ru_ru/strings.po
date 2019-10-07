@@ -260,14 +260,18 @@ msgid "[B]Widevine information[/B]"
 msgstr "[B]Информация о Widevine[/B]"
 
 msgctxt "#30821"
+msgid "Widevine version: [B]Built-in[/B]"
+msgstr ""
+
+msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
 msgstr "Версия Widevine: [B]{version}[/B] [COLOR gray](последнее обновление [B]{date}[/B])[/COLOR]"
 
-msgctxt "#30822"
+msgctxt "#30823"
 msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Путь к Widevine CDM: [B]{path}[/B]"
 
-msgctxt "#30823"
+msgctxt "#30824"
 msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Версия Chrome OS: [B]{version}[/B]"
 

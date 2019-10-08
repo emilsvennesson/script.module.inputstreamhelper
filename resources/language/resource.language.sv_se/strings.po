@@ -260,7 +260,7 @@ msgid "[B]Widevine information[/B]"
 msgstr "[B]Widevine-information[/B]"
 
 msgctxt "#30821"
-msgid "Widevine version: [B]Built-in[/B]"
+msgid "Widevine version: [B]Built into Android[/B]"
 msgstr ""
 
 msgctxt "#30822"

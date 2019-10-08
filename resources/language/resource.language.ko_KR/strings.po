@@ -268,14 +268,18 @@ msgid "[B]Widevine information[/B]"
 msgstr "[B]Widevine 정보[/B]"
 
 msgctxt "#30821"
+msgid "Widevine version: [B]Built into Android[/B]"
+msgstr ""
+
+msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
 msgstr "Widevine 버전: [B]{version}[/B] [COLOR gray]([B]{date}[/B]에 마지막으로 업데이트)[/COLOR]"
 
-msgctxt "#30822"
+msgctxt "#30823"
 msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Widevine CDM 경로: [B]{path}[/B]"
 
-msgctxt "#30823"
+msgctxt "#30824"
 msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Chrome OS 버전: [B]{version}[/B]"
 

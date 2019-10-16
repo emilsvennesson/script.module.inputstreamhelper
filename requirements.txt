@@ -3,4 +3,5 @@ kodi-addon-checker
 polib
 proxy.py==0.3
 pylint
+setuptools >= 41
 tox-travis

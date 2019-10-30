@@ -237,12 +237,14 @@ class Helper:
 
     @staticmethod
     def _get_lib_version(path):
-        if path:
-            import re
-            with open(path, 'rb') as library:
-                match = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(library.read()))
-            return match.group(0).lstrip('0')
-        return '(Not found)'
+        if not path:
+            return '(Not found)'
+        import re
+        with open(path, 'rb') as library:
+            match = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(library.read()))
+        if not match:
+            return '(Undetected)'
+        return match.group(0).lstrip('0')
 
     def _chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""

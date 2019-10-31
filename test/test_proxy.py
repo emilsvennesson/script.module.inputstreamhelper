@@ -5,6 +5,7 @@
 # pylint: disable=duplicate-code,invalid-name,missing-docstring,protected-access
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 import unittest
 import platform
 import inputstreamhelper
@@ -14,13 +15,18 @@ xbmcaddon = __import__('xbmcaddon')
 xbmcgui = __import__('xbmcgui')
 xbmcvfs = __import__('xbmcvfs')
 
-xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = True
-xbmc.GLOBAL_SETTINGS['network.httpproxytype'] = 0
-xbmc.GLOBAL_SETTINGS['network.httpproxyserver'] = '127.0.0.1'
-xbmc.GLOBAL_SETTINGS['network.httpproxyport'] = '8899'
 
-
+@unittest.skipIf(sys.version_info[0] < 3, 'Skipping proxy tests on Python 2')
 class LinuxProxyTests(unittest.TestCase):
+
+    def setUp(self):
+        xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = True
+        xbmc.GLOBAL_SETTINGS['network.httpproxytype'] = 0
+        xbmc.GLOBAL_SETTINGS['network.httpproxyserver'] = '127.0.0.1'
+        xbmc.GLOBAL_SETTINGS['network.httpproxyport'] = '8899'
+
+    def tearDown(self):
+        xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = False
 
     def test_check_inputstream_mpd(self):
         inputstreamhelper.system_os = lambda: 'Linux'

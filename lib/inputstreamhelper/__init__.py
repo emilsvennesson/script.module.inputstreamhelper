@@ -11,11 +11,9 @@ from distutils.version import LooseVersion  # pylint: disable=import-error,no-na
 from datetime import datetime, timedelta
 
 try:  # Python 3
-    from http.client import BadStatusLine
     from urllib.error import HTTPError
     from urllib.request import build_opener, install_opener, ProxyHandler, urlopen
 except ImportError:  # Python 2
-    from httplib import BadStatusLine
     from urllib2 import build_opener, HTTPError, install_opener, ProxyHandler, urlopen
 
 from inputstreamhelper import config
@@ -348,20 +346,14 @@ class Helper:
         log('Request URL: {url}', url=url)
         filename = url.split('/')[-1]
 
-        for retry in (False, True):
-            try:
-                req = urlopen(url)
-                log('Response code: {code}', code=req.getcode())
-                if 400 <= req.getcode() < 600:
-                    raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
-                break
-            except HTTPError:
-                Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
-                return None
-            except BadStatusLine:
-                if retry:
-                    Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
-                    return None
+        try:
+            req = urlopen(url)
+            log('Response code: {code}', code=req.getcode())
+            if 400 <= req.getcode() < 600:
+                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
+        except HTTPError:
+            Dialog().ok(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
+            return None
         return req
 
     def _http_get(self, url):

@@ -190,8 +190,8 @@ msgid "Uncompressing image..."
 msgstr "De recovery-image wordt uitgepakt..."
 
 msgctxt "#30046"
-msgid "This may take several minutes."
-msgstr "Dit kan enkele minuten duren."
+msgid "This may take several minutes. ({mins:d}:{secs:02d})"
+msgstr "Dit kan enkele minuten duren. ({mins:d}:{secs:02d})"
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"

@@ -6,6 +6,7 @@
 # pylint: disable=invalid-name,too-many-arguments,unused-argument
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+import sys
 from xbmcextra import kodi_to_ansi
 
 
@@ -80,17 +81,19 @@ class DialogProgress:
         ''' A stub constructor for the xbmcgui DialogProgress class '''
         self.percentage = 0
 
-    @staticmethod
-    def close():
+    def close(self):
         ''' A stub implementation for the xbmcgui DialogProgress class close() method '''
+        self.percentage = 0
         print()
+        sys.stdout.flush()
 
-    @staticmethod
-    def create(heading, line1, line2=None, line3=None):
+    def create(self, heading, line1, line2=None, line3=None):
         ''' A stub implementation for the xbmcgui DialogProgress class create() method '''
+        self.percentage = 0
         heading = kodi_to_ansi(heading)
         line1 = kodi_to_ansi(line1)
         print('\033[37;44;1mPROGRESS:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, line1))
+        sys.stdout.flush()
 
     @staticmethod
     def iscanceled():
@@ -100,14 +103,16 @@ class DialogProgress:
         ''' A stub implementation for the xbmcgui DialogProgress class update() method '''
         if (percentage - 5) < self.percentage:
             return
+
         self.percentage = percentage
         line1 = kodi_to_ansi(line1)
         line2 = kodi_to_ansi(line2)
         line3 = kodi_to_ansi(line3)
         if line1 or line2 or line3:
-            print('\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%] \033[37;1m%s\033[39;0m' % (percentage, line1 or line2 or line3))
+            print('\033[1G\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%] \033[37;1m%s\033[39;0m' % (percentage, line1 or line2 or line3), end='')
         else:
             print('\033[1G\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%]\033[39;0m' % (percentage), end='')
+        sys.stdout.flush()
 
 
 class DialogBusy:

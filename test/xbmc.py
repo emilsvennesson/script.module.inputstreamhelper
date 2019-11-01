@@ -152,9 +152,9 @@ def setContent(self, content):
     return
 
 
-def sleep(seconds):
+def sleep(timemillis):
     ''' A reimplementation of the xbmc sleep() function '''
-    time.sleep(seconds)
+    time.sleep(timemillis/1000)
 
 
 def translatePath(path):

@@ -129,6 +129,20 @@ def execute_jsonrpc(payload):
     return json.loads(response)
 
 
-def log(msg, **kwargs):
+def log(msg, level=xbmc.LOGDEBUG, **kwargs):
     ''' InputStream Helper log method '''
-    xbmc.log(msg=from_unicode('[{addon}]: {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=xbmc.LOGDEBUG)
+    xbmc.log(msg=from_unicode('[{addon}]: {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=level)
+
+
+def kodi_to_ascii(string):
+    ''' Convert Kodi format tags to ascii '''
+    if string is None:
+        return None
+    string = string.replace('[B]', '')
+    string = string.replace('[/B]', '')
+    string = string.replace('[I]', '')
+    string = string.replace('[/I]', '')
+    string = string.replace('[COLOR gray]', '')
+    string = string.replace('[COLOR yellow]', '')
+    string = string.replace('[/COLOR]', '')
+    return string

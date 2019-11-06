@@ -49,8 +49,10 @@ def notification(heading='', message='', icon='info', time=4000):
     return Dialog().notification(heading=heading, message=message, icon=icon, time=time)
 
 
-def ok_dialog(heading='', message=''):
+def ok_dialog(heading='', message='', autoanswer=None):
     ''' Show Kodi's OK dialog '''
+    if autoanswer is not None and get_setting('automatic_install') == 'true':
+        return autoanswer
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -71,8 +73,10 @@ def textviewer(heading='', text='', usemono=False):
     return Dialog().textviewer(heading=heading, text=text, usemono=usemono)
 
 
-def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=0):
+def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=0, autoanswer=None):
     ''' Show Kodi's Yes/No dialog '''
+    if autoanswer is not None and get_setting('automatic_install') == 'true':
+        return autoanswer
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')

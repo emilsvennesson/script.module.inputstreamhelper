@@ -74,7 +74,7 @@ WIDEVINE_LICENSE_FILE = 'LICENSE.txt'
 
 WIDEVINE_MANIFEST_FILE = 'manifest.json'
 
-WIDEVINE_CONFIG_NAME = 'widevine_config.json'
+WIDEVINE_CONFIG_NAME = 'manifest.json'
 
 CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
 

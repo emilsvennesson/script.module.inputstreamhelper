@@ -6,6 +6,7 @@
 # pylint: disable=invalid-name
 
 from __future__ import absolute_import, division, print_function, unicode_literals
+from shutil import copyfile
 import os
 
 
@@ -29,6 +30,11 @@ def Stat(path):
             return self._stat.st_mtime
 
     return stat(path)
+
+
+def copy(src, dst):
+    ''' A reimplementation of the xbmcvfs mkdir() function '''
+    return copyfile(src, dst) == dst
 
 
 def delete(path):

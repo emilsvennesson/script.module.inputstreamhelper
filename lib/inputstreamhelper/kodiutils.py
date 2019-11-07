@@ -57,7 +57,7 @@ def ok_dialog(heading='', message=''):
     return Dialog().ok(heading=heading, line1=message)
 
 
-def select_dialog(heading='', opt_list=None, autoclose=False, preselect=None, useDetails=False): # pylint: disable=invalid-name
+def select_dialog(heading='', opt_list=None, autoclose=False, preselect=None, useDetails=False):  # pylint: disable=invalid-name
     ''' Show Kodi's Select dialog '''
     from xbmcgui import Dialog
     if not heading:

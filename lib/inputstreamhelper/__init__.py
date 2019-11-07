@@ -25,8 +25,8 @@ def system_os():
         if getCondVisibility('system.platform.android'):
             system_os.name = 'Android'
         else:
-            import platform
-            system_os.name = platform.system()
+            from platform import system
+            system_os.name = system()
 
     # Return the stored value
     return system_os.name
@@ -45,8 +45,8 @@ class Helper:
         self.protocol = protocol
         self.drm = drm
 
-        import platform
-        log('Platform information: {platform}', platform=platform.uname())
+        from platform import uname
+        log('Platform information: {uname}', uname=uname())
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise InputStreamException('UnsupportedProtocol')
@@ -117,12 +117,10 @@ class Helper:
     @classmethod
     def _backup_path(cls):
         ''' Return the path to the cdm backups '''
-        import xbmcvfs
-
+        from xbmcvfs import exists, mkdir
         path = os.path.join(get_userdata_path(), 'backup')
-        if not xbmcvfs.exists(path):
-            xbmcvfs.mkdir(path)
-
+        if not exists(path):
+            mkdir(path)
         return path
 
     @classmethod
@@ -135,9 +133,9 @@ class Helper:
     @classmethod
     def _load_widevine_config(cls):
         ''' Load the widevine or recovery config in JSON format '''
-        import json
+        from json import loads
         with open(cls._widevine_config_path(), 'r') as config_file:
-            return json.loads(config_file.read())
+            return loads(config_file.read())
 
     @classmethod
     def _widevine_path(cls):
@@ -164,15 +162,15 @@ class Helper:
     @classmethod
     def _arch(cls):
         """Map together and return the system architecture."""
-        import platform
-        arch = platform.machine()
+        from platform import architecture, machine
+        arch = machine()
         if arch == 'aarch64':
             import struct
             if struct.calcsize('P') * 8 == 32:
                 # Detected 64-bit kernel in 32-bit userspace, use 32-bit arm widevine
                 arch = 'arm'
         if arch == 'AMD64':
-            arch_bit = platform.architecture()[0]
+            arch_bit = architecture()[0]
             if arch_bit == '32bit':
                 arch = 'x86'  # else, arch = AMD64
         elif 'armv' in arch:
@@ -208,8 +206,8 @@ class Helper:
 
         set_setting('temp_path', new_temp_path)
         if old_temp_path != self._temp_path():
-            import shutil
-            shutil.move(old_temp_path, self._temp_path())
+            from shutil import move
+            move(old_temp_path, self._temp_path())
 
     def _helper_disabled(self):
         """Return if inputstreamhelper has been disabled in settings.xml."""
@@ -423,6 +421,7 @@ class Helper:
                 progress.update(percent)
 
         progress.close()
+        req.close()
         return True
 
     def _has_inputstream(self):
@@ -530,8 +529,8 @@ class Helper:
             return versions.split()[-1]
 
         from datetime import datetime
-        import time
-        set_setting('last_update', str(time.mktime(datetime.utcnow().timetuple())))
+        from time import mktime
+        set_setting('last_update', str(mktime(datetime.utcnow().timetuple())))
         if 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
             versions = self._http_get(url)
@@ -568,7 +567,7 @@ class Helper:
     def _remove_old_backups(self, backup_path):
         """Removes old Widevine backups, if number of allowed backups is exceeded"""
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
-        import shutil
+        from shutil import rmtree
 
         max_backups = int(get_setting('backups', '4'))
         versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
@@ -584,14 +583,14 @@ class Helper:
         while len(versions) > max_backups + 1:
             remove_version = str(versions[1] if versions[0] == installed_version else versions[0])
             log('removing oldest backup which is not installed: {version}', version=remove_version)
-            shutil.rmtree(os.path.join(backup_path, remove_version))
+            rmtree(os.path.join(backup_path, remove_version))
             versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
 
         return
 
     def _install_cdm_from_backup(self, version):
         """Copies files from specified backup version to cdm dir"""
-        import xbmcvfs
+        from xbmcvfs import copy, delete, exists
 
         filenames = os.listdir(os.path.join(self._backup_path(), version))
 
@@ -599,13 +598,13 @@ class Helper:
             backup_fpath = os.path.join(self._backup_path(), version, filename)
             install_fpath = os.path.join(self._ia_cdm_path(), filename)
 
-            if xbmcvfs.exists(install_fpath):
-                xbmcvfs.delete(install_fpath)
+            if exists(install_fpath):
+                delete(install_fpath)
 
             try:
                 os.link(backup_fpath, install_fpath)
             except OSError:
-                xbmcvfs.copy(backup_fpath, install_fpath)
+                copy(backup_fpath, install_fpath)
 
         log('Installed CDM version {version} from backup', version=version)
         self._remove_old_backups(self._backup_path())
@@ -710,7 +709,8 @@ class Helper:
 
                     progress.update(91, line1=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
-                    with open(os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json'), 'w') as config_file:
+                    json_file = os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
+                    with open(json_file, 'w') as config_file:
                         config_file.write(json.dumps(devices, indent=4))
 
                     progress.update(94, line1=localize(30049))  # Installing Widevine CDM
@@ -719,7 +719,6 @@ class Helper:
                     progress.update(97, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
-                        import json
                         set_setting('chromeos_version', arm_device['version'])
                         wv_check = self._check_widevine()
                         if wv_check:
@@ -819,8 +818,8 @@ class Helper:
             if not downloaded:
                 return False
 
-            import zipfile
-            with zipfile.ZipFile(self._download_path) as archive:
+            from zipfile import ZipFile
+            with ZipFile(self._download_path) as archive:
                 with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
                     eula = file_obj.read().decode().strip().replace('\n', ' ')
 
@@ -828,17 +827,17 @@ class Helper:
 
     def _extract_widevine_from_img(self, backup_path):
         ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
-        import shutil
-        import xbmcvfs
+        from shutil import copyfile
+        from xbmcvfs import exists, mkdir
 
         for root, _, files in os.walk(str(self._mnt_path())):
             if str('libwidevinecdm.so') not in files:
                 continue
             cdm_path = os.path.join(root, 'libwidevinecdm.so')
             log('Found libwidevinecdm.so in {path}', path=cdm_path)
-            if not xbmcvfs.exists(backup_path):
-                xbmcvfs.mkdir(backup_path)
-            shutil.copyfile(cdm_path, os.path.join(backup_path, 'libwidevinecdm.so'))
+            if not exists(backup_path):
+                mkdir(backup_path)
+            copyfile(cdm_path, os.path.join(backup_path, 'libwidevinecdm.so'))
             return True
 
         log('Failed to find Widevine CDM binary in Chrome OS image.')
@@ -909,15 +908,15 @@ class Helper:
 
     def _unzip(self, unzip_dir, file_to_unzip=None):
         ''' Unzip files to specified path '''
-        import xbmcvfs
+        from xbmcvfs import exists, mkdirs
 
         ret = False
 
-        if not xbmcvfs.exists(unzip_dir):
-            xbmcvfs.mkdirs(unzip_dir)
+        if not exists(unzip_dir):
+            mkdirs(unzip_dir)
 
-        import zipfile
-        zip_obj = zipfile.ZipFile(self._download_path)
+        from zipfile import ZipFile
+        zip_obj = ZipFile(self._download_path)
         for filename in zip_obj.namelist():
             if file_to_unzip and filename != file_to_unzip:
                 continue
@@ -943,7 +942,7 @@ class Helper:
 
     def _cleanup(self):
         ''' Clean up function after Widevine CDM installation '''
-        import shutil
+        from shutil import rmtree
         self._unmount()
         if self._attached_loop_dev:
             cmd = ['losetup', '-d', self._loop_dev]
@@ -953,9 +952,9 @@ class Helper:
         if self._modprobe_loop:
             notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not self._has_widevine():
-            shutil.rmtree(self._ia_cdm_path())
+            rmtree(self._ia_cdm_path())
 
-        shutil.rmtree(self._temp_path())
+        rmtree(self._temp_path())
         return True
 
     def _supports_hls(self):

@@ -3,14 +3,16 @@
 from __future__ import absolute_import, division, unicode_literals
 
 
-def to_unicode(text, encoding='utf-8'):
+def to_unicode(text, encoding='utf-8', errors='strict'):
     ''' Force text to unicode '''
-    return text.decode(encoding) if isinstance(text, bytes) else text
+    if isinstance(text, bytes):
+        return text.decode(encoding, errors)
+    return text
 
 
-def from_unicode(text, encoding='utf-8'):
+def from_unicode(text, encoding='utf-8', errors='strict'):
     ''' Force unicode to text '''
     import sys
     if sys.version_info.major == 2 and isinstance(text, unicode):  # noqa: F821; pylint: disable=undefined-variable
-        return text.encode(encoding)
+        return text.encode(encoding, errors)
     return text

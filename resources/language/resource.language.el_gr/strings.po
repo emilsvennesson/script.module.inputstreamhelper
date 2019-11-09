@@ -190,8 +190,8 @@ msgid "Uncompressing image..."
 msgstr "Εξαγωγή εικόνας..."
 
 msgctxt "#30046"
-msgid "This may take several minutes."
-msgstr "Αυτό μπορεί να διαρκέσει μερικά λεπτά."
+msgid "This may take several minutes. ({mins:d}:{secs:02d})"
+msgstr "Αυτό μπορεί να διαρκέσει μερικά λεπτά. ({mins:d}:{secs:02d})"
 
 msgctxt "#30047"
 msgid "[I]Please do not interrupt this process.[/I]"

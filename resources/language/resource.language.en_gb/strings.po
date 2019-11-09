@@ -190,7 +190,7 @@ msgid "Uncompressing image..."
 msgstr ""
 
 msgctxt "#30046"
-msgid "This may take several minutes."
+msgid "This may take several minutes. ({mins:d}:{secs:02d})"
 msgstr ""
 
 msgctxt "#30047"

@@ -478,7 +478,7 @@ class Helper:
 
     @staticmethod
     def _select_best_chromeos_image(devices):
-        log('Find best ARM image to use from recovery.conf')
+        log('Find best ARM image to use from the Chrome OS recovery.conf')
 
         best = None
         for device in devices:
@@ -539,7 +539,7 @@ class Helper:
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
-            log('We could not find an ARM device in recovery.conf')
+            log('We could not find an ARM device in the Chrome OS recovery.conf')
             ok_dialog(localize(30004), localize(30005))
             return ''
         return arm_device['version']
@@ -649,7 +649,7 @@ class Helper:
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
-            log('We could not find an ARM device in recovery.conf')
+            log('We could not find an ARM device in the Chrome OS recovery.conf')
             ok_dialog(localize(30004), localize(30005))
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
@@ -691,14 +691,31 @@ class Helper:
             url = arm_device['url']
             downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
             if downloaded:
+                from threading import Thread
+                from xbmc import sleep
                 progress = progress_dialog()
                 progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
                 bin_filename = url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(self._temp_path(), bin_filename)
 
-                progress.update(5, line1=localize(30045), line2=localize(30046), line3=localize(30047))  # Uncompressing image
+                progress.update(0, line1=localize(30045), line2=localize(30046, mins=0, secs=0), line3=localize(30047))  # Uncompressing image
+                unzip_result = []
+                unzip_thread = Thread(target=self._unzip, args=[self._temp_path(), bin_filename, unzip_result], name='ImageExtraction')
+                unzip_thread.start()
+
+                time = 0
+                percent = 0
+                remaining = 95
+                while unzip_thread.is_alive():
+                    offset = remaining * 0.6 / 100
+                    percent += offset
+                    remaining -= offset
+                    time += 1
+                    sleep(1000)
+                    progress.update(int(percent), line2=localize(30046, mins=time // 60, secs=time % 60))
+
                 success = [
-                    self._unzip(self._temp_path(), bin_filename),
+                    bool(unzip_result),  # Passed by reference
                     self._check_loop(),
                     self._set_loop_dev(),
                     self._losetup(bin_path),
@@ -706,17 +723,16 @@ class Helper:
                 ]
                 if all(success):
                     import json
-
-                    progress.update(91, line1=localize(30048))  # Extracting Widevine CDM
+                    progress.update(96, line1=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
                     json_file = os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
                     with open(json_file, 'w') as config_file:
                         config_file.write(json.dumps(devices, indent=4))
 
-                    progress.update(94, line1=localize(30049))  # Installing Widevine CDM
+                    progress.update(97, line1=localize(30049))  # Installing Widevine CDM
                     self._install_cdm_from_backup(arm_device['version'])
 
-                    progress.update(97, line1=localize(30050))  # Finishing
+                    progress.update(98, line1=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         set_setting('chromeos_version', arm_device['version'])
@@ -888,7 +904,7 @@ class Helper:
             return True
 
         if not os.path.exists(self._widevine_config_path()):
-            log('Widevine or recovery config is missing. Reinstall is required.')
+            log('Widevine or Chrome OS recovery.conf is missing. Reinstall is required.')
             ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
@@ -906,11 +922,9 @@ class Helper:
         self._update_widevine()
         return True
 
-    def _unzip(self, unzip_dir, file_to_unzip=None):
+    def _unzip(self, unzip_dir, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
         ''' Unzip files to specified path '''
         from xbmcvfs import exists, mkdirs
-
-        ret = False
 
         if not exists(unzip_dir):
             mkdirs(unzip_dir)
@@ -928,9 +942,9 @@ class Helper:
                 os.unlink(fullname)
 
             zip_obj.extract(filename, unzip_dir)
-            ret = True
+            result.append(True)  # Pass by reference for Thread
 
-        return ret
+        return bool(result)
 
     def _unmount(self):
         ''' Unmount mountpoint if mounted '''

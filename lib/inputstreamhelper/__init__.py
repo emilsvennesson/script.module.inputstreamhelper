@@ -279,13 +279,15 @@ class Helper:
         ''' Run subprocess command and return if it succeeds as a bool '''
         from .unicodehelper import to_unicode
         import subprocess
+        env = os.environ.copy()
+        env['LANG'] = 'C'
         output = ''
         success = False
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
 
         try:
-            output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT))
+            output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT, env=env))
         except subprocess.CalledProcessError as error:
             output = error.output
             log('{cmd} cmd failed.', cmd=cmd)

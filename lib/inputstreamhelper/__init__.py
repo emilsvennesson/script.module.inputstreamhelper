@@ -298,7 +298,7 @@ class Helper:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
         return {
-            'output': output.decode(),
+            'output': output,
             'success': success
         }
 

@@ -283,7 +283,8 @@ class Helper:
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
         try:
-            output = subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT)
+            from .unicodehelper import to_unicode
+            output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT))
             success = True
             log('{cmd} cmd executed successfully.', cmd=cmd)
         except subprocess.CalledProcessError as error:

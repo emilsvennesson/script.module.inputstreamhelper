@@ -277,27 +277,31 @@ class Helper:
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
         ''' Run subprocess command and return if it succeeds as a bool '''
+        from .unicodehelper import to_unicode
         import subprocess
         output = ''
         success = False
         if sudo and os.getuid() != 0 and self._cmd_exists('sudo'):
             cmd.insert(0, 'sudo')
+
         try:
-            output = subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT)
-            success = True
-            log('{cmd} cmd executed successfully.', cmd=cmd)
+            output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT))
         except subprocess.CalledProcessError as error:
             output = error.output
             log('{cmd} cmd failed.', cmd=cmd)
         except OSError as error:
             log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
+        else:
+            success = True
+            log('{cmd} cmd executed successfully.', cmd=cmd)
+
         if output.rstrip():
             log('{cmd} cmd output:\n{output}', cmd=cmd, output=output)
         if 'sudo' in cmd:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
         return {
-            'output': output.decode(),
+            'output': output,
             'success': success
         }
 

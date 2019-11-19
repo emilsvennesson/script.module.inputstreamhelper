@@ -198,7 +198,7 @@ class Helper:
         """Check whether cmd exists on system."""
         # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
         import subprocess
-        return subprocess.call('type ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+        return subprocess.call(['type ' + cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
     def _update_temp_path(self, new_temp_path):
         """"Updates temp_path and merges files."""

@@ -265,11 +265,12 @@ class Helper:
 
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
+            import re
             for line in output['output'].splitlines():
-                partition_data = line.split()
+                partition_data = re.match(r'^\s?(3|.+bin3)\s+(\d+)s?\s+\d+', line)
                 if partition_data:
-                    if partition_data[0] == '3' or '.bin3' in partition_data[0]:
-                        offset = int(partition_data[1].replace('s', ''))
+                    if partition_data.group(1) == '3' or partition_data.group(1).endswith('.bin3'):
+                        offset = int(partition_data.group(2))
                         return str(offset * config.CHROMEOS_BLOCK_SIZE)
 
         log('Failed to calculate losetup offset.')

@@ -4,78 +4,79 @@ msgstr ""
 "Project-Id-Version: script.module.inputstreamhelper\n"
 "Report-Msgid-Bugs-To: https://github.com/emilsvennesson/script.module.inputstreamhelper\n"
 "POT-Creation-Date: 2013-11-18 16:15+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: English\n"
+"PO-Revision-Date: 2019-11-27 13:28+0100\n"
+"Language-Team: Croatian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Language: hr\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Last-Translator: \n"
+"X-Generator: Poedit 2.2.4\n"
 
 msgctxt "#30001"
 msgid "Information"
-msgstr ""
+msgstr "Informacije"
 
 msgctxt "#30002"
 msgid "This add-on relies on the proprietary decryption module [B]Widevine CDM[/B] for playback."
-msgstr ""
+msgstr "Ovaj dodatak, za reprodukciju, se oslanja na vlasnički modul za dešifriranje [B]Widevine CDM[/B]"
 
 msgctxt "#30004"
 msgid "Error"
-msgstr ""
+msgstr "Greška"
 
 msgctxt "#30005"
 msgid "An error occurred while installing [B]Widevine CDM[/B]. Please enable debug logging and file a bug report at:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
-msgstr ""
+msgstr "Došlo je do pogreške prilikom instaliranja [B]Widevine CDM[/B]. Omogućite evidentiranje pogrešaka (debug logging) i podnesite izvještaj o pogrešci na:[CR][CR]github.com/emilsvennesson/script.module.inputstreamhelper"
 
 msgctxt "#30006"
 msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from a Chrome OS recovery image. This process requires at least [B]{diskspace}[/B] of free disk space. Do you wish to continue?"
-msgstr ""
+msgstr "Zbog prava distribucije, [B]Widevine CDM[/B] treba izvući iz slike za oporavak Chrome OS-a. Za ovaj je postupak potrebno najmanje [B]{diskspace}[/B] slobodnog prostora na disku. Želite li nastaviti?"
 
 msgctxt "#30007"
 msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] nažalost nije dostupan za ovu arhitekturu sustava."
 
 msgctxt "#30008"
 msgid "[B]{addon}[/B] is missing on your Kodi install. This add-on is required to play this content."
-msgstr ""
+msgstr "[B]{addon}[/B] nedostaje na vašoj Kodi instalaciji. Ovaj je dodatak potreban za reprodukciju ovog sadržaja."
 
 msgctxt "#30009"
 msgid "[B]{addon}[/B] is not enabled. This add-on is required to play this content.[CR][CR]Would you like to enable [B]{addon}[/B]?"
-msgstr ""
+msgstr "[B]{addon}[/B] nije omogućen. Ovaj dodatak potreban je za reprodukciju ovog sadržaja.[CR][CR]Želite li omogućiti [B]{addon}[/B]?"
 
 msgctxt "#30010"
 msgid "[B]Kodi {version}[/B] or higher is required for [B]Widevine CDM[/B] content playback."
-msgstr ""
+msgstr "Potreban je [B]Kodi {verzija}[/B] ili noviji za reprodukciju sadržaja preko [B]Widevine CDM[/B]."
 
 msgctxt "#30011"
 msgid "This operating system ([B]{0}[/B]) is not supported by [B]Widevine CDM[/B]."
-msgstr ""
+msgstr "[B]Widevine CDM[/B] ne podržava ovaj operativni sustav ([B]{0}[/B]) ."
 
 msgctxt "#30012"
 msgid "The Windows Store version of Kodi does not support [B]Widevine CDM[/B].[CR][CR]Please use the installer from kodi.tv instead."
-msgstr ""
+msgstr "Verzija Kodi-a za Windows Store ne podržava [B]Widevine CDM[/B].[CR][CR]Molimo koristite instalacijski program sa kodi.tv."
 
 msgctxt "#30013"
 msgid "Failed to retrieve [B]{filename}[/B]."
-msgstr ""
+msgstr "Nemoguće dohvatiti [B]{filename}[/B]."
 
 msgctxt "#30014"
 msgid "Download in progress..."
-msgstr ""
+msgstr "Preuzimanje u tijeku…"
 
 msgctxt "#30015"
 msgid "Downloading [B]{filename}[/B]..."
-msgstr ""
+msgstr "Preuzimanje [B]{filename}[/B]…"
 
 msgctxt "#30016"
 msgid "Failed to extract [B]Widevine CDM[/B] from zip file."
-msgstr ""
+msgstr "Nije uspjelo izdvajanje [B]Widevine CDM[/B]-a iz zip datoteke."
 
 msgctxt "#30017"
 msgid "[B]{addon}[/B] {version} or later is required to play this content."
-msgstr ""
+msgstr "[B]{addon}[/B] {verzija} ili novija verzija potrebna je za reprodukciju ovog sadržaja."
 
 msgctxt "#30018"
 msgid "You do not have enough free disk space to install [B]Widevine CDM[/B]. Free up at least [B]{diskspace}[/B] and try again."
@@ -237,8 +238,7 @@ msgctxt "#30057"
 msgid "Choose a backup to restore"
 msgstr ""
 
-
-### INFORMATION DIALOG
+# ## INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi information[/B]"
 msgstr ""
@@ -280,11 +280,12 @@ msgid "Chrome OS version: [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30830"
-msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
+msgid ""
+"Please report issues to:\n"
+" - [COLOR yellow]{url}[/COLOR]"
 msgstr ""
 
-
-### SETTINGS
+# ## SETTINGS
 msgctxt "#30900"
 msgid "Expert"
 msgstr ""

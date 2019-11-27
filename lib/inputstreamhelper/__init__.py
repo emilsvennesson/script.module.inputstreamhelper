@@ -1061,7 +1061,7 @@ class Helper:
         text += '\n'
 
         if system_os() != 'Android':
-            text += ' - ' + localize(30820) + '\n'  # Widevine information
+            text += localize(30820) + '\n'  # Widevine information
             from datetime import datetime
             wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
             text += ' - ' + localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'

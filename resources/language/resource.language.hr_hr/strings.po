@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: hr\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"Last-Translator: \n"
+"Last-Translator: arvvoid\n"
 "X-Generator: Poedit 2.2.4\n"
 
 msgctxt "#30001"

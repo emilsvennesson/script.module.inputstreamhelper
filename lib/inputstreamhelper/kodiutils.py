@@ -7,7 +7,7 @@ import xbmc
 from xbmcaddon import Addon
 from .unicodehelper import from_unicode, to_unicode
 
-ADDON = Addon('script.module.inputstreamhelper')
+ADDON = Addon()
 
 
 class SafeDict(dict):
@@ -17,20 +17,22 @@ class SafeDict(dict):
         return '{' + key + '}'
 
 
+def addon_profile():
+    ''' Cache and return add-on profile '''
+    return to_unicode(xbmc.translatePath(ADDON.getAddonInfo('profile')))
+
+
 def has_socks():
-    ''' Test if socks is installed, and remember this information '''
-
-    # If it wasn't stored before, check if socks is installed
-    if not hasattr(has_socks, 'installed'):
-        try:
-            import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
-            has_socks.installed = True
-        except ImportError:
-            has_socks.installed = False
-            return None  # Detect if this is the first run
-
-    # Return the stored value
-    return has_socks.installed
+    ''' Test if socks is installed, and use a static variable to remember '''
+    if hasattr(has_socks, 'cached'):
+        return getattr(has_socks, 'cached')
+    try:
+        import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
+    except ImportError:
+        has_socks.cached = False
+        return None  # Detect if this is the first run
+    has_socks.cached = True
+    return True
 
 
 def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):  # pylint: disable=invalid-name,redefined-builtin
@@ -90,15 +92,17 @@ def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=
 def localize(string_id, **kwargs):
     ''' Return the translated string from the .po language files, optionally translating variables '''
     if kwargs:
-        import string
-        return string.Formatter().vformat(ADDON.getLocalizedString(string_id), (), SafeDict(**kwargs))
-
+        from string import Formatter
+        return Formatter().vformat(ADDON.getLocalizedString(string_id), (), SafeDict(**kwargs))
     return ADDON.getLocalizedString(string_id)
 
 
-def get_setting(setting_id, default=None):
+def get_setting(key, default=None):
     ''' Get an add-on setting '''
-    value = to_unicode(ADDON.getSetting(setting_id))
+    try:
+        value = to_unicode(ADDON.getSetting(key))
+    except RuntimeError:  # Occurs when the add-on is disabled
+        return default
     if value == '' and default is not None:
         return default
     return value
@@ -109,15 +113,15 @@ def translate_path(path):
     return to_unicode(xbmc.translatePath(path))
 
 
-def set_setting(setting_id, setting_value):
+def set_setting(key, value):
     ''' Set an add-on setting '''
-    return ADDON.setSetting(setting_id, setting_value)
+    return ADDON.setSetting(key, from_unicode(str(value)))
 
 
-def get_global_setting(setting):
+def get_global_setting(key):
     ''' Get a Kodi setting '''
-    result = execute_jsonrpc(dict(jsonrpc='2.0', id=1, method='Settings.GetSettingValue', params=dict(setting='%s' % setting)))
-    return result.get('result', dict()).get('value')
+    result = jsonrpc(method='Settings.GetSettingValue', params=dict(setting=key))
+    return result.get('result', {}).get('value')
 
 
 def get_proxies():
@@ -163,28 +167,40 @@ def get_proxies():
     return dict(http=proxy_address, https=proxy_address)
 
 
-def get_userdata_path():
-    ''' Return the addon's addon_data path '''
-    return translate_path(ADDON.getAddonInfo('profile'))
-
-
 def get_addon_info(key):
     ''' Return addon information '''
     return to_unicode(ADDON.getAddonInfo(key))
 
 
-def execute_jsonrpc(payload):
-    ''' Kodi JSON-RPC request. Return the response in a dictionary. '''
-    import json
-    log('jsonrpc payload: {payload}', payload=payload)
-    response = xbmc.executeJSONRPC(json.dumps(payload))
-    log('jsonrpc response: {response}', response=response)
-    return json.loads(response)
+def jsonrpc(*args, **kwargs):
+    ''' Perform JSONRPC calls '''
+    from json import dumps, loads
+
+    # We do not accept both args and kwargs
+    if args and kwargs:
+        log('ERROR: Wrong use of jsonrpc()')
+        return None
+
+    # Process a list of actions
+    if args:
+        for (idx, cmd) in enumerate(args):
+            if cmd.get('id') is None:
+                cmd.update(id=idx)
+            if cmd.get('jsonrpc') is None:
+                cmd.update(jsonrpc='2.0')
+        return loads(xbmc.executeJSONRPC(dumps(args)))
+
+    # Process a single action
+    if kwargs.get('id') is None:
+        kwargs.update(id=0)
+    if kwargs.get('jsonrpc') is None:
+        kwargs.update(jsonrpc='2.0')
+    return loads(xbmc.executeJSONRPC(dumps(kwargs)))
 
 
 def log(msg, level=xbmc.LOGDEBUG, **kwargs):
     ''' InputStream Helper log method '''
-    xbmc.log(msg=from_unicode('[{addon}]: {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=level)
+    xbmc.log(msg=from_unicode('[{addon}] {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=level)
 
 
 def kodi_to_ascii(string):

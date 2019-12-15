@@ -3,12 +3,16 @@
 .tox/
 __pycache__/
 *.py[cod]
+
+# Userdata
 test/cdm/
 test/userdata/addon_settings.json
 test/userdata/addon_data/
 test/userdata/cdm/
+test/userdata/backup/
 test/userdata/tmp/
 
+# Temporary
 experiment/
 *.zip
 

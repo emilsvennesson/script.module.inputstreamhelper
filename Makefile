@@ -1,9 +1,8 @@
 export PYTHONPATH := $(CURDIR)/lib:$(CURDIR)/test
-addon_xml := addon.xml
+PYTHON := python
 
-# Collect information to build as sensible package name
-name = $(shell xmllint --xpath 'string(/addon/@id)' $(addon_xml))
-version = $(shell xmllint --xpath 'string(/addon/@version)' $(addon_xml))
+name = $(shell xmllint --xpath 'string(/addon/@id)' addon.xml)
+version = $(shell xmllint --xpath 'string(/addon/@version)' addon.xml)
 git_branch = $(shell git rev-parse --abbrev-ref HEAD)
 git_hash = $(shell git rev-parse --short HEAD)
 
@@ -13,7 +12,7 @@ include_paths = $(patsubst %,$(name)/%,$(include_files))
 exclude_files = \*.new \*.orig \*.pyc \*.pyo
 zip_dir = $(name)/
 
-languages := de_de el_gr fr_fr it_it nl_nl ru_ru sv_se
+languages = $(filter-out en_gb, $(patsubst resources/language/resource.language.%, %, $(wildcard resources/language/*)))
 
 blue = \e[1;34m
 white = \e[1;37m
@@ -31,11 +30,11 @@ sanity: tox pylint language
 
 tox:
 	@echo -e "$(white)=$(blue) Starting sanity tox test$(reset)"
-	tox -q
+	$(PYTHON) -m tox -q
 
 pylint:
 	@echo -e "$(white)=$(blue) Starting sanity pylint test$(reset)"
-	pylint lib/ test/
+	$(PYTHON) -m pylint lib/ test/
 
 language:
 	@echo -e "$(white)=$(blue) Starting language test$(reset)"
@@ -50,14 +49,14 @@ addon: clean
 
 unit: clean
 	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
-	-pkill -ef proxy.py
-	proxy.py &
-	python -m unittest discover
-	pkill -ef proxy.py
+	-pkill -ef '$(PYTHON) -m proxy'
+	$(PYTHON) -m proxy &
+	$(PYTHON) -m unittest discover
+	pkill -ef '$(PYTHON) -m proxy'
 
 run:
 	@echo -e "$(white)=$(blue) Run CLI$(reset)"
-	python default.py
+	$(PYTHON) default.py
 
 zip: clean
 	@echo -e "$(white)=$(blue) Building new package$(reset)"
@@ -65,10 +64,13 @@ zip: clean
 	cd ..; zip -r $(zip_name) $(include_paths) -x $(exclude_files)
 	@echo -e "$(white)=$(blue) Successfully wrote package as: $(white)../$(zip_name)$(reset)"
 
+codecov:
+	@echo -e "$(white)=$(blue) Test codecov.yml syntax$(reset)"
+	curl --data-binary @.github/codecov.yml https://codecov.io/validate
+
 clean:
 	@echo -e "$(white)=$(blue) Cleaning up$(reset)"
-	find . -name '*.pyc' -type f -delete
-	find . -name '*.pyo' -type f -delete
+	find . -name '*.py[cod]' -type f -delete
 	find . -name '__pycache__' -type d -delete
 	find test/userdata/ -mindepth 1 -not -name '*settings.json' -delete
 	rm -rf .pytest_cache/ .tox/ *.log lib/inputstreamhelper.egg-info/

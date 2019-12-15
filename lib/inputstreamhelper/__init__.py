@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
-from .kodiutils import (browsesingle, execute_jsonrpc, get_addon_info, get_proxies, get_setting, get_userdata_path, kodi_to_ascii, localize,
+from .kodiutils import (addon_profile, browsesingle, get_addon_info, get_proxies, get_setting, jsonrpc, kodi_to_ascii, localize,
                         log, notification, ok_dialog, progress_dialog, select_dialog, set_setting, textviewer, translate_path, yesno_dialog)
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -118,7 +118,7 @@ class Helper:
     def _backup_path(cls):
         ''' Return the path to the cdm backups '''
         from xbmcvfs import exists, mkdir
-        path = os.path.join(get_userdata_path(), 'backup')
+        path = os.path.join(addon_profile(), 'backup')
         if not exists(path):
             mkdir(path)
         return path
@@ -433,7 +433,7 @@ class Helper:
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
-        data = execute_jsonrpc(dict(jsonrpc='2.0', id=1, method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon)))
+        data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon))
         if 'error' in data:
             log('{addon} is not installed.', addon=self.inputstream_addon)
             return False
@@ -443,7 +443,7 @@ class Helper:
 
     def _inputstream_enabled(self):
         """Returns whether selected InputStream add-on is enabled.."""
-        data = execute_jsonrpc(dict(jsonrpc='2.0', id=1, method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon, properties=['enabled'])))
+        data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon, properties=['enabled']))
         if data.get('result', {}).get('addon', {}).get('enabled'):
             log('{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
             return True
@@ -453,7 +453,7 @@ class Helper:
 
     def _enable_inputstream(self):
         """Enables selected InputStream add-on."""
-        data = execute_jsonrpc(dict(jsonrpc='2.0', id=1, method='Addons.SetAddonEnabled', params=dict(addonid=self.inputstream_addon, enabled=True)))
+        data = jsonrpc(method='Addons.SetAddonEnabled', params=dict(addonid=self.inputstream_addon, enabled=True))
         if 'error' in data:
             return False
         return True

@@ -72,7 +72,7 @@ def read_addon_xml(path):
 
 def global_settings():
     ''' Use the global_settings file '''
-    import json
+    import json  # pylint: disable=import-outside-toplevel
     try:
         with open('test/userdata/global_settings.json') as f:
             settings = json.load(f)
@@ -100,9 +100,9 @@ def global_settings():
     return settings
 
 
-def addon_settings():
+def addon_settings(addon_id=None):
     ''' Use the addon_settings file '''
-    import json
+    import json  # pylint: disable=import-outside-toplevel
     try:
         with open('test/userdata/addon_settings.json') as f:
             settings = json.load(f)
@@ -110,13 +110,19 @@ def addon_settings():
         print("Error: Cannot use 'test/userdata/addon_settings.json' : %s" % e)
         settings = {}
 
+    if addon_id:
+        return settings[addon_id]
+
     return settings
 
 
 def import_language(language):
     ''' Process the language.po file '''
-    return polib.pofile('resources/language/{language}/strings.po'.format(language=language))
+    try:
+        return polib.pofile('resources/language/{language}/strings.po'.format(language=language))
+    except IOError:
+        return polib.pofile('resources/language/resource.language.en_gb/strings.po')
 
 
 ADDON_INFO = read_addon_xml('addon.xml')
-ADDON_ID = next(iter(ADDON_INFO.values())).get('id')
+ADDON_ID = next(iter(list(ADDON_INFO.values()))).get('id')

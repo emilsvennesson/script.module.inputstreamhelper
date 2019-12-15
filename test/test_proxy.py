@@ -20,13 +20,13 @@ xbmcvfs = __import__('xbmcvfs')
 class LinuxProxyTests(unittest.TestCase):
 
     def setUp(self):
-        xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = True
-        xbmc.GLOBAL_SETTINGS['network.httpproxytype'] = 0
-        xbmc.GLOBAL_SETTINGS['network.httpproxyserver'] = '127.0.0.1'
-        xbmc.GLOBAL_SETTINGS['network.httpproxyport'] = '8899'
+        xbmc.settings['network.usehttpproxy'] = True
+        xbmc.settings['network.httpproxytype'] = 0
+        xbmc.settings['network.httpproxyserver'] = '127.0.0.1'
+        xbmc.settings['network.httpproxyport'] = '8899'
 
     def tearDown(self):
-        xbmc.GLOBAL_SETTINGS['network.usehttpproxy'] = False
+        xbmc.settings['network.usehttpproxy'] = False
 
     def test_check_inputstream_mpd(self):
         inputstreamhelper.system_os = lambda: 'Linux'

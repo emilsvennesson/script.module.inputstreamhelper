@@ -3,11 +3,39 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 ''' This file implements the Kodi xbmcgui module, either using stubs or alternative functionality '''
 
-# pylint: disable=invalid-name,too-many-arguments,unused-argument
+# pylint: disable=invalid-name,super-on-old-class,too-many-arguments,unused-argument,useless-super-delegation
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 import sys
 from xbmcextra import kodi_to_ansi
+
+
+class Control:  # pylint: disable=too-few-public-methods
+    ''' A reimplementation of the xbmcgui Control class '''
+
+    def __init__(self):
+        ''' A stub constructor for the xbmcgui Control class '''
+
+    @staticmethod
+    def selectItem(index):
+        ''' A stub implementation for the xbmcgui Control class selectItem() method '''
+        return
+
+
+class ControlLabel(Control):
+    ''' A reimplementation of the xbmcgui ControlLabel class '''
+
+    def __init__(self):  # pylint: disable=super-init-not-called
+        ''' A stub constructor for the xbmcgui ControlLabel class '''
+
+    @staticmethod
+    def getLabel():
+        ''' A stub implementation for the xbmcgui ControlLabel class getLabel() method '''
+        return 'Label'
+
+    @staticmethod
+    def setLabel(label='', font=None, textColor=None, disabledColor=None, shadowColor=None, focusedColor=None, label2=''):
+        ''' A stub implementation for the xbmcgui ControlLabel class getLabel() method '''
 
 
 class Dialog:
@@ -51,6 +79,12 @@ class Dialog:
         heading = kodi_to_ansi(heading)
         print('\033[37;44;1mMULTISELECT:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, ', '.join(options)))
         return None
+
+    @staticmethod
+    def contextmenu(items):
+        ''' A stub implementation for the xbmcgui Dialog class contextmenu() method '''
+        print('\033[37;44;1mCONTEXTMENU:\033[35;49;1m \033[37;1m%s\033[39;0m' % (', '.join(items)))
+        return -1
 
     @staticmethod
     def yesno(heading, line1, line2=None, line3=None, nolabel=None, yeslabel=None, autoclose=0):
@@ -103,7 +137,6 @@ class DialogProgress:
         ''' A stub implementation for the xbmcgui DialogProgress class update() method '''
         if (percentage - 5) < self.percentage:
             return
-
         self.percentage = percentage
         line1 = kodi_to_ansi(line1)
         line2 = kodi_to_ansi(line2)
@@ -113,6 +146,41 @@ class DialogProgress:
         else:
             print('\033[1G\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%]\033[39;0m' % (percentage), end='')
         sys.stdout.flush()
+
+
+class DialogProgressBG:
+    ''' A reimplementation of the xbmcgui DialogProgressBG '''
+
+    def __init__(self):
+        ''' A stub constructor for the xbmcgui DialogProgressBG class '''
+        self.percentage = 0
+
+    @staticmethod
+    def close():
+        ''' A stub implementation for the xbmcgui DialogProgressBG class close() method '''
+        print()
+
+    @staticmethod
+    def create(heading, message):
+        ''' A stub implementation for the xbmcgui DialogProgressBG class create() method '''
+        heading = kodi_to_ansi(heading)
+        message = kodi_to_ansi(message)
+        print('\033[37;44;1mPROGRESS:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, message))
+
+    @staticmethod
+    def isfinished():
+        ''' A stub implementation for the xbmcgui DialogProgressBG class isfinished() method '''
+
+    def update(self, percentage, heading=None, message=None):
+        ''' A stub implementation for the xbmcgui DialogProgressBG class update() method '''
+        if (percentage - 5) < self.percentage:
+            return
+        self.percentage = percentage
+        message = kodi_to_ansi(message)
+        if message:
+            print('\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%] \033[37;1m%s\033[39;0m' % (percentage, message))
+        else:
+            print('\033[1G\033[37;44;1mPROGRESS:\033[35;49;1m [%d%%]\033[39;0m' % (percentage), end='')
 
 
 class DialogBusy:
@@ -165,6 +233,11 @@ class ListItem:
         return
 
     @staticmethod
+    def setIsFolder(isFolder):
+        ''' A stub implementation for the xbmcgui ListItem class setIsFolder() method '''
+        return
+
+    @staticmethod
     def setMimeType(mimetype):
         ''' A stub implementation for the xbmcgui ListItem class setMimeType() method '''
         return
@@ -179,6 +252,76 @@ class ListItem:
         return
 
     @staticmethod
+    def setProperties(dictionary):
+        ''' A stub implementation for the xbmcgui ListItem class setProperties() method '''
+        return
+
+    @staticmethod
     def setSubtitles(subtitleFiles):
         ''' A stub implementation for the xbmcgui ListItem class setSubtitles() method '''
         return
+
+    @staticmethod
+    def setUniqueIDs(values, defaultrating=None):
+        ''' A stub implementation for the xbmcgui ListItem class setUniqueIDs() method '''
+        return
+
+
+class Window:
+    ''' A reimplementation of the xbmcgui Window '''
+
+    def __init__(self, windowId):
+        ''' A stub constructor for the xbmcgui Window class '''
+        return None
+
+    def close(self):
+        ''' A stub implementation for the xbmcgui Window class close() method '''
+
+    @staticmethod
+    def getControl():
+        ''' A stub implementation for the xbmcgui Window class getControl() method '''
+        return ControlLabel()
+
+    @staticmethod
+    def getFocusId():
+        ''' A stub implementation for the xbmcgui Window class getFocusId() method '''
+        return 0
+
+    @staticmethod
+    def getProperty(key):
+        ''' A stub implementation for the xbmcgui Window class getProperty() method '''
+        return ''
+
+    @staticmethod
+    def setProperty(key, value):
+        ''' A stub implementation for the xbmcgui Window class setProperty() method '''
+        return
+
+    @staticmethod
+    def clearProperty(key):
+        ''' A stub implementation for the xbmcgui Window class clearProperty() method '''
+        return
+
+    def show(self):
+        ''' A stub implementation for the xbmcgui Window class show() method '''
+
+
+class WindowXML(Window):
+    ''' A reimplementation of the xbmcgui WindowXML '''
+
+    def __init__(self):
+        ''' A stub constructor for the xbmcgui WindowXML class '''
+        super(WindowXML, self).__init__()
+
+
+class WindowXMLDialog(WindowXML):
+    ''' A reimplementation of the xbmcgui WindowXMLDialog '''
+
+    def __init__(self):
+        ''' A stub constructor for the xbmcgui WindowXMLDialog class '''
+        super(WindowXMLDialog, self).__init__()
+
+
+def getCurrentWindowId():
+    ''' A stub implementation of the xbmcgui getCurrentWindowId() method '''
+    return 0

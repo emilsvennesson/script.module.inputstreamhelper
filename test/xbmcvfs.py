@@ -6,8 +6,8 @@
 # pylint: disable=invalid-name
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-from shutil import copyfile
 import os
+from shutil import copyfile
 
 
 def File(path, flags='r'):
@@ -54,10 +54,13 @@ def listdir(path):
     ''' A reimplementation of the xbmcvfs listdir() function '''
     files = []
     dirs = []
+    if not exists(path):
+        return dirs, files
     for filename in os.listdir(path):
-        if os.path.isfile(filename):
+        fullname = os.path.join(path, filename)
+        if os.path.isfile(fullname):
             files.append(filename)
-        if os.path.isdir(filename):
+        if os.path.isdir(fullname):
             dirs.append(filename)
     return dirs, files
 
@@ -70,3 +73,8 @@ def mkdir(path):
 def mkdirs(path):
     ''' A reimplementation of the xbmcvfs mkdirs() function '''
     return os.makedirs(path)
+
+
+def rmdir(path):
+    ''' A reimplementation of the xbmcvfs rmdir() function '''
+    return os.rmdir(path)

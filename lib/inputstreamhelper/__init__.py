@@ -3,8 +3,10 @@
 from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
-from .kodiutils import (addon_profile, browsesingle, get_addon_info, get_proxies, get_setting, jsonrpc, kodi_to_ascii, localize,
-                        log, notification, ok_dialog, progress_dialog, select_dialog, set_setting, textviewer, translate_path, yesno_dialog)
+from .kodiutils import (addon_profile, browsesingle, copy, delete, exists, get_addon_info, get_proxies, get_setting,
+                        hardlink, jsonrpc, kodi_to_ascii, localize, log, mkdir, mkdirs, notification, ok_dialog,
+                        progress_dialog, samefile, select_dialog, set_setting, textviewer, translate_path,
+                        yesno_dialog)
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -46,7 +48,7 @@ class Helper:
         self.drm = drm
 
         from platform import uname
-        log('Platform information: {uname}', uname=uname())
+        log(0, 'Platform information: {uname}', uname=uname())
 
         if self.protocol not in config.INPUTSTREAM_PROTOCOLS:
             raise InputStreamException('UnsupportedProtocol')
@@ -81,7 +83,6 @@ class Helper:
     @classmethod
     def _temp_path(cls):
         """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
-        from xbmcvfs import exists, mkdirs
         temp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
         if not exists(temp_path):
             mkdirs(temp_path)
@@ -91,7 +92,6 @@ class Helper:
     @classmethod
     def _mnt_path(cls):
         """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
-        from xbmcvfs import exists, mkdir
         mnt_path = os.path.join(cls._temp_path(), 'mnt')
         if not exists(mnt_path):
             mkdir(mnt_path)
@@ -108,7 +108,6 @@ class Helper:
             return None
 
         cdm_path = translate_path(addon.getSetting('DECRYPTERPATH'))
-        from xbmcvfs import exists, mkdir
         if not exists(cdm_path):
             mkdir(cdm_path)
 
@@ -117,7 +116,6 @@ class Helper:
     @classmethod
     def _backup_path(cls):
         """Return the path to the cdm backups"""
-        from xbmcvfs import exists, mkdir
         path = os.path.join(addon_profile(), 'backup')
         if not exists(path):
             mkdir(path)
@@ -138,6 +136,20 @@ class Helper:
             return loads(config_file.read())
 
     @classmethod
+    def _has_vendor_widevine(cls):
+        """Whether the system has a vendor-supplied widevine CDM"""
+        widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
+        if widevine_cdm_filename is None:
+            return False
+
+        widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
+        vendor_widevine_path = '{0}_vendor{1}'.format(*os.path.splitext(widevine_path))
+        if exists(vendor_widevine_path):
+            return True
+
+        return False
+
+    @classmethod
     def _widevine_path(cls):
         """Get full widevine path"""
         widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
@@ -146,7 +158,15 @@ class Helper:
 
         if cls._ia_cdm_path():
             widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
-            from xbmcvfs import exists
+
+            # Support vendor-supplied Widevine CDM
+            vendor_widevine_path = '{0}_vendor{1}'.format(*os.path.splitext(widevine_path))
+            if exists(vendor_widevine_path):
+                if exists(widevine_path):
+                    if not samefile(vendor_widevine_path, widevine_path):
+                        hardlink(vendor_widevine_path, widevine_path)
+                else:
+                    hardlink(vendor_widevine_path, widevine_path)
 
             if exists(widevine_path):
                 return widevine_path
@@ -218,7 +238,7 @@ class Helper:
             disabled = 'true'
 
         if disabled == 'true':
-            log('inputstreamhelper is disabled in settings.xml.')
+            log(3, 'inputstreamhelper is disabled in settings.xml.')
             return True
 
         return False
@@ -274,7 +294,7 @@ class Helper:
                         offset = int(partition_data.group(2))
                         return str(offset * config.CHROMEOS_BLOCK_SIZE)
 
-        log('Failed to calculate losetup offset.')
+        log(4, 'Failed to calculate losetup offset.')
         return '0'
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
@@ -292,15 +312,15 @@ class Helper:
             output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT, env=env))
         except subprocess.CalledProcessError as error:
             output = error.output
-            log('{cmd} cmd failed.', cmd=cmd)
+            log(4, '{cmd} cmd failed.', cmd=cmd)
         except OSError as error:
-            log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
+            log(4, '{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
         else:
             success = True
-            log('{cmd} cmd executed successfully.', cmd=cmd)
+            log(0, '{cmd} cmd executed successfully.', cmd=cmd)
 
         if output.rstrip():
-            log('{cmd} cmd output:\n{output}', cmd=cmd, output=output)
+            log(0, '{cmd} cmd output:\n{output}', cmd=cmd, output=output)
         if 'sudo' in cmd:
             subprocess.call(['sudo', '-k'])  # reset timestamp
 
@@ -312,7 +332,7 @@ class Helper:
     def _check_loop(self):
         """Check if loop module needs to be loaded into system."""
         if not self._run_cmd(['modinfo', 'loop'])['success']:
-            log('loop is built in the kernel.')
+            log(0, 'loop is built in the kernel.')
             return True  # assume loop is built in the kernel
 
         self._modprobe_loop = True
@@ -326,10 +346,10 @@ class Helper:
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
             self._loop_dev = output['output'].strip()
-            log('Found free loop device: {device}', device=self._loop_dev)
+            log(0, 'Found free loop device: {device}', device=self._loop_dev)
             return True
 
-        log('Failed to find free loop device.')
+        log(4, 'Failed to find free loop device.')
         return False
 
     def _losetup(self, bin_path):
@@ -357,10 +377,10 @@ class Helper:
             return True
 
         if self._widevine_path():
-            log('Found Widevine binary at {path}', path=self._widevine_path())
+            log(0, 'Found Widevine binary at {path}', path=self._widevine_path())
             return True
 
-        log('Widevine is not installed.')
+        log(3, 'Widevine is not installed.')
         return False
 
     @staticmethod
@@ -373,12 +393,12 @@ class Helper:
         except ImportError:  # Python 2
             from urllib2 import HTTPError, urlopen
 
-        log('Request URL: {url}', url=url)
+        log(0, 'Request URL: {url}', url=url)
         filename = url.split('/')[-1]
 
         try:
             req = urlopen(url)
-            log('Response code: {code}', code=req.getcode())
+            log(0, 'Response code: {code}', code=req.getcode())
             if 400 <= req.getcode() < 600:
                 raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
         except HTTPError:
@@ -394,7 +414,7 @@ class Helper:
 
         content = req.read()
         # NOTE: Do not log reponse (as could be large)
-        # log('Response: {response}', response=content)
+        # log(0, 'Response: {response}', response=content)
         return content.decode()
 
     def _http_download(self, url, message=None):
@@ -436,20 +456,20 @@ class Helper:
         """Checks if selected InputStream add-on is installed."""
         data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon))
         if 'error' in data:
-            log('{addon} is not installed.', addon=self.inputstream_addon)
+            log(3, '{addon} is not installed.', addon=self.inputstream_addon)
             return False
 
-        log('{addon} is installed.', addon=self.inputstream_addon)
+        log(0, '{addon} is installed.', addon=self.inputstream_addon)
         return True
 
     def _inputstream_enabled(self):
         """Returns whether selected InputStream add-on is enabled.."""
         data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon, properties=['enabled']))
         if data.get('result', {}).get('addon', {}).get('enabled'):
-            log('{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
+            log(0, '{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
             return True
 
-        log('{addon} is disabled.', addon=self.inputstream_addon)
+        log(3, '{addon} is disabled.', addon=self.inputstream_addon)
         return False
 
     def _enable_inputstream(self):
@@ -462,23 +482,23 @@ class Helper:
     def _supports_widevine(self):
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
-            log('Unsupported Widevine architecture found: {arch}', arch=self._arch())
+            log(4, 'Unsupported Widevine architecture found: {arch}', arch=self._arch())
             ok_dialog(localize(30004), localize(30007))  # Widevine not available on this architecture
             return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:
-            log('Unsupported Widevine OS found: {os}', os=system_os())
+            log(4, 'Unsupported Widevine OS found: {os}', os=system_os())
             ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
-            log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
+            log(4, 'Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
             ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
 
         if 'WindowsApps' in translate_path('special://xbmcbin/'):  # uwp is not supported
-            log('Unsupported UWP Kodi version detected.')
+            log(4, 'Unsupported UWP Kodi version detected.')
             ok_dialog(localize(30004), localize(30012))  # Windows Store Kodi falls short
             return False
 
@@ -486,7 +506,7 @@ class Helper:
 
     @staticmethod
     def _select_best_chromeos_image(devices):
-        log('Find best ARM image to use from the Chrome OS recovery.conf')
+        log(0, 'Find best ARM image to use from the Chrome OS recovery.conf')
 
         best = None
         for device in devices:
@@ -512,7 +532,7 @@ class Helper:
             # Select the newest version
             from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
             if LooseVersion(device['version']) > LooseVersion(best['version']):
-                log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
+                log(0, '{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
                     device=device,
                     best=best)
                 best = device
@@ -520,7 +540,7 @@ class Helper:
             # Select the smallest image (disk space requirement)
             elif LooseVersion(device['version']) == LooseVersion(best['version']):
                 if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
-                    log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',
+                    log(0, '{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',
                         device=device,
                         best=best,
                         device_size=int(device['filesize']) + int(device['zipfilesize']),
@@ -547,7 +567,7 @@ class Helper:
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
-            log('We could not find an ARM device in the Chrome OS recovery.conf')
+            log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
             ok_dialog(localize(30004), localize(30005))
             return ''
         return arm_device['version']
@@ -590,7 +610,7 @@ class Helper:
 
         while len(versions) > max_backups + 1:
             remove_version = str(versions[1] if versions[0] == installed_version else versions[0])
-            log('removing oldest backup which is not installed: {version}', version=remove_version)
+            log(0, 'Removing oldest backup which is not installed: {version}', version=remove_version)
             rmtree(os.path.join(backup_path, remove_version))
             versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
 
@@ -598,23 +618,14 @@ class Helper:
 
     def _install_cdm_from_backup(self, version):
         """Copies files from specified backup version to cdm dir"""
-        from xbmcvfs import copy, delete, exists
-
         filenames = os.listdir(os.path.join(self._backup_path(), version))
 
         for filename in filenames:
             backup_fpath = os.path.join(self._backup_path(), version, filename)
             install_fpath = os.path.join(self._ia_cdm_path(), filename)
+            hardlink(backup_fpath, install_fpath)
 
-            if exists(install_fpath):
-                delete(install_fpath)
-
-            try:
-                os.link(backup_fpath, install_fpath)
-            except OSError:
-                copy(backup_fpath, install_fpath)
-
-        log('Installed CDM version {version} from backup', version=version)
+        log(0, 'Installed CDM version {version} from backup', version=version)
         self._remove_old_backups(self._backup_path())
 
     def _install_widevine_x86(self):
@@ -657,7 +668,7 @@ class Helper:
         devices = self._chromeos_config()
         arm_device = self._select_best_chromeos_image(devices)
         if arm_device is None:
-            log('We could not find an ARM device in the Chrome OS recovery.conf')
+            log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
             ok_dialog(localize(30004), localize(30005))
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
@@ -771,10 +782,9 @@ class Helper:
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
-        from xbmcvfs import delete, exists
         widevinecdm = self._widevine_path()
         if widevinecdm and exists(widevinecdm):
-            log('Remove Widevine CDM at {path}', path=widevinecdm)
+            log(0, 'Remove Widevine CDM at {path}', path=widevinecdm)
             delete(widevinecdm)
             notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
             return True
@@ -794,7 +804,7 @@ class Helper:
         if LooseVersion(addon_version) > LooseVersion(settings_version):
             # New version found, save addon_version to settings
             set_setting('version', addon_version)
-            log('inputstreamhelper version {version} is running for the first time', version=addon_version)
+            log(2, 'inputstreamhelper version {version} is running for the first time', version=addon_version)
             return True
         return False
 
@@ -805,7 +815,7 @@ class Helper:
             from datetime import datetime, timedelta
             last_update_dt = datetime.fromtimestamp(float(get_setting('last_update')))
             if last_update_dt + timedelta(days=int(get_setting('update_frequency', '14'))) >= datetime.utcnow():
-                log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
+                log(2, 'Widevine update check was made on {date}', date=last_update_dt.isoformat())
                 return
 
         wv_config = self._load_widevine_config()
@@ -816,18 +826,18 @@ class Helper:
         else:
             component = 'Chrome OS'
             current_version = self._select_best_chromeos_image(wv_config)['version']
-        log('Latest {component} version is {version}', component=component, version=latest_version)
-        log('Current {component} version installed is {version}', component=component, version=current_version)
+        log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
+        log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
         if LooseVersion(latest_version) > LooseVersion(current_version):
-            log('There is an update available for {component}', component=component)
+            log(2, 'There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
                 self.install_widevine()
             else:
-                log('User declined to update {component}.', component=component)
+                log(3, 'User declined to update {component}.', component=component)
         else:
-            log('User is on the latest available {component} version.', component=component)
+            log(0, 'User is on the latest available {component} version.', component=component)
 
     def _widevine_eula(self):
         """Displays the Widevine EULA and prompts user to accept it."""
@@ -836,7 +846,7 @@ class Helper:
             with open(license_file, 'r') as file_obj:
                 eula = file_obj.read().strip().replace('\n', ' ')
         else:  # grab the license from the x86 files
-            log('Acquiring Widevine EULA from x86 files.')
+            log(0, 'Acquiring Widevine EULA from x86 files.')
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
             downloaded = self._http_download(url, message=localize(30025))  # Acquiring EULA
             if not downloaded:
@@ -851,20 +861,18 @@ class Helper:
 
     def _extract_widevine_from_img(self, backup_path):
         """Extract the Widevine CDM binary from the mounted Chrome OS image"""
-        from shutil import copyfile
-        from xbmcvfs import exists, mkdir
 
         for root, _, files in os.walk(str(self._mnt_path())):
             if str('libwidevinecdm.so') not in files:
                 continue
             cdm_path = os.path.join(root, 'libwidevinecdm.so')
-            log('Found libwidevinecdm.so in {path}', path=cdm_path)
+            log(0, 'Found libwidevinecdm.so in {path}', path=cdm_path)
             if not exists(backup_path):
                 mkdir(backup_path)
-            copyfile(cdm_path, os.path.join(backup_path, 'libwidevinecdm.so'))
+            copy(cdm_path, os.path.join(backup_path, 'libwidevinecdm.so'))
             return True
 
-        log('Failed to find Widevine CDM binary in Chrome OS image.')
+        log(4, 'Failed to find Widevine CDM binary in Chrome OS image.')
         return False
 
     def _missing_widevine_libs(self):
@@ -874,7 +882,7 @@ class Helper:
 
         if self._cmd_exists('ldd'):
             if not os.access(self._widevine_path(), os.X_OK):
-                log('Changing {path} permissions to 744.', path=self._widevine_path())
+                log(0, 'Changing {path} permissions to 744.', path=self._widevine_path())
                 os.chmod(self._widevine_path(), 0o744)
 
             missing_libs = []
@@ -891,19 +899,19 @@ class Helper:
                         missing_libs.append(lib)
 
                 if missing_libs:
-                    log('Widevine is missing the following libraries: {libs}', libs=missing_libs)
+                    log(4, 'Widevine is missing the following libraries: {libs}', libs=missing_libs)
                     return missing_libs
 
-                log('There are no missing Widevine libraries! :-)')
+                log(0, 'There are no missing Widevine libraries! :-)')
                 return None
 
         if self._arch() == 'arm64':
             import struct
             if struct.calcsize('P') * 8 == 64:
-                log('ARM64 ldd check failed. User needs 32-bit userspace.')
+                log(4, 'ARM64 ldd check failed. User needs 32-bit userspace.')
                 ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
 
-        log('Failed to check for missing Widevine libraries.')
+        log(4, 'Failed to check for missing Widevine libraries.')
         return None
 
     def _check_widevine(self):
@@ -911,15 +919,18 @@ class Helper:
         if system_os() == 'Android':  # no checks needed for Android
             return True
 
+        if self._has_vendor_widevine():  # no checks needed for vendor-supplied Widevine
+            return True
+
         if not os.path.exists(self._widevine_config_path()):
-            log('Widevine or Chrome OS recovery.conf is missing. Reinstall is required.')
+            log(4, 'Widevine or Chrome OS recovery.conf is missing. Reinstall is required.')
             ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
         if 'x86' in self._arch():  # check that widevine arch matches system arch
             wv_config = self._load_widevine_config()
             if config.WIDEVINE_ARCH_MAP_X86[self._arch()] != wv_config['arch']:
-                log('Widevine/system arch mismatch. Reinstall is required.')
+                log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()
 
@@ -932,8 +943,6 @@ class Helper:
 
     def _unzip(self, unzip_dir, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
         """Unzip files to specified path"""
-        from xbmcvfs import exists, mkdirs
-
         if not exists(unzip_dir):
             mkdirs(unzip_dir)
 
@@ -946,8 +955,8 @@ class Helper:
             # Detect and remove (dangling) symlinks before extraction
             fullname = os.path.join(unzip_dir, filename)
             if os.path.islink(fullname):
-                log('Remove (dangling) symlink at {symlink}', symlink=fullname)
-                os.unlink(fullname)
+                log(3, 'Remove (dangling) symlink at {symlink}', symlink=fullname)
+                delete(fullname)
 
             zip_obj.extract(filename, unzip_dir)
             result.append(True)  # Pass by reference for Thread
@@ -957,7 +966,7 @@ class Helper:
     def _unmount(self):
         """Unmount mountpoint if mounted"""
         while os.path.ismount(self._mnt_path()):
-            log('Unmount {mountpoint}', mountpoint=self._mnt_path())
+            log(0, 'Unmount {mountpoint}', mountpoint=self._mnt_path())
             umount_output = self._run_cmd(['umount', self._mnt_path()], sudo=True)
             if not umount_output['success']:
                 break
@@ -985,7 +994,7 @@ class Helper:
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
 
-        log('HLS is unsupported on {addon} version {version}', addon=self.inputstream_addon, version=self._inputstream_version())
+        log(3, 'HLS is unsupported on {addon} version {version}', addon=self.inputstream_addon, version=self._inputstream_version())
         return False
 
     def _check_drm(self):
@@ -1015,10 +1024,10 @@ class Helper:
             # Check if InputStream add-on exists!
             Addon('{}'.format(self.inputstream_addon))
 
-            log('inputstream addon installed from repo')
+            log(0, 'inputstream addon installed from repo')
             return True
         except RuntimeError:
-            log('inputstream addon not installed')
+            log(3, 'inputstream addon not installed')
             return False
 
     def check_inputstream(self):
@@ -1037,7 +1046,7 @@ class Helper:
             if ret:
                 self._enable_inputstream()
             return False
-        log('{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
+        log(0, '{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
 
         if self.protocol == 'hls' and not self._supports_hls():
             ok_dialog(localize(30004),  # HLS Minimum version is needed
@@ -1061,23 +1070,25 @@ class Helper:
         text += ' - ' + localize(30812, version=self._inputstream_version(), state=istream_state) + '\n'
         text += '\n'
 
-        text += ' - ' + localize(30820) + '\n'  # Widevine information
+        text += localize(30820) + '\n'  # Widevine information
         if system_os() == 'Android':
             text += ' - ' + localize(30821) + '\n'
+        elif self._has_vendor_widevine():
+            text += ' - ' + localize(30822) + '\n'
         else:
             from datetime import datetime
             wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
-            text += ' - ' + localize(30822, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
-            text += ' - ' + localize(30823, path=self._ia_cdm_path()) + '\n'
+            text += ' - ' + localize(30823, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
+            text += ' - ' + localize(30824, path=self._ia_cdm_path()) + '\n'
 
             if self._arch() in ('arm', 'arm64'):  # Chrome OS version
-                text += ' - ' + localize(30824, version=get_setting('chromeos_version')) + '\n'
+                text += ' - ' + localize(30825, version=get_setting('chromeos_version')) + '\n'
 
         text += '\n'
 
         text += localize(30830, url=config.ISSUE_URL)  # Report issues
 
-        log('\n{info}'.format(info=kodi_to_ascii(text)), level=2)
+        log(2, '\n{info}'.format(info=kodi_to_ascii(text)))
         textviewer(localize(30901), text)
 
     def rollback_libwv(self):
@@ -1106,7 +1117,7 @@ class Helper:
 
         version = select_dialog(localize(30057), show_versions)
         if version != -1:
-            log('Rollback to version {version}', version=versions[version])
+            log(0, 'Rollback to version {version}', version=versions[version])
             self._install_cdm_from_backup(versions[version])
             notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
 

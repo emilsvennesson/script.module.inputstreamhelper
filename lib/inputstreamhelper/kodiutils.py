@@ -17,6 +17,11 @@ class SafeDict(dict):
         return '{' + key + '}'
 
 
+def addon_id():
+    """Return add-on ID"""
+    return get_addon_info('id')
+
+
 def addon_profile():
     """Cache and return add-on profile"""
     return to_unicode(xbmc.translatePath(ADDON.getAddonInfo('profile')))
@@ -178,7 +183,7 @@ def jsonrpc(*args, **kwargs):
 
     # We do not accept both args and kwargs
     if args and kwargs:
-        log('ERROR: Wrong use of jsonrpc()')
+        log(4, 'ERROR: Wrong use of jsonrpc()')
         return None
 
     # Process a list of actions
@@ -198,9 +203,13 @@ def jsonrpc(*args, **kwargs):
     return loads(xbmc.executeJSONRPC(dumps(kwargs)))
 
 
-def log(msg, level=xbmc.LOGDEBUG, **kwargs):
-    """InputStream Helper log method"""
-    xbmc.log(msg=from_unicode('[{addon}] {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=level)
+def log(level=0, message='', **kwargs):
+    """Log info messages to Kodi"""
+    if kwargs:
+        from string import Formatter
+        message = Formatter().vformat(message, (), SafeDict(**kwargs))
+    message = '[{addon}] {message}'.format(addon=addon_id(), message=message)
+    xbmc.log(from_unicode(message), level)
 
 
 def kodi_to_ascii(string):
@@ -215,3 +224,83 @@ def kodi_to_ascii(string):
     string = string.replace('[COLOR yellow]', '')
     string = string.replace('[/COLOR]', '')
     return string
+
+
+def samefile(src, dest):
+    """Check if file is identical"""
+    stat_src = stat_file(src)
+    stat_dest = stat_file(dest)
+    # Check if this is a hardlink
+    if (stat_src.st_dev(), stat_src.st_ino()) == (stat_dest.st_dev(), stat_dest.st_ino()):
+        return True
+
+    # Check file sizes
+    if stat_src.st_size() != stat_dest.st_size():
+        return False
+
+    # Check if this is a symlink
+    from os.path import samefile as opsamefile
+    if opsamefile(src, dest):
+        return True
+
+    # Otherwise compare content (may be slow)
+    with open(src, 'r') as srcfd, open(dest, 'r') as destfd:
+        if srcfd.read() == destfd.read():
+            return True
+
+    return False
+
+
+def copy(src, dest):
+    """Copy a file (using xbmcvfs)"""
+    from xbmcvfs import copy as vfscopy
+    log(2, "Copy file '{src}' to '{dest}'.", src=src, dest=dest)
+    return vfscopy(src, dest)
+
+
+def delete(path):
+    """Remove a file (using xbmcvfs)"""
+    from xbmcvfs import delete as vfsdelete
+    log(2, "Delete file '{path}'.", path=path)
+    return vfsdelete(path)
+
+
+def exists(path):
+    """Whether the path exists (using xbmcvfs)"""
+    from xbmcvfs import exists as vfsexists
+    return vfsexists(path)
+
+
+def hardlink(src, dest):
+    """Hardlink a file when possible, copy when needed"""
+    from os import link
+
+    if exists(dest):
+        delete(dest)
+
+    try:
+        link(src, dest)
+    except OSError:
+        return copy(src, dest)
+    log(2, "Hardlink file '{src}' to '{dest}'.", src=src, dest=dest)
+    return True
+
+
+def mkdir(path):
+    """Create a directory (using xbmcvfs)"""
+    from xbmcvfs import mkdir as vfsmkdir
+    log(2, "Create directory '{path}'.", path=path)
+    return vfsmkdir(path)
+
+
+def mkdirs(path):
+    """Create directory including parents (using xbmcvfs)"""
+    from xbmcvfs import mkdirs as vfsmkdirs
+    log(2, "Recursively create directory '{path}'.", path=path)
+    return vfsmkdirs(path)
+
+
+def stat_file(path):
+    """Return information about a file (using xbmcvfs)"""
+    from xbmcvfs import Stat
+    return Stat(path)

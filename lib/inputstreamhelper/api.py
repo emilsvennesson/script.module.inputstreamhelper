@@ -24,7 +24,7 @@ def run(params):
             rollback()
 
     elif len(params) > 4:
-        log('invalid API call, too many parameters')
+        log(4, 'invalid API call, too many parameters')
     else:
         ADDON.openSettings()
 

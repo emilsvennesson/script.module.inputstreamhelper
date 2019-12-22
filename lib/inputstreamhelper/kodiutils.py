@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-''' Implements Kodi Helper functions '''
+"""Implements Kodi Helper functions"""
 from __future__ import absolute_import, division, unicode_literals
 import xbmc
 from xbmcaddon import Addon
@@ -11,19 +11,19 @@ ADDON = Addon()
 
 
 class SafeDict(dict):
-    ''' A safe dictionary implementation that does not break down on missing keys '''
+    """A safe dictionary implementation that does not break down on missing keys"""
     def __missing__(self, key):
-        ''' Replace missing keys with the original placeholder '''
+        """Replace missing keys with the original placeholder"""
         return '{' + key + '}'
 
 
 def addon_profile():
-    ''' Cache and return add-on profile '''
+    """Cache and return add-on profile"""
     return to_unicode(xbmc.translatePath(ADDON.getAddonInfo('profile')))
 
 
 def has_socks():
-    ''' Test if socks is installed, and use a static variable to remember '''
+    """Test if socks is installed, and use a static variable to remember"""
     if hasattr(has_socks, 'cached'):
         return getattr(has_socks, 'cached')
     try:
@@ -36,7 +36,7 @@ def has_socks():
 
 
 def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):  # pylint: disable=invalid-name,redefined-builtin
-    ''' Show a Kodi browseSingle dialog '''
+    """Show a Kodi browseSingle dialog"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -44,7 +44,7 @@ def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFold
 
 
 def notification(heading='', message='', icon='info', time=4000):
-    ''' Show a Kodi notification '''
+    """Show a Kodi notification"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -52,7 +52,7 @@ def notification(heading='', message='', icon='info', time=4000):
 
 
 def ok_dialog(heading='', message=''):
-    ''' Show Kodi's OK dialog '''
+    """Show Kodi's OK dialog"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -60,7 +60,7 @@ def ok_dialog(heading='', message=''):
 
 
 def select_dialog(heading='', opt_list=None, autoclose=False, preselect=None, useDetails=False):  # pylint: disable=invalid-name
-    ''' Show Kodi's Select dialog '''
+    """Show Kodi's Select dialog"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -68,13 +68,13 @@ def select_dialog(heading='', opt_list=None, autoclose=False, preselect=None, us
 
 
 def progress_dialog():
-    ''' Show Kodi's Progress dialog '''
+    """Show Kodi's Progress dialog"""
     from xbmcgui import DialogProgress
     return DialogProgress()
 
 
 def textviewer(heading='', text='', usemono=False):
-    ''' Show a Kodi textviewer dialog '''
+    """Show a Kodi textviewer dialog"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -82,7 +82,7 @@ def textviewer(heading='', text='', usemono=False):
 
 
 def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=0):
-    ''' Show Kodi's Yes/No dialog '''
+    """Show Kodi's Yes/No dialog"""
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
@@ -90,7 +90,7 @@ def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=
 
 
 def localize(string_id, **kwargs):
-    ''' Return the translated string from the .po language files, optionally translating variables '''
+    """Return the translated string from the .po language files, optionally translating variables"""
     if kwargs:
         from string import Formatter
         return Formatter().vformat(ADDON.getLocalizedString(string_id), (), SafeDict(**kwargs))
@@ -98,7 +98,7 @@ def localize(string_id, **kwargs):
 
 
 def get_setting(key, default=None):
-    ''' Get an add-on setting '''
+    """Get an add-on setting"""
     try:
         value = to_unicode(ADDON.getSetting(key))
     except RuntimeError:  # Occurs when the add-on is disabled
@@ -109,23 +109,23 @@ def get_setting(key, default=None):
 
 
 def translate_path(path):
-    ''' Translate special xbmc paths '''
+    """Translate special xbmc paths"""
     return to_unicode(xbmc.translatePath(path))
 
 
 def set_setting(key, value):
-    ''' Set an add-on setting '''
+    """Set an add-on setting"""
     return ADDON.setSetting(key, from_unicode(str(value)))
 
 
 def get_global_setting(key):
-    ''' Get a Kodi setting '''
+    """Get a Kodi setting"""
     result = jsonrpc(method='Settings.GetSettingValue', params=dict(setting=key))
     return result.get('result', {}).get('value')
 
 
 def get_proxies():
-    ''' Return a usable proxies dictionary from Kodi proxy settings '''
+    """Return a usable proxies dictionary from Kodi proxy settings"""
     usehttpproxy = get_global_setting('network.usehttpproxy')
     if usehttpproxy is not True:
         return None
@@ -168,12 +168,12 @@ def get_proxies():
 
 
 def get_addon_info(key):
-    ''' Return addon information '''
+    """Return addon information"""
     return to_unicode(ADDON.getAddonInfo(key))
 
 
 def jsonrpc(*args, **kwargs):
-    ''' Perform JSONRPC calls '''
+    """Perform JSONRPC calls"""
     from json import dumps, loads
 
     # We do not accept both args and kwargs
@@ -204,7 +204,7 @@ def log(msg, level=xbmc.LOGDEBUG, **kwargs):
 
 
 def kodi_to_ascii(string):
-    ''' Convert Kodi format tags to ascii '''
+    """Convert Kodi format tags to ascii"""
     if string is None:
         return None
     string = string.replace('[B]', '')

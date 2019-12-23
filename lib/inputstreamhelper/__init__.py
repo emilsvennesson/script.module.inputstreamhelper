@@ -136,42 +136,48 @@ class Helper:
             return loads(config_file.read())
 
     @classmethod
-    def _has_vendor_widevine(cls):
-        """Whether the system has a vendor-supplied widevine CDM"""
-        widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
-        if widevine_cdm_filename is None:
-            return False
-
-        widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
-        vendor_widevine_path = '{0}_vendor{1}'.format(*os.path.splitext(widevine_path))
-        if exists(vendor_widevine_path):
-            return True
-
-        return False
+    def _widevinecdm_path(cls):
+        """Get full widevine path"""
+        widevinecdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
+        if widevinecdm_filename is None:
+            return None
+        if cls._ia_cdm_path() is None:
+            return None
+        return os.path.join(cls._ia_cdm_path(), widevinecdm_filename)
 
     @classmethod
-    def _widevine_path(cls):
-        """Get full widevine path"""
-        widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
-        if widevine_cdm_filename is None:
+    def _vendor_widevinecdm_path(cls):
+        widevinecdm_path = cls._widevinecdm_path()
+        return '{0}_vendor{1}'.format(*os.path.splitext(widevinecdm_path))
+
+    @classmethod
+    def _has_widevinecdm(cls):
+        """Whether the system has a widevine CDM"""
+        widevinecdm_path = cls._widevinecdm_path()
+        if widevinecdm_path is None:
             return False
+        if not exists(widevinecdm_path):
+            return False
+        return True
 
-        if cls._ia_cdm_path():
-            widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
+    @classmethod
+    def _has_vendor_widevinecdm(cls):
+        """Whether the system has a vendor-supplied widevine CDM"""
+        vendor_widevinecdm_path = cls._vendor_widevinecdm_path()
+        if not exists(vendor_widevinecdm_path):
+            return False
+        return True
 
-            # Support vendor-supplied Widevine CDM
-            vendor_widevine_path = '{0}_vendor{1}'.format(*os.path.splitext(widevine_path))
-            if exists(vendor_widevine_path):
-                if exists(widevine_path):
-                    if not samefile(vendor_widevine_path, widevine_path):
-                        hardlink(vendor_widevine_path, widevine_path)
-                else:
-                    hardlink(vendor_widevine_path, widevine_path)
-
-            if exists(widevine_path):
-                return widevine_path
-
-        return False
+    @classmethod
+    def _hardlink_vendor_widevinecdm(cls):
+        """Hardlink vendor Widevine into place"""
+        vendor_widevinecdm_path = cls._vendor_widevinecdm_path()
+        if not exists(vendor_widevinecdm_path):
+            return
+        widevinecdm_path = cls._widevinecdm_path()
+        if exists(widevinecdm_path) and samefile(vendor_widevinecdm_path, widevinecdm_path):
+            return
+        hardlink(vendor_widevinecdm_path, widevinecdm_path)
 
     @classmethod
     def _kodi_version(cls):
@@ -268,7 +274,7 @@ class Helper:
 
     @staticmethod
     def _get_lib_version(path):
-        if not path:
+        if not path or not exists(path):
             return '(Not found)'
         import re
         with open(path, 'rb') as library:
@@ -373,11 +379,13 @@ class Helper:
 
     def _has_widevine(self):
         """Checks if Widevine CDM is installed on system."""
-        if system_os() == 'Android':  # widevine is built in on android
+        if system_os() == 'Android':  # Widevine is built into Android
             return True
 
-        if self._widevine_path():
-            log(0, 'Found Widevine binary at {path}', path=self._widevine_path())
+        self._hardlink_vendor_widevinecdm()  # If vendor Widevine is present, hardlink into place
+
+        if self._has_widevinecdm():
+            log(0, 'Found Widevine binary at {path}', path=self._widevinecdm_path())
             return True
 
         log(3, 'Widevine is not installed.')
@@ -782,10 +790,10 @@ class Helper:
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
-        widevinecdm = self._widevine_path()
-        if widevinecdm and exists(widevinecdm):
-            log(0, 'Remove Widevine CDM at {path}', path=widevinecdm)
-            delete(widevinecdm)
+        if self._has_widevinecdm():
+            widevinecdm_path = self._widevinecdm_path()
+            log(0, 'Remove Widevine CDM at {path}', path=widevinecdm_path)
+            delete(widevinecdm_path)
             notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
             return True
         notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
@@ -881,12 +889,13 @@ class Helper:
             return None
 
         if self._cmd_exists('ldd'):
-            if not os.access(self._widevine_path(), os.X_OK):
-                log(0, 'Changing {path} permissions to 744.', path=self._widevine_path())
-                os.chmod(self._widevine_path(), 0o744)
+            widevinecdm_path = self._widevinecdm_path()
+            if not os.access(widevinecdm_path, os.X_OK):
+                log(0, 'Changing {path} permissions to 744.', path=widevinecdm_path)
+                os.chmod(widevinecdm_path, 0o744)
 
             missing_libs = []
-            cmd = ['ldd', self._widevine_path()]
+            cmd = ['ldd', widevinecdm_path]
             output = self._run_cmd(cmd, sudo=False)
             if output['success']:
                 for line in output['output'].splitlines():
@@ -919,7 +928,7 @@ class Helper:
         if system_os() == 'Android':  # no checks needed for Android
             return True
 
-        if self._has_vendor_widevine():  # no checks needed for vendor-supplied Widevine
+        if self._has_vendor_widevinecdm():  # no checks needed for vendor-supplied Widevine
             return True
 
         if not os.path.exists(self._widevine_config_path()):
@@ -1073,12 +1082,12 @@ class Helper:
         text += localize(30820) + '\n'  # Widevine information
         if system_os() == 'Android':
             text += ' - ' + localize(30821) + '\n'
-        elif self._has_vendor_widevine():
-            text += ' - ' + localize(30822, version=self._get_lib_version(self._widevine_path())) + '\n'
+        elif self._has_vendor_widevinecdm():
+            text += ' - ' + localize(30822, version=self._get_lib_version(self._widevinecdm_path())) + '\n'
         else:
             from datetime import datetime
             wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
-            text += ' - ' + localize(30823, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
+            text += ' - ' + localize(30823, version=self._get_lib_version(self._widevinecdm_path()), date=wv_updated) + '\n'
             text += ' - ' + localize(30824, path=self._ia_cdm_path()) + '\n'
 
             if self._arch() in ('arm', 'arm64'):  # Chrome OS version

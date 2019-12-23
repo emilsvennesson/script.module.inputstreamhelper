@@ -18,7 +18,7 @@ def File(path, flags='r'):
 def Stat(path):
     ''' A reimplementation of the xbmcvfs Stat() function '''
 
-    class stat:  # pylint: disable=too-few-public-methods
+    class stat:
         ''' A reimplementation of the xbmcvfs stat class '''
 
         def __init__(self, path):

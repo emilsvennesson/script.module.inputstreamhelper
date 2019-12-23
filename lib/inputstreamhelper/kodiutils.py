@@ -7,7 +7,7 @@ import xbmc
 from xbmcaddon import Addon
 from .unicodehelper import from_unicode, to_unicode
 
-ADDON = Addon()
+ADDON = Addon('script.module.inputstreamhelper')
 
 
 class SafeDict(dict):

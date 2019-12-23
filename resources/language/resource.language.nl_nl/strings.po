@@ -272,8 +272,8 @@ msgid "Widevine version: [B]Built into Android[/B]"
 msgstr "Widevine versie: [B]Ingebouwd in Android[/B]"
 
 msgctxt "#30822"
-msgid "Widevine version: [B]Supplied by vendor[/B]"
-msgstr "Widevine versie: [B]Aangeleverd door vendor[/B]"
+msgid "Widevine version: [B]{version} [COLOR gray](supplied by vendor)[/COLOR][/B]"
+msgstr "Widevine versie: [B]{version} [COLOR gray](aangeleverd door vendor)[/COLOR][/B]"
 
 msgctxt "#30823"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"

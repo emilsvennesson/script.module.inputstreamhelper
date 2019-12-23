@@ -9,6 +9,7 @@ import os
 import unittest
 import platform
 import inputstreamhelper
+import default
 
 xbmc = __import__('xbmc')
 xbmcaddon = __import__('xbmcaddon')
@@ -19,7 +20,7 @@ xbmcvfs = __import__('xbmcvfs')
 class LinuxVendorTests(unittest.TestCase):
 
     def setUp(self):
-        open('test/cdm/libwidevinecdm_vendor.so', 'w').write('Linux')
+        open('test/cdm/libwidevinecdm_vendor.so', 'w').write('Linux\n1.2.3.4')
 
     def tearDown(self):
         os.unlink('test/cdm/libwidevinecdm_vendor.so')
@@ -39,11 +40,15 @@ class LinuxVendorTests(unittest.TestCase):
         is_installed = is_helper.check_inputstream()
         self.assertTrue(is_installed, True)
 
+    @staticmethod
+    def test_about():
+        default.run(['default.py', 'info'])
+
 
 class WindowsVendorTests(unittest.TestCase):
 
     def setUp(self):
-        open('test/cdm/widevinecdm_vendor.dll', 'w').write('Windows')
+        open('test/cdm/widevinecdm_vendor.dll', 'w').write('Windows\n1.2.3.4')
 
     def tearDown(self):
         os.unlink('test/cdm/widevinecdm_vendor.dll')
@@ -63,6 +68,10 @@ class WindowsVendorTests(unittest.TestCase):
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
         is_installed = is_helper.check_inputstream()
         self.assertTrue(is_installed, True)
+
+    @staticmethod
+    def test_about():
+        default.run(['default.py', 'info'])
 
 
 if __name__ == '__main__':

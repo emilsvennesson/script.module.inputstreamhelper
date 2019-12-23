@@ -260,14 +260,18 @@ msgid "[B]Widevine information[/B]"
 msgstr "[B]Widevine Informationen[/B]"
 
 msgctxt "#30821"
+msgid "Widevine version: [B]Built into Android[/B]"
+msgstr ""
+
+msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
 msgstr "Widevine Version: [B]{version}[/B] [COLOR gray](zuletzt aktualisiert am [B]{date}[/B])[/COLOR]"
 
-msgctxt "#30822"
+msgctxt "#30823"
 msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Widevine CDM Pfad: [B]{path}[/B]"
 
-msgctxt "#30823"
+msgctxt "#30824"
 msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Chrome OS Version: [B]{version}[/B]"
 

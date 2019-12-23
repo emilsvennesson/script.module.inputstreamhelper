@@ -1061,17 +1061,19 @@ class Helper:
         text += ' - ' + localize(30812, version=self._inputstream_version(), state=istream_state) + '\n'
         text += '\n'
 
-        if system_os() != 'Android':
-            text += localize(30820) + '\n'  # Widevine information
+        text += ' - ' + localize(30820) + '\n'  # Widevine information
+        if system_os() == 'Android':
+            text += ' - ' + localize(30821) + '\n'
+        else:
             from datetime import datetime
             wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
-            text += ' - ' + localize(30821, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
-            text += ' - ' + localize(30822, path=self._ia_cdm_path()) + '\n'
+            text += ' - ' + localize(30822, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
+            text += ' - ' + localize(30823, path=self._ia_cdm_path()) + '\n'
 
             if self._arch() in ('arm', 'arm64'):  # Chrome OS version
-                text += ' - ' + localize(30823, version=get_setting('chromeos_version')) + '\n'
+                text += ' - ' + localize(30824, version=get_setting('chromeos_version')) + '\n'
 
-            text += '\n'
+        text += '\n'
 
         text += localize(30830, url=config.ISSUE_URL)  # Report issues
 

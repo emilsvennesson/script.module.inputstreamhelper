@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-''' Configuration variables for inpustreamhelper '''
+"""Configuration variables for inpustreamhelper"""
 from __future__ import absolute_import, division, unicode_literals
 
 

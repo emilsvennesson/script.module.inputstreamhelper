@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-''' Implements the main InputStream Helper class '''
+"""Implements the main InputStream Helper class"""
 from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
@@ -13,11 +13,11 @@ if hasattr(os, 'popen'):
 
 
 class InputStreamException(Exception):
-    ''' Stub Exception '''
+    """Stub Exception"""
 
 
 def system_os():
-    ''' Get system platform, and remember this information '''
+    """Get system platform, and remember this information"""
 
     # If it wasn't stored before, get the correct value
     if not hasattr(system_os, 'name'):
@@ -33,10 +33,10 @@ def system_os():
 
 
 class Helper:
-    ''' The main InputStream Helper class '''
+    """The main InputStream Helper class"""
 
     def __init__(self, protocol, drm=None):
-        ''' Initialize InputStream Helper class '''
+        """Initialize InputStream Helper class"""
         self._download_path = None
         self._loop_dev = None
         self._modprobe_loop = False
@@ -69,7 +69,7 @@ class Helper:
             install_opener(build_opener(ProxyHandler(proxies)))
 
     def __repr__(self):
-        ''' String representation of Helper class '''
+        """String representation of Helper class"""
         return 'Helper({protocol}, drm={drm})'.format(protocol=self.protocol, drm=self.drm)
 
     @classmethod
@@ -80,7 +80,7 @@ class Helper:
 
     @classmethod
     def _temp_path(cls):
-        ''' Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp '''
+        """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
         from xbmcvfs import exists, mkdirs
         temp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
         if not exists(temp_path):
@@ -90,7 +90,7 @@ class Helper:
 
     @classmethod
     def _mnt_path(cls):
-        ''' Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt '''
+        """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
         from xbmcvfs import exists, mkdir
         mnt_path = os.path.join(cls._temp_path(), 'mnt')
         if not exists(mnt_path):
@@ -100,7 +100,7 @@ class Helper:
 
     @classmethod
     def _ia_cdm_path(cls):
-        ''' Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm '''
+        """Return the specified CDM path for inputstream.adaptive, usually ~/.kodi/cdm"""
         from xbmcaddon import Addon
         try:
             addon = Addon('inputstream.adaptive')
@@ -116,7 +116,7 @@ class Helper:
 
     @classmethod
     def _backup_path(cls):
-        ''' Return the path to the cdm backups '''
+        """Return the path to the cdm backups"""
         from xbmcvfs import exists, mkdir
         path = os.path.join(addon_profile(), 'backup')
         if not exists(path):
@@ -125,21 +125,21 @@ class Helper:
 
     @classmethod
     def _widevine_config_path(cls):
-        ''' Return the full path to the widevine or recovery config file '''
+        """Return the full path to the widevine or recovery config file"""
         if 'x86' in cls._arch():
             return os.path.join(cls._ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
         return os.path.join(cls._ia_cdm_path(), os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
 
     @classmethod
     def _load_widevine_config(cls):
-        ''' Load the widevine or recovery config in JSON format '''
+        """Load the widevine or recovery config in JSON format"""
         from json import loads
         with open(cls._widevine_config_path(), 'r') as config_file:
             return loads(config_file.read())
 
     @classmethod
     def _widevine_path(cls):
-        ''' Get full widevine path '''
+        """Get full widevine path"""
         widevine_cdm_filename = config.WIDEVINE_CDM_FILENAME[system_os()]
         if widevine_cdm_filename is None:
             return False
@@ -147,6 +147,7 @@ class Helper:
         if cls._ia_cdm_path():
             widevine_path = os.path.join(cls._ia_cdm_path(), widevine_cdm_filename)
             from xbmcvfs import exists
+
             if exists(widevine_path):
                 return widevine_path
 
@@ -154,7 +155,7 @@ class Helper:
 
     @classmethod
     def _kodi_version(cls):
-        ''' Return the current Kodi version '''
+        """Return the current Kodi version"""
         from xbmc import getInfoLabel
         version = getInfoLabel('System.BuildVersion')
         return version.split(' ')[0]
@@ -224,18 +225,18 @@ class Helper:
 
     @staticmethod
     def disable():
-        ''' Disable plugin '''
+        """Disable plugin"""
         if get_setting('disabled', 'false') == 'false':
             set_setting('disabled', 'true')
 
     @staticmethod
     def enable():
-        ''' Enable plugin '''
+        """Enable plugin"""
         if get_setting('disabled', 'false') == 'true':
             set_setting('disabled', 'false')
 
     def _inputstream_version(self):
-        ''' Return the requested inputstream version '''
+        """Return the requested inputstream version"""
         from xbmcaddon import Addon
         try:
             addon = Addon(self.inputstream_addon)
@@ -277,7 +278,7 @@ class Helper:
         return '0'
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
-        ''' Run subprocess command and return if it succeeds as a bool '''
+        """Run subprocess command and return if it succeeds as a bool"""
         from .unicodehelper import to_unicode
         import subprocess
         env = os.environ.copy()
@@ -364,7 +365,7 @@ class Helper:
 
     @staticmethod
     def _http_request(url):
-        ''' Perform an HTTP request and return request '''
+        """Perform an HTTP request and return request"""
 
         try:  # Python 3
             from urllib.error import HTTPError
@@ -386,7 +387,7 @@ class Helper:
         return req
 
     def _http_get(self, url):
-        ''' Perform an HTTP GET request and return content '''
+        """Perform an HTTP GET request and return content"""
         req = self._http_request(url)
         if req is None:
             return None
@@ -552,7 +553,7 @@ class Helper:
         return arm_device['version']
 
     def _chromeos_config(self):
-        ''' Parse the Chrome OS recovery configuration and put it in a dictionary '''
+        """Parse the Chrome OS recovery configuration and put it in a dictionary"""
         url = config.CHROMEOS_RECOVERY_URL
         conf = [line for line in self._http_get(url).split('\n\n') if 'hwidmatch=' in line]
 
@@ -759,7 +760,7 @@ class Helper:
         return False
 
     def install_widevine(self):
-        ''' Wrapper function that calls Widevine installer method depending on architecture '''
+        """Wrapper function that calls Widevine installer method depending on architecture"""
         if not self._supports_widevine():
             return False
 
@@ -849,7 +850,7 @@ class Helper:
         return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
 
     def _extract_widevine_from_img(self, backup_path):
-        ''' Extract the Widevine CDM binary from the mounted Chrome OS image '''
+        """Extract the Widevine CDM binary from the mounted Chrome OS image"""
         from shutil import copyfile
         from xbmcvfs import exists, mkdir
 
@@ -930,7 +931,7 @@ class Helper:
         return True
 
     def _unzip(self, unzip_dir, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
-        ''' Unzip files to specified path '''
+        """Unzip files to specified path"""
         from xbmcvfs import exists, mkdirs
 
         if not exists(unzip_dir):
@@ -954,7 +955,7 @@ class Helper:
         return bool(result)
 
     def _unmount(self):
-        ''' Unmount mountpoint if mounted '''
+        """Unmount mountpoint if mounted"""
         while os.path.ismount(self._mnt_path()):
             log('Unmount {mountpoint}', mountpoint=self._mnt_path())
             umount_output = self._run_cmd(['umount', self._mnt_path()], sudo=True)
@@ -962,7 +963,7 @@ class Helper:
                 break
 
     def _cleanup(self):
-        ''' Clean up function after Widevine CDM installation '''
+        """Clean up function after Widevine CDM installation"""
         from shutil import rmtree
         self._unmount()
         if self._attached_loop_dev:

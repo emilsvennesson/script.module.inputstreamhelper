@@ -199,7 +199,7 @@ def jsonrpc(*args, **kwargs):
 
 
 def log(msg, level=xbmc.LOGDEBUG, **kwargs):
-    ''' InputStream Helper log method '''
+    """InputStream Helper log method"""
     xbmc.log(msg=from_unicode('[{addon}] {msg}'.format(addon=get_addon_info('id'), msg=msg.format(**kwargs))), level=level)
 
 

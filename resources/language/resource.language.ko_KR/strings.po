@@ -326,5 +326,5 @@ msgid "Number of backups"
 msgstr "몇개를 백업할까요?"
 
 msgctxt "#30915"
-msgid "Rollback Widevine CDM library..."
-msgstr "Widevine CDM 라이브러리를 이전 상태로 되돌립니다..."
+msgid "Restore Widevine CDM library..."
+msgstr ""

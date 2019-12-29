@@ -229,6 +229,14 @@ msgctxt "#30055"
 msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
 msgstr "Non c'è abbastanza spazio libero nella cartella temporanea in uso. Ne vuoi specificare un'altra da usare temporaneamente per l'immagine di recovery di Chrome OS (es. disco USB)?"
 
+msgctxt "#30056"
+msgid "No backups found!"
+msgstr ""
+
+msgctxt "#30057"
+msgid "Choose a backup to restore"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
@@ -312,3 +320,11 @@ msgstr "(Re)installa Widevine CDM"
 msgctxt "#30911"
 msgid "Remove Widevine CDM library..."
 msgstr "Rimuovi Widevine CDM"
+
+msgctxt "#30913"
+msgid "Number of backups"
+msgstr ""
+
+msgctxt "#30915"
+msgid "Restore Widevine CDM library..."
+msgstr ""

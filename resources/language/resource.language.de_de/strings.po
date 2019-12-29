@@ -115,7 +115,7 @@ msgstr "Widevine CDM EULA"
 
 msgctxt "#30027"
 msgid "I accept"
-msgstr "Ich akzeptiere die Bedingungen"
+msgstr "Ich akzeptiere"
 
 msgctxt "#30028"
 msgid "Cancel"
@@ -155,7 +155,7 @@ msgstr "Führe zum Auswerfen [B]modprobe -r loop[/B] im Terminal aus."
 
 msgctxt "#30037"
 msgid "Success!"
-msgstr "Erfolgreich!"
+msgstr "Erfolg!"
 
 msgctxt "#30038"
 msgid "Install Widevine"
@@ -229,6 +229,14 @@ msgctxt "#30055"
 msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
 msgstr "Es ist nicht genügend Speicher im aktuellen temporären Verzeichnis vorhanden. Möchten Sie ein anderes angeben, welches temporär für das Chrome OS Recovery Image verwendet wird (z.B. auf einem USB Stick)?"
 
+msgctxt "#30056"
+msgid "No backups found!"
+msgstr "Keine Backups gefunden!"
+
+msgctxt "#30057"
+msgid "Choose a backup to restore"
+msgstr "Wählen Sie ein Backup zum Wiederherstellen aus."
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
@@ -261,7 +269,7 @@ msgstr "[B]Widevine Informationen[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Widevine Version: [B]In Android eingebaut[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
@@ -311,4 +319,13 @@ msgstr "Widevine CDM Bibliothek (erneut) installieren..."
 
 msgctxt "#30911"
 msgid "Remove Widevine CDM library..."
-msgstr "Entferne die Widevine CDM Bibliothek..."
+msgstr "Widevine CDM Bibliothek entfernen..."
+
+msgctxt "#30913"
+msgid "Number of backups"
+msgstr "Anzahl Backups"
+
+msgctxt "#30915"
+msgid "Restore Widevine CDM library..."
+msgstr "Widevine CDM Bibliothek wiederherstellen..."
+

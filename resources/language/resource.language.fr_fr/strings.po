@@ -231,11 +231,11 @@ msgstr "Il n'y a pas suffisamment d'espace disque dans le répertoire temporaire
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr ""
+msgstr "Aucune sauvegarde trouvée!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"
-msgstr ""
+msgstr "Choisissez une sauvegarde à restaurer"
 
 
 ### INFORMATION DIALOG
@@ -319,12 +319,12 @@ msgstr "(Re)installer la bibliothèque Widevine CDM..."
 
 msgctxt "#30911"
 msgid "Remove Widevine CDM library..."
-msgstr "désinstaller la bibliothèque Widevine CDM..."
+msgstr "Désinstaller la bibliothèque Widevine CDM..."
 
 msgctxt "#30913"
 msgid "Number of backups"
-msgstr ""
+msgstr "Nombre de sauvegardes"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Restaurer la bibliothèque Widevine CDM..."

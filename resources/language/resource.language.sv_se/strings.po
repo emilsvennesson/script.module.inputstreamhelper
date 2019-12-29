@@ -229,6 +229,14 @@ msgctxt "#30055"
 msgid "There is not enough free disk space in the current temporary directory. Would you like to specify a different one to temporarily use for the Chrome OS Recovery Image (e.g. on a USB)?"
 msgstr "Det finns inte tillräckligt med ledigt diskutrymme i den temporära mappen. Vill du specificera en annan mapp att använda för Chrome OS-återställningsavbilden (t.ex på ett USB-minne)?"
 
+msgctxt "#30056"
+msgid "No backups found!"
+msgstr ""
+
+msgctxt "#30057"
+msgid "Choose a backup to restore"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
@@ -312,3 +320,11 @@ msgstr "(Om)installera Widevine CDM-biblioteket..."
 msgctxt "#30911"
 msgid "Remove Widevine CDM library..."
 msgstr "Ta bort Widevine CDM-biblioteket..."
+
+msgctxt "#30913"
+msgid "Number of backups"
+msgstr ""
+
+msgctxt "#30915"
+msgid "Restore Widevine CDM library..."
+msgstr ""

@@ -106,8 +106,8 @@ msgid "The installation now needs to unzip, mount and extract [B]Widevine CDM[/B
 msgstr "A telepítésnek most ki kell csomagolnia, össze kell raknia és ki kell vonnia a [B]Widevine CDM-t[/B] a helyreállítási képfájlból.[CR][CR]Ez akár 10 percnél is tovább tarthat."
 
 msgctxt "#30025"
-msgid "EULA elolvasása."
-msgstr "Acquiring EULA."
+msgid "Acquiring EULA."
+msgstr "EULA elolvasása."
 
 msgctxt "#30026"
 msgid "Widevine CDM EULA"
@@ -326,5 +326,5 @@ msgid "Number of backups"
 msgstr "Mentések száma"
 
 msgctxt "#30915"
-msgid "Rollback Widevine CDM library..."
-msgstr "Widevine könyvtár mentés..."
+msgid "Restore Widevine CDM library..."
+msgstr ""

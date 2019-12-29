@@ -12,7 +12,6 @@ msgstr ""
 "Language: hr\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "Last-Translator: arvvoid\n"
-"X-Generator: Poedit 2.2.4\n"
 
 msgctxt "#30001"
 msgid "Information"
@@ -238,7 +237,8 @@ msgctxt "#30057"
 msgid "Choose a backup to restore"
 msgstr "Odaberite sigurnosnu kopiju za vraćanje"
 
-# ## INFORMATION DIALOG
+
+### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi information[/B]"
 msgstr "[B]Kodi informacije[/B]"
@@ -284,14 +284,11 @@ msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Chrome OS verzija: [B]{version}[/B]"
 
 msgctxt "#30830"
-msgid ""
-"Please report issues to:\n"
-" - [COLOR yellow]{url}[/COLOR]"
-msgstr ""
-"Molim prijavite probleme na:\n"
-"- [COLOR yellow]{url}[/COLOR]"
+msgid "Please report issues to:\n - [COLOR yellow]{url}[/COLOR]"
+msgstr "Molim prijavite probleme na:\n - [COLOR yellow]{url}[/COLOR]"
 
-# ## SETTINGS
+
+### SETTINGS
 msgctxt "#30900"
 msgid "Expert"
 msgstr "Stručnjak"
@@ -329,5 +326,5 @@ msgid "Number of backups"
 msgstr "Broj sigurnosnih kopija"
 
 msgctxt "#30915"
-msgid "Rollback Widevine CDM library..."
-msgstr "Vrati Widevine CDM…"
+msgid "Restore Widevine CDM library..."
+msgstr ""

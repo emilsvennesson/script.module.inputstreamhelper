@@ -27,7 +27,7 @@ def has_socks():
     if hasattr(has_socks, 'cached'):
         return getattr(has_socks, 'cached')
     try:
-        import socks  # noqa: F401; pylint: disable=unused-variable,unused-import
+        import socks  # noqa: F401; pylint: disable=unused-variable,unused-import,useless-suppression
     except ImportError:
         has_socks.cached = False
         return None  # Detect if this is the first run

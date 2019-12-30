@@ -512,7 +512,7 @@ class Helper:
             # Select the newest version
             from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
             if LooseVersion(device['version']) > LooseVersion(best['version']):
-                log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',  # pylint: disable=invalid-format-index
+                log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
                     device=device,
                     best=best)
                 best = device
@@ -520,7 +520,7 @@ class Helper:
             # Select the smallest image (disk space requirement)
             elif LooseVersion(device['version']) == LooseVersion(best['version']):
                 if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
-                    log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',  # pylint: disable=invalid-format-index
+                    log('{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',
                         device=device,
                         best=best,
                         device_size=int(device['filesize']) + int(device['zipfilesize']),

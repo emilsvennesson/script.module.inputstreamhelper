@@ -34,7 +34,7 @@ tox:
 
 pylint:
 	@echo -e "$(white)=$(blue) Starting sanity pylint test$(reset)"
-	$(PYTHON) -m pylint lib/ test/
+	$(PYTHON) -m pylint -e useless-suppression lib/ test/
 
 language:
 	@echo -e "$(white)=$(blue) Starting language test$(reset)"

@@ -31,12 +31,12 @@ LICENSE_URL = 'https://cwip-shaka-proxy.appspot.com/no_auth'
 def play():
     is_helper = inputstreamhelper.Helper(PROTOCOL, drm=DRM)
     if is_helper.check_inputstream():
-        playitem = xbmcgui.ListItem(path=STREAM_URL)
-        playitem.setProperty('inputstreamaddon', is_helper.inputstream_addon)
-        playitem.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
-        playitem.setProperty('inputstream.adaptive.license_type', DRM)
-        playitem.setProperty('inputstream.adaptive.license_key', LICENSE_URL + '||R{SSM}|')
-        xbmcplugin.setResolvedUrl(handle=sys.argv[1], succeeded=True, listitem=play_item)
+        play_item = xbmcgui.ListItem(path=STREAM_URL)
+        play_item.setProperty('inputstreamaddon', is_helper.inputstream_addon)
+        play_item.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
+        play_item.setProperty('inputstream.adaptive.license_type', DRM)
+        play_item.setProperty('inputstream.adaptive.license_key', LICENSE_URL + '||R{SSM}|')
+        xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=play_item)
 
 if __name__ == '__main__':
     play()

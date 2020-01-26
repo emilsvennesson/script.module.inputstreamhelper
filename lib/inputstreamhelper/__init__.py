@@ -243,10 +243,11 @@ class Helper:
             return '(Not found)'
         import re
         with open(path, 'rb') as library:
-            match = re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', str(library.read()))
+            match = re.search(br'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', library.read())
         if not match:
             return '(Undetected)'
-        return match.group(0).lstrip('0')
+        from .utils import to_unicode
+        return to_unicode(match.group(0))
 
     def _chromeos_offset(self, bin_path):
         """Calculate the Chrome OS losetup start offset using fdisk/parted."""

@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
+# MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements the main InputStream Helper class"""
+
 from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
-from .kodiutils import (addon_profile, browsesingle, get_addon_info, get_proxies, get_setting, jsonrpc, kodi_to_ascii, localize,
-                        log, notification, ok_dialog, progress_dialog, select_dialog, set_setting, textviewer, translate_path, yesno_dialog)
+from .kodiutils import (addon_profile, addon_version, browsesingle, get_proxies, get_setting, get_setting_bool,
+                        get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, localize, log, notification,
+                        ok_dialog, progress_dialog, select_dialog, set_setting, set_setting_bool, textviewer,
+                        translate_path, yesno_dialog)
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -210,30 +214,17 @@ class Helper:
             from shutil import move
             move(old_temp_path, self._temp_path())
 
-    def _helper_disabled(self):
-        """Return if inputstreamhelper has been disabled in settings.xml."""
-        disabled = get_setting('disabled')
-        if not disabled:  # This is either None or '' if unset
-            self.disable()  # Create default entry
-            disabled = 'true'
-
-        if disabled == 'true':
-            log('inputstreamhelper is disabled in settings.xml.')
-            return True
-
-        return False
-
     @staticmethod
     def disable():
         """Disable plugin"""
-        if get_setting('disabled', 'false') == 'false':
-            set_setting('disabled', 'true')
+        if not get_setting_bool('disabled', False):
+            set_setting_bool('disabled', True)
 
     @staticmethod
     def enable():
         """Enable plugin"""
-        if get_setting('disabled', 'false') == 'true':
-            set_setting('disabled', 'false')
+        if get_setting('disabled', False):
+            set_setting_bool('disabled', False)
 
     def _inputstream_version(self):
         """Return the requested inputstream version"""
@@ -243,7 +234,7 @@ class Helper:
         except RuntimeError:
             return None
 
-        from .unicodehelper import to_unicode
+        from .utils import to_unicode
         return to_unicode(addon.getAddonInfo('version'))
 
     @staticmethod
@@ -279,7 +270,7 @@ class Helper:
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
         """Run subprocess command and return if it succeeds as a bool"""
-        from .unicodehelper import to_unicode
+        from .utils import to_unicode
         import subprocess
         env = os.environ.copy()
         env['LANG'] = 'C'
@@ -471,7 +462,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
             log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
             ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
@@ -510,7 +501,7 @@ class Helper:
                 continue
 
             # Select the newest version
-            from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+            from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
             if LooseVersion(device['version']) > LooseVersion(best['version']):
                 log('{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
                     device=device,
@@ -538,7 +529,7 @@ class Helper:
 
         from datetime import datetime
         from time import mktime
-        set_setting('last_update', str(mktime(datetime.utcnow().timetuple())))
+        set_setting('last_update', mktime(datetime.utcnow().timetuple()))
         if 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
             versions = self._http_get(url)
@@ -574,10 +565,10 @@ class Helper:
 
     def _remove_old_backups(self, backup_path):
         """Removes old Widevine backups, if number of allowed backups is exceeded"""
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         from shutil import rmtree
 
-        max_backups = int(get_setting('backups', '4'))
+        max_backups = get_setting_int('backups', 4)
         versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
 
         if len(versions) < 2:
@@ -589,7 +580,7 @@ class Helper:
             installed_version = self._select_best_chromeos_image(self._load_widevine_config())['version']
 
         while len(versions) > max_backups + 1:
-            remove_version = str(versions[1] if versions[0] == installed_version else versions[0])
+            remove_version = str(versions[1] if versions[0] == LooseVersion(installed_version) else versions[0])
             log('removing oldest backup which is not installed: {version}', version=remove_version)
             rmtree(os.path.join(backup_path, remove_version))
             versions = sorted([LooseVersion(version) for version in os.listdir(backup_path)])
@@ -787,24 +778,23 @@ class Helper:
 
         # Get versions
         settings_version = get_setting('version', '0.3.4')  # settings_version didn't exist in version 0.3.4 and older
-        addon_version = get_addon_info('version')
 
         # Compare versions
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
-        if LooseVersion(addon_version) > LooseVersion(settings_version):
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
+        if LooseVersion(addon_version()) > LooseVersion(settings_version):
             # New version found, save addon_version to settings
-            set_setting('version', addon_version)
-            log('inputstreamhelper version {version} is running for the first time', version=addon_version)
+            set_setting('version', addon_version())
+            log('inputstreamhelper version {version} is running for the first time', version=addon_version())
             return True
         return False
 
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
-        last_update = get_setting('last_update')
+        last_update = get_setting_float('last_update', 0.0)
         if last_update and not self._first_run():
             from datetime import datetime, timedelta
-            last_update_dt = datetime.fromtimestamp(float(get_setting('last_update')))
-            if last_update_dt + timedelta(days=int(get_setting('update_frequency', '14'))) >= datetime.utcnow():
+            last_update_dt = datetime.fromtimestamp(get_setting_float('last_update', 0.0))
+            if last_update_dt + timedelta(days=get_setting_int('update_frequency', 14)) >= datetime.utcnow():
                 log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
                 return
 
@@ -819,7 +809,7 @@ class Helper:
         log('Latest {component} version is {version}', component=component, version=latest_version)
         log('Current {component} version installed is {version}', component=component, version=current_version)
 
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log('There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
@@ -981,7 +971,7 @@ class Helper:
 
     def _supports_hls(self):
         """Return if HLS support is available in inputstream.adaptive."""
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
             return True
 
@@ -1015,15 +1005,16 @@ class Helper:
             # Check if InputStream add-on exists!
             Addon('{}'.format(self.inputstream_addon))
 
-            log('inputstream addon installed from repo')
+            log('inputstream addon installed from repo.')
             return True
         except RuntimeError:
-            log('inputstream addon not installed')
+            log('inputstream addon not installed.')
             return False
 
     def check_inputstream(self):
         """Main function. Ensures that all components are available for InputStream add-on playback."""
-        if self._helper_disabled():  # blindly return True if helper has been disabled
+        if get_setting_bool('disabled', False):  # blindly return True if helper has been disabled
+            log('inputstreamhelper is disabled in its settings.xml.')
             return True
         if self.drm == 'widevine' and not self._supports_widevine():
             return False
@@ -1034,9 +1025,9 @@ class Helper:
                 return False
         elif not self._inputstream_enabled():
             ret = yesno_dialog(localize(30001), localize(30009, addon=self.inputstream_addon))  # inputstream is disabled
-            if ret:
-                self._enable_inputstream()
-            return False
+            if not ret:
+                return False
+            self._enable_inputstream()
         log('{addon} {version} is installed and enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
 
         if self.protocol == 'hls' and not self._supports_hls():
@@ -1055,9 +1046,9 @@ class Helper:
 
         text += localize(30810) + '\n'  # InputStream information
         disabled_str = ' ({disabled})'.format(disabled=localize(30054))
-        ishelper_state = disabled_str if get_setting('disabled', 'false') != 'false' else ''
+        ishelper_state = disabled_str if get_setting_bool('disabled', False) else ''
         istream_state = disabled_str if not self._inputstream_enabled() else ''
-        text += ' - ' + localize(30811, version=get_addon_info('version'), state=ishelper_state) + '\n'
+        text += ' - ' + localize(30811, version=addon_version(), state=ishelper_state) + '\n'
         text += ' - ' + localize(30812, version=self._inputstream_version(), state=istream_state) + '\n'
         text += '\n'
 
@@ -1066,7 +1057,7 @@ class Helper:
             text += ' - ' + localize(30821) + '\n'
         else:
             from datetime import datetime
-            wv_updated = datetime.fromtimestamp(float(get_setting('last_update'))).strftime("%Y-%m-%d %H:%M") if get_setting('last_update') else 'Never'
+            wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M") if get_setting_float('last_update', 0.0) else 'Never'
             text += ' - ' + localize(30822, version=self._get_lib_version(self._widevine_path()), date=wv_updated) + '\n'
             text += ' - ' + localize(30823, path=self._ia_cdm_path()) + '\n'
 

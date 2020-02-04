@@ -62,10 +62,8 @@ class Dialog:
         """A stub implementation for the xbmcgui Dialog class info() method"""
 
     @staticmethod
-    def select(heading, opt_list, autoclose=0, preselect=None, useDetails=False):
+    def select(heading, opt_list, autoclose=0, preselect=-1, useDetails=False):
         """A stub implementation for the xbmcgui Dialog class select() method"""
-        if preselect is None:
-            preselect = []
         heading = kodi_to_ansi(heading)
         print('\033[37;44;1mSELECT:\033[35;49;1m [%s] \033[37;1m%s\033[39;0m' % (heading, ', '.join(opt_list)))
         return -1

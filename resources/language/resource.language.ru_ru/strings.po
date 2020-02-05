@@ -231,11 +231,11 @@ msgstr "На разделе с временым каталогом недост�
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr ""
+msgstr "Резервные копии не найдены!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"
-msgstr ""
+msgstr "Выберите резервную копию для восстановления"
 
 
 ### INFORMATION DIALOG
@@ -269,7 +269,7 @@ msgstr "[B]Информация о Widevine[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Версия Widevine: [B]Встроенный в Android[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
@@ -323,8 +323,8 @@ msgstr "Удалить модуль Widevine CDM..."
 
 msgctxt "#30913"
 msgid "Number of backups"
-msgstr ""
+msgstr "Количество резервных копий"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Восстановить модуль Widevine CDM..."

@@ -603,7 +603,7 @@ class Helper:
 
             try:
                 os.link(backup_fpath, install_fpath)
-            except OSError:
+            except AttributeError:
                 copy(backup_fpath, install_fpath)
 
         log('Installed CDM version {version} from backup', version=version)

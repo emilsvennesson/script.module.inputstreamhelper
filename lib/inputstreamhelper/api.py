@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """This is the actual InputStream Helper API script"""
 
 from __future__ import absolute_import, division, unicode_literals

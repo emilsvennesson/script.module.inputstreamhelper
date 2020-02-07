@@ -231,11 +231,11 @@ msgstr "Det finns inte tillräckligt med ledigt diskutrymme i den temporära map
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr ""
+msgstr "Hittade inga säkerhetskopior!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"
-msgstr ""
+msgstr "Välj säkerhetskopia att återställa"
 
 
 ### INFORMATION DIALOG
@@ -269,7 +269,7 @@ msgstr "[B]Widevine-information[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Widevine-version: [B]Inbyggd i Android[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
@@ -323,8 +323,8 @@ msgstr "Ta bort Widevine CDM-biblioteket..."
 
 msgctxt "#30913"
 msgid "Number of backups"
-msgstr ""
+msgstr "Antal säkerhetskopior"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Återställ Widevine CDM-biblioteket..."

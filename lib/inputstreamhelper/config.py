@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Configuration variables for inpustreamhelper"""
 from __future__ import absolute_import, division, unicode_literals
 

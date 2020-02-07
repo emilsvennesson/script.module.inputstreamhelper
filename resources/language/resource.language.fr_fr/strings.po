@@ -269,7 +269,7 @@ msgstr "[B]Information Widevine[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Version Widevine : [B]Intégré dans Android[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"

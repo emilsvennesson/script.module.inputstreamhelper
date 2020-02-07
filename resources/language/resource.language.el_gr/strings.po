@@ -231,7 +231,7 @@ msgstr "Δεν υπάρχει επαρκής αποθηκευτικός χώρο
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr "Αντόγραφα ασφαλείας δεν βρεθήκανε!"
+msgstr "Δεν βρεθήκανε αντίγραφα ασφαλείας!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"

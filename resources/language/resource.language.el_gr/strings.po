@@ -231,11 +231,11 @@ msgstr "Δεν υπάρχει επαρκής αποθηκευτικός χώρο
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr ""
+msgstr "Αντόγραφα ασφαλείας δεν βρεθήκανε!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"
-msgstr ""
+msgstr "Επιλέξτε ένα αντίγραφο ασφαλείας για επαναφορά"
 
 
 ### INFORMATION DIALOG
@@ -323,8 +323,8 @@ msgstr "Αφαίρεση της βιβλιοθήκης CDM..."
 
 msgctxt "#30913"
 msgid "Number of backups"
-msgstr ""
+msgstr "Αριθμός αντιγράφων ασφαλείας"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Επαναφορά βιβλιοθήκης Widevine CDM"

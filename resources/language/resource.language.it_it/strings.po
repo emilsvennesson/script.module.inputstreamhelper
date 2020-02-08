@@ -231,11 +231,11 @@ msgstr "Non c'è abbastanza spazio libero nella cartella temporanea in uso. Ne v
 
 msgctxt "#30056"
 msgid "No backups found!"
-msgstr ""
+msgstr "Backup non trovato!"
 
 msgctxt "#30057"
 msgid "Choose a backup to restore"
-msgstr ""
+msgstr "Scegli un backup da ripristinare"
 
 
 ### INFORMATION DIALOG
@@ -269,7 +269,7 @@ msgstr "[B]Widevine info[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Widevine: [B]incluso in Android[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
@@ -323,8 +323,8 @@ msgstr "Rimuovi Widevine CDM"
 
 msgctxt "#30913"
 msgid "Number of backups"
-msgstr ""
+msgstr "Copie di backup"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Ripristino libreria Widevine CDM..."

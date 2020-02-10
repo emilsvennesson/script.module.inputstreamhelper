@@ -269,7 +269,7 @@ msgstr "[B]Widevine informacije[/B]"
 
 msgctxt "#30821"
 msgid "Widevine version: [B]Built into Android[/B]"
-msgstr ""
+msgstr "Widevine verzija: [B]Ugrađen u Android[/B]"
 
 msgctxt "#30822"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
@@ -327,4 +327,4 @@ msgstr "Broj sigurnosnih kopija"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr ""
+msgstr "Vrati sigurnosnu kopiju Widevine CDM-a..."

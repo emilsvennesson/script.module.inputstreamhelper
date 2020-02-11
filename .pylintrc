@@ -11,3 +11,4 @@ disable=
     too-many-locals,
     too-many-return-statements,
     unexpected-keyword-arg,
+    too-many-instance-attributes,

@@ -47,6 +47,11 @@ class Helper:
         self._modprobe_loop = False
         self._attached_loop_dev = False
 
+        if 'x86' in self._arch() or self._cmd_exists('udisksctl'):
+            self._mnt_path = None  # _mnt_path not needed on x86, set later if udisksctl is used
+        else:
+            self._mnt_path = self._mk_mnt_path()
+
         self.protocol = protocol
         self.drm = drm
 
@@ -84,7 +89,7 @@ class Helper:
         return statvfs.f_frsize * statvfs.f_bavail
 
     @classmethod
-    def _mnt_path(cls):
+    def _mk_mnt_path(cls):
         """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
         from xbmcvfs import exists, mkdir
         mnt_path = os.path.join(temp_path(), 'mnt')
@@ -301,8 +306,13 @@ class Helper:
 
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', '-o', self._chromeos_offset(bin_path), self._loop_dev, bin_path]
-        output = self._run_cmd(cmd, sudo=True)
+        if self._cmd_exists('udisksctl'):
+            cmd = ['udisksctl', 'loop-setup', '-o', self._chromeos_offset(bin_path), '-f', bin_path]
+            sudo = False
+        else:
+            cmd = ['losetup', '-o', self._chromeos_offset(bin_path), self._loop_dev, bin_path]
+            sudo = True
+        output = self._run_cmd(cmd, sudo=sudo)
         if output['success']:
             self._attached_loop_dev = True
             return True
@@ -310,9 +320,14 @@ class Helper:
         return False
 
     def _mnt_loop_dev(self):
-        """Mount loop device to self._mnt_path()"""
-        cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path()]
-        output = self._run_cmd(cmd, sudo=True)
+        """Mount loop device to self._mnt_path"""
+        if self._cmd_exists('udisksctl'):
+            cmd = ['udisksctl', 'mount', '-t', 'ext2', '-o', 'ro', '-b', self._loop_dev]
+            output = self._run_cmd(cmd, sudo=False)
+            self._mnt_path = output['output'].split()[-1].rstrip('.')
+        else:
+            cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path]
+            output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             return True
 
@@ -584,9 +599,10 @@ class Helper:
                 ok_dialog(localize(30004), localize(30021, command='losetup'))  # Losetup command is missing
                 return False
 
-            if os.getuid() != 0 and not yesno_dialog(localize(30001),  # Ask for permission to run cmds as root
-                                                     localize(30030, cmds=', '.join(root_cmds)),
-                                                     nolabel=localize(30028), yeslabel=localize(30027)):
+            if os.getuid() != 0 and not (self._cmd_exists('udisksctl') or
+                                         yesno_dialog(localize(30001),  # Ask for permission to run cmds as root if udisksctl unavailable
+                                                      localize(30030, cmds=', '.join(root_cmds)),
+                                                      nolabel=localize(30028), yeslabel=localize(30027))):
                 return False
 
             url = arm_device['url']
@@ -758,7 +774,7 @@ class Helper:
         from shutil import copyfile
         from xbmcvfs import exists, mkdir
 
-        for root, _, files in os.walk(str(self._mnt_path())):
+        for root, _, files in os.walk(str(self._mnt_path)):
             if str('libwidevinecdm.so') not in files:
                 continue
             cdm_path = os.path.join(root, 'libwidevinecdm.so')
@@ -836,9 +852,15 @@ class Helper:
 
     def _unmount(self):
         """Unmount mountpoint if mounted"""
-        while os.path.ismount(self._mnt_path()):
-            log('Unmount {mountpoint}', mountpoint=self._mnt_path())
-            umount_output = self._run_cmd(['umount', self._mnt_path()], sudo=True)
+        if not self._mnt_path:
+            return
+
+        while os.path.ismount(self._mnt_path):
+            log('Unmount {mountpoint}', mountpoint=self._mnt_path)
+            if self._cmd_exists('udisksctl'):
+                umount_output = self._run_cmd(['udisksctl', 'unmount', '-b', self._loop_dev], sudo=False)
+            else:
+                umount_output = self._run_cmd(['umount', self._mnt_path], sudo=True)
             if not umount_output['success']:
                 break
 
@@ -847,8 +869,13 @@ class Helper:
         from shutil import rmtree
         self._unmount()
         if self._attached_loop_dev:
-            cmd = ['losetup', '-d', self._loop_dev]
-            unattach_output = self._run_cmd(cmd, sudo=True)
+            if self._cmd_exists('udisksctl'):
+                cmd = ['udisksctl', 'loop-delete', '-b', self._loop_dev]
+                sudo = False
+            else:
+                cmd = ['losetup', '-d', self._loop_dev]
+                sudo = True
+            unattach_output = self._run_cmd(cmd, sudo=sudo)
             if unattach_output['success']:
                 self._loop_dev = False
         if self._modprobe_loop:

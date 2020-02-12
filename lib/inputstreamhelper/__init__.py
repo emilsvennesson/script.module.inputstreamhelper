@@ -46,11 +46,7 @@ class Helper:
         self._loop_dev = None
         self._modprobe_loop = False
         self._attached_loop_dev = False
-
-        if 'x86' in self._arch() or self._cmd_exists('udisksctl'):
-            self._mnt_path = None  # _mnt_path not needed on x86, set later if udisksctl is used
-        else:
-            self._mnt_path = self._mk_mnt_path()
+        self._stored_mnt_path = None
 
         self.protocol = protocol
         self.drm = drm
@@ -88,11 +84,16 @@ class Helper:
         statvfs = os.statvfs(temp_path())
         return statvfs.f_frsize * statvfs.f_bavail
 
-    @classmethod
-    def _mk_mnt_path(cls):
+    def _mnt_path(self, unmount=False):
         """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
+        if self._stored_mnt_path:
+            return self._stored_mnt_path
+
         from xbmcvfs import exists, mkdir
         mnt_path = os.path.join(temp_path(), 'mnt')
+        if not exists(mnt_path) and unmount:
+            return None
+
         if not exists(mnt_path):
             mkdir(mnt_path)
 
@@ -320,13 +321,13 @@ class Helper:
         return False
 
     def _mnt_loop_dev(self):
-        """Mount loop device to self._mnt_path"""
+        """Mount loop device to self._mnt_path()"""
         if self._cmd_exists('udisksctl'):
             cmd = ['udisksctl', 'mount', '-t', 'ext2', '-o', 'ro', '-b', self._loop_dev]
             output = self._run_cmd(cmd, sudo=False)
-            self._mnt_path = output['output'].split()[-1].rstrip('.')
+            self._stored_mnt_path = output['output'].split()[-1].rstrip('.')
         else:
-            cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path]
+            cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path()]
             output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             return True
@@ -774,7 +775,7 @@ class Helper:
         from shutil import copyfile
         from xbmcvfs import exists, mkdir
 
-        for root, _, files in os.walk(str(self._mnt_path)):
+        for root, _, files in os.walk(str(self._mnt_path())):
             if str('libwidevinecdm.so') not in files:
                 continue
             cdm_path = os.path.join(root, 'libwidevinecdm.so')
@@ -852,15 +853,15 @@ class Helper:
 
     def _unmount(self):
         """Unmount mountpoint if mounted"""
-        if not self._mnt_path:
+        if not self._mnt_path(unmount=True):
             return
 
-        while os.path.ismount(self._mnt_path):
-            log('Unmount {mountpoint}', mountpoint=self._mnt_path)
+        while os.path.ismount(self._mnt_path()):
+            log('Unmount {mountpoint}', mountpoint=self._mnt_path())
             if self._cmd_exists('udisksctl'):
                 umount_output = self._run_cmd(['udisksctl', 'unmount', '-b', self._loop_dev], sudo=False)
             else:
-                umount_output = self._run_cmd(['umount', self._mnt_path], sudo=True)
+                umount_output = self._run_cmd(['umount', self._mnt_path()], sudo=True)
             if not umount_output['success']:
                 break
 

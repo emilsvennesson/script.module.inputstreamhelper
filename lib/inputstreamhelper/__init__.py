@@ -455,7 +455,7 @@ class Helper:
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         if self._arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
             log('Unsupported Widevine architecture found: {arch}', arch=self._arch())
-            ok_dialog(localize(30004), localize(30007))  # Widevine not available on this architecture
+            ok_dialog(localize(30004), localize(30007, arch=self._arch()))  # Widevine not available on this architecture
             return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:

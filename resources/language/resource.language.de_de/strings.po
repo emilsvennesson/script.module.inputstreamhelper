@@ -34,8 +34,8 @@ msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from 
 msgstr "Wegen lizenzrechtlicher Reglementierungen muss die [B]Widevine CDM[/B] Bibliothek aus einem Chrome OS Image extrahiert werden. Dafür sind mindestens [B]{diskspace}[/B] freier Festplattenspeicher notwendig. Soll der Vorgang fortgesetzt werden?"
 
 msgctxt "#30007"
-msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
-msgstr "Die [B]Widevine CDM[/B] Bibliothek ist leider für diese System-Architektur nicht verfügbar."
+msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture ([B]{arch}[/B])."
+msgstr "Die [B]Widevine CDM[/B] Bibliothek ist leider für diese System-Architektur ([B]{arch}[/B]) nicht verfügbar."
 
 msgctxt "#30008"
 msgid "[B]{addon}[/B] is missing on your Kodi install. This add-on is required to play this content."
@@ -50,8 +50,8 @@ msgid "[B]Kodi {version}[/B] or higher is required for [B]Widevine CDM[/B] conte
 msgstr "[B]Kodi in der Version {version}[/B] oder höher wird benötigt, um [B]Widevine CDM[/B] geschützte Inhalte wiederzugeben."
 
 msgctxt "#30011"
-msgid "This operating system ([B]{0}[/B]) is not supported by [B]Widevine CDM[/B]."
-msgstr "Das genutzte Betriebssystem ([B]{0}[/B]) wird aktuell nicht von der [B]Widevine CDM[/B] Bibliothek unterstützt."
+msgid "This operating system ([B]{os}[/B]) is not supported by [B]Widevine CDM[/B]."
+msgstr "Das genutzte Betriebssystem ([B]{os}[/B]) wird aktuell nicht von der [B]Widevine CDM[/B] Bibliothek unterstützt."
 
 msgctxt "#30012"
 msgid "The Windows Store version of Kodi does not support [B]Widevine CDM[/B].[CR][CR]Please use the installer from kodi.tv instead."

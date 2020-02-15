@@ -34,7 +34,7 @@ msgid "Due to distribution rights, [B]Widevine CDM[/B] has to be extracted from 
 msgstr ""
 
 msgctxt "#30007"
-msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture."
+msgid "[B]Widevine CDM[/B] is unfortunately not available on this system architecture ([B]{arch}[/B])."
 msgstr ""
 
 msgctxt "#30008"
@@ -50,7 +50,7 @@ msgid "[B]Kodi {version}[/B] or higher is required for [B]Widevine CDM[/B] conte
 msgstr ""
 
 msgctxt "#30011"
-msgid "This operating system ([B]{0}[/B]) is not supported by [B]Widevine CDM[/B]."
+msgid "This operating system ([B]{os}[/B]) is not supported by [B]Widevine CDM[/B]."
 msgstr ""
 
 msgctxt "#30012"

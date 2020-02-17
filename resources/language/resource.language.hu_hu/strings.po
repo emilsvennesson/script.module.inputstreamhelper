@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: script.module.inputstreamhelper\n"
 "Report-Msgid-Bugs-To: https://github.com/emilsvennesson/script.module.inputstreamhelper\n"
 "POT-Creation-Date: 2013-11-18 16:15+0000\n"
-"PO-Revision-Date: 2020-02-05 07:30+0000\n"
+"PO-Revision-Date: 2020-02-17 16:30+0000\n"
 "Last-Translator: frodo19\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -51,7 +51,7 @@ msgstr "[B]Kodi {version}[/B] vagy magasabb verzió kell a [B]Widevine CDM[/B] t
 
 msgctxt "#30011"
 msgid "This operating system ([B]{os}[/B]) is not supported by [B]Widevine CDM[/B]."
-msgstr "Ezt az operációs rendszert ([B]{os}[/B]) nem támogstja a [B]Widevine CDM[/B]"
+msgstr "Ezt az operációs rendszert ([B]{os}[/B]) nem támogatja a [B]Widevine CDM[/B]"
 
 msgctxt "#30012"
 msgid "The Windows Store version of Kodi does not support [B]Widevine CDM[/B].[CR][CR]Please use the installer from kodi.tv instead."

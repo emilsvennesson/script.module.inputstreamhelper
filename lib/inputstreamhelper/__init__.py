@@ -685,9 +685,6 @@ class Helper:
                                                      nolabel=localize(30028), yeslabel=localize(30027)):
                 return False
 
-            # Clean up any remaining mounts
-            self._unmount()
-
             url = arm_device['url']
             downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
             if downloaded:
@@ -755,6 +752,9 @@ class Helper:
         """Wrapper function that calls Widevine installer method depending on architecture"""
         if not self._supports_widevine():
             return False
+
+        # Clean up in case anything went wrong the last time.
+        self._cleanup()
 
         if 'x86' in self._arch():
             return self._install_widevine_x86()

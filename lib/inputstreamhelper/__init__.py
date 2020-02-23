@@ -369,7 +369,7 @@ class Helper:
         filename = url.split('/')[-1]
 
         try:
-            req = urlopen(url)
+            req = urlopen(url, timeout=5)
             log('Response code: {code}', code=req.getcode())
             if 400 <= req.getcode() < 600:
                 raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)

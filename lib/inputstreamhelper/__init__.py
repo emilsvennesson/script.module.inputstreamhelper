@@ -283,7 +283,7 @@ class Helper:
         try:
             output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT, env=env))
         except subprocess.CalledProcessError as error:
-            output = error.output
+            output = to_unicode(error.output)
             log('{cmd} cmd failed.', cmd=cmd)
         except OSError as error:
             log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)

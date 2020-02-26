@@ -389,8 +389,17 @@ class Helper:
         # log('Response: {response}', response=content)
         return content.decode()
 
-    def _http_download(self, url, message=None):
+    def _http_download(self, url, message=None, checksum=None, hash_alg='sha1'):
         """Makes HTTP request and displays a progress dialog on download."""
+        if checksum:
+            from hashlib import sha1, md5
+            if hash_alg == 'sha1':
+                calc_checksum = sha1()
+            elif hash_alg == 'md5':
+                calc_checksum = md5()
+            else:
+                raise ValueError('Invalid hash algorithm specified: {}'.format(hash_alg))
+
         req = self._http_request(url)
         if req is None:
             return None
@@ -412,6 +421,8 @@ class Helper:
                 if not chunk:
                     break
                 image.write(chunk)
+                if checksum:
+                    calc_checksum.update(chunk)
                 size += len(chunk)
                 percent = int(size * 100 / total_length)
                 if progress.iscanceled():
@@ -420,6 +431,9 @@ class Helper:
                     return False
                 progress.update(percent)
 
+        if checksum and not calc_checksum.hexdigest() == checksum:
+            log('Download failed, checksums do not match!')
+            return False
         progress.close()
         req.close()
         return True
@@ -686,7 +700,7 @@ class Helper:
                 return False
 
             url = arm_device['url']
-            downloaded = self._http_download(url, message=localize(30022))  # Downloading the recovery image
+            downloaded = self._http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1')  # Downloading the recovery image
             if downloaded:
                 from threading import Thread
                 from xbmc import sleep

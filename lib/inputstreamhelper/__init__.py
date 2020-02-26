@@ -398,7 +398,8 @@ class Helper:
             elif hash_alg == 'md5':
                 calc_checksum = md5()
             else:
-                raise ValueError('Invalid hash algorithm specified: {}'.format(hash_alg))
+                log('Invalid hash algorithm specified: {}'.format(hash_alg))
+                checksum = None
 
         req = self._http_request(url)
         if req is None:

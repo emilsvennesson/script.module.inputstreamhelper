@@ -29,6 +29,10 @@ def Stat(path):
             """The xbmcvfs stat class st_mtime method"""
             return self._stat.st_mtime
 
+        def st_size(self):
+            """The xbmcvfs stat class st_size method"""
+            return self._stat.st_size
+
     return stat(path)
 
 

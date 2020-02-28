@@ -389,7 +389,7 @@ class Helper:
         # log('Response: {response}', response=content)
         return content.decode()
 
-    def _http_download(self, url, message=None, checksum=None, hash_alg='sha1'):
+    def _http_download(self, url, message=None, checksum=None, hash_alg='sha1', dl_size=None):
         """Makes HTTP request and displays a progress dialog on download."""
         if checksum:
             from hashlib import sha1, md5
@@ -435,6 +435,12 @@ class Helper:
         if checksum and not calc_checksum.hexdigest() == checksum:
             log('Download failed, checksums do not match!')
             return False
+
+        from xbmcvfs import Stat
+        if dl_size and not Stat(self._download_path).st_size() == dl_size:
+            log('Download failed, filesize does not match!')
+            return False
+
         progress.close()
         req.close()
         return True
@@ -701,7 +707,7 @@ class Helper:
                 return False
 
             url = arm_device['url']
-            downloaded = self._http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1')  # Downloading the recovery image
+            downloaded = self._http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
             if downloaded:
                 from threading import Thread
                 from xbmc import sleep

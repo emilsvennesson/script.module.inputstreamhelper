@@ -1099,6 +1099,12 @@ class Helper:
         versions = os.listdir(backup_path)
 
         if 'x86' in self._arch():
+            installed_version = self._load_widevine_config()['version']
+        else:
+            installed_version = self._select_best_chromeos_image(self._load_widevine_config())['version']
+        del versions[versions.index(installed_version)]
+
+        if 'x86' in self._arch():
             show_versions = versions
         else:
             show_versions = []
@@ -1110,12 +1116,6 @@ class Helper:
         if not show_versions:
             notification(localize(30004), localize(30056))
             return
-
-        if 'x86' in self._arch():
-            installed_version = self._load_widevine_config()['version']
-        else:
-            installed_version = self._select_best_chromeos_image(self._load_widevine_config())['version']
-        del show_versions[show_versions.index(installed_version)]
 
         version = select_dialog(localize(30057), show_versions)
         if version != -1:

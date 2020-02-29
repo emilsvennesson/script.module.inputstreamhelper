@@ -328,4 +328,3 @@ msgstr "Anzahl Backups"
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
 msgstr "Widevine CDM Bibliothek wiederherstellen..."
-

@@ -18,6 +18,11 @@ class SafeDict(dict):
         return '{' + key + '}'
 
 
+def kodi_version():
+    """Returns major Kodi version"""
+    return int(xbmc.getInfoLabel('System.BuildVersion').split('.')[0])
+
+
 def translate_path(path):
     """Translate special xbmc paths"""
     return to_unicode(xbmc.translatePath(path))
@@ -86,6 +91,8 @@ def textviewer(heading='', text='', usemono=False):
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
+    if kodi_version() < 18:
+        return Dialog().textviewer(heading=heading, text=text)
     return Dialog().textviewer(heading=heading, text=text, usemono=usemono)
 
 

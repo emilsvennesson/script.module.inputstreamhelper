@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 from inputstreamhelper import config
 from .kodiutils import (addon_profile, addon_version, browsesingle, get_proxies, get_setting, get_setting_bool,
-                        get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, localize, log, notification,
+                        get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, kodi_version, localize, log, notification,
                         ok_dialog, progress_dialog, select_dialog, set_setting, set_setting_bool, textviewer,
                         translate_path, yesno_dialog)
 
@@ -156,13 +156,6 @@ class Helper:
                 return widevine_path
 
         return False
-
-    @classmethod
-    def _kodi_version(cls):
-        """Return the current Kodi version"""
-        from xbmc import getInfoLabel
-        version = getInfoLabel('System.BuildVersion')
-        return version.split(' ')[0]
 
     @classmethod
     def _arch(cls):
@@ -485,8 +478,8 @@ class Helper:
             return False
 
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(self._kodi_version()):
-            log('Unsupported Kodi version for Widevine: {version}', version=self._kodi_version())
+        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(kodi_version()):
+            log('Unsupported Kodi version for Widevine: {version}', version=kodi_version())
             ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
 
@@ -1062,7 +1055,7 @@ class Helper:
     def info_dialog(self):
         """ Show an Info box with useful info e.g. for bug reports"""
         text = localize(30800) + '\n'  # Kodi information
-        text += ' - ' + localize(30801, version=self._kodi_version()) + '\n'
+        text += ' - ' + localize(30801, version=kodi_version()) + '\n'
         text += ' - ' + localize(30802, platform=system_os(), arch=self._arch()) + '\n'
         text += '\n'
 

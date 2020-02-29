@@ -1091,6 +1091,11 @@ class Helper:
         backup_path = self._backup_path()
         versions = os.listdir(backup_path)
 
+        # Return if Widevine is not installed
+        if not os.path.exists(self._widevine_config_path()):
+            notification(localize(30004), localize(30041))
+            return
+
         if 'x86' in self._arch():
             installed_version = self._load_widevine_config()['version']
         else:

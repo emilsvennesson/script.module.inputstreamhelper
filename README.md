@@ -63,6 +63,16 @@ Please report any issues or bug reports on the [GitHub Issues](https://github.co
 This module is licensed under the **The MIT License**. Please see the [LICENSE.txt](LICENSE.txt) file for details.
 
 ## Releases
+## v0.4.4 (2020-03-01)
+- Added option to restore a previously installed Widevine version (@horstle)
+- Improve progress bar when extracting Widevine on ARM devices (@dagwieers)
+- Improve Widevine library version detection (@dagwieers, @mediaminister)
+- Improve InputStream Helper information (@dagwieers, @mediaminister)
+- Increase download reliability for Chrome OS on ARM devices (@horstle, @RolfWojtech)
+- Added Japanese, Korean, Croatian and Hungarian translations (@Thunderbird2086, @arvvoid, @frodo19)
+- Updated existing translations (@dnicolaas, @Sopor, @tweimer, @horstle, @mediaminister)
+- Various small bugfixes for Widevine installation on ARM devices (@dagwieers, @mediaminister, @Twilight0, @janhicken)
+
 ## v0.4.3 (2019-09-25)
 - French translation (@brunoduc)
 - Updated translations (@vlmaksime, @dagwieers, @pinoelefante, @horstle, @Twilight0, @emilsvennesson)

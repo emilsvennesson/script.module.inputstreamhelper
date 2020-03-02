@@ -13,6 +13,7 @@ def to_unicode(text, encoding='utf-8'):
     return text.decode(encoding) if isinstance(text, bytes) else text
 
 
+# NOTE: This is required so our RunScript interface can import our own inputstreamhelper package
 sys.path.append(os.path.join(to_unicode(translatePath(Addon().getAddonInfo('path'))), 'lib'))
 from inputstreamhelper.api import run  # noqa: E402
 

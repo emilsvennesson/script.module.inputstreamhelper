@@ -14,6 +14,8 @@ def run(params):
             widevine_install()
         elif params[1] == 'widevine_remove':
             widevine_remove()
+        elif params[1] in ('rollback', 'widevine_rollback'):
+            widevine_rollback()
         elif params[1] == 'check_inputstream':
             if len(params) == 3:
                 check_inputstream(params[2])
@@ -21,8 +23,8 @@ def run(params):
                 check_inputstream(params[2], drm=params[3])
         elif params[1] == 'info':
             info_dialog()
-        elif params[1] == 'rollback':
-            rollback()
+        else:
+            log("invalid API call method '{method}'", method=params[1])
 
     elif len(params) > 4:
         log('invalid API call, too many parameters')
@@ -41,15 +43,15 @@ def widevine_install():
 
 
 def widevine_remove():
-    """The API interface to remove Widevine CDMs"""
+    """The API interface to remove Widevine CDM"""
     Helper('mpd', drm='widevine').remove_widevine()
+
+
+def widevine_rollback():
+    """The API interface to rollback Widevine CDM"""
+    Helper('mpd', drm='widevine').rollback_libwv()
 
 
 def info_dialog():
     """The API interface to show an info Dialog"""
     Helper('mpd', drm='widevine').info_dialog()
-
-
-def rollback():
-    """The API interface to rollback Widevine CDM"""
-    Helper('mpd', drm='widevine').rollback_libwv()

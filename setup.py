@@ -22,7 +22,17 @@ setup(
     long_description=open(os.path.join(project_dir, 'README.md')).read(),
     keywords='Kodi, plugin, inputstream, helper',
     license='MIT',
+    python_requires='>=2.7',
     package_dir={'': 'lib'},
     packages=find_packages('lib'),
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+    ],
     zip_safe=False,
 )

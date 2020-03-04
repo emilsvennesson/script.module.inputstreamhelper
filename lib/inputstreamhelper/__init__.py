@@ -4,7 +4,7 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
-from inputstreamhelper import config
+from . import config
 from .kodiutils import (addon_profile, addon_version, browsesingle, get_proxies, get_setting, get_setting_bool,
                         get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, kodi_version, localize, log, notification,
                         ok_dialog, progress_dialog, select_dialog, set_setting, set_setting_bool, textviewer,

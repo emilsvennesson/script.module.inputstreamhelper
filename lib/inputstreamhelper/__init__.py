@@ -542,9 +542,6 @@ class Helper:
             versions = self._http_get(url)
             return versions.split()[-1]
 
-        from datetime import datetime
-        from time import mktime
-        set_setting('last_update', mktime(datetime.utcnow().timetuple()))
         if 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
             versions = self._http_get(url)
@@ -771,9 +768,15 @@ class Helper:
         self._cleanup()
 
         if 'x86' in self._arch():
-            return self._install_widevine_x86()
+            result = self._install_widevine_x86()
+        else:
+            result = self._install_widevine_arm()
+        if result:
+            from datetime import datetime
+            from time import mktime
+            set_setting('last_update', mktime(datetime.utcnow().timetuple()))
 
-        return self._install_widevine_arm()
+        return result
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
@@ -805,9 +808,10 @@ class Helper:
 
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
+        from datetime import datetime, timedelta
+
         last_update = get_setting_float('last_update', 0.0)
         if last_update and not self._first_run():
-            from datetime import datetime, timedelta
             last_update_dt = datetime.fromtimestamp(get_setting_float('last_update', 0.0))
             if last_update_dt + timedelta(days=get_setting_int('update_frequency', 14)) >= datetime.utcnow():
                 log('Widevine update check was made on {date}', date=last_update_dt.isoformat())
@@ -832,6 +836,8 @@ class Helper:
             else:
                 log('User declined to update {component}.', component=component)
         else:
+            from time import mktime
+            set_setting('last_update', mktime(datetime.utcnow().timetuple()))
             log('User is on the latest available {component} version.', component=component)
 
     def _widevine_eula(self):

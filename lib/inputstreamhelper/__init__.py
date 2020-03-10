@@ -9,6 +9,7 @@ from .kodiutils import (addon_profile, addon_version, browsesingle, get_proxies,
                         get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, kodi_version, localize, log, notification,
                         ok_dialog, progress_dialog, select_dialog, set_setting, set_setting_bool, textviewer,
                         translate_path, yesno_dialog)
+from .utils import http_get, http_download, temp_path, unzip, update_temp_path
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -79,24 +80,14 @@ class Helper:
     @classmethod
     def _diskspace(cls):
         """Return the free disk space available (in bytes) in temp_path."""
-        statvfs = os.statvfs(cls._temp_path())
+        statvfs = os.statvfs(temp_path())
         return statvfs.f_frsize * statvfs.f_bavail
-
-    @classmethod
-    def _temp_path(cls):
-        """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
-        from xbmcvfs import exists, mkdirs
-        temp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
-        if not exists(temp_path):
-            mkdirs(temp_path)
-
-        return temp_path
 
     @classmethod
     def _mnt_path(cls):
         """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
         from xbmcvfs import exists, mkdir
-        mnt_path = os.path.join(cls._temp_path(), 'mnt')
+        mnt_path = os.path.join(temp_path(), 'mnt')
         if not exists(mnt_path):
             mkdir(mnt_path)
 
@@ -198,15 +189,6 @@ class Helper:
         import subprocess
         return subprocess.call(['type ' + cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
-    def _update_temp_path(self, new_temp_path):
-        """"Updates temp_path and merges files."""
-        old_temp_path = self._temp_path()
-
-        set_setting('temp_path', new_temp_path)
-        if old_temp_path != self._temp_path():
-            from shutil import move
-            move(old_temp_path, self._temp_path())
-
     @staticmethod
     def disable():
         """Disable plugin"""
@@ -227,7 +209,7 @@ class Helper:
         except RuntimeError:
             return None
 
-        from .utils import to_unicode
+        from .unicodes import to_unicode
         return to_unicode(addon.getAddonInfo('version'))
 
     @staticmethod
@@ -239,7 +221,7 @@ class Helper:
             match = re.search(br'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', library.read())
         if not match:
             return '(Undetected)'
-        from .utils import to_unicode
+        from .unicodes import to_unicode
         return to_unicode(match.group(0))
 
     def _chromeos_offset(self, bin_path):
@@ -264,7 +246,7 @@ class Helper:
 
     def _run_cmd(self, cmd, sudo=False, shell=False):
         """Run subprocess command and return if it succeeds as a bool"""
-        from .utils import to_unicode
+        from .unicodes import to_unicode
         import subprocess
         env = os.environ.copy()
         env['LANG'] = 'C'
@@ -347,96 +329,6 @@ class Helper:
 
         log('Widevine is not installed.')
         return False
-
-    @staticmethod
-    def _http_request(url):
-        """Perform an HTTP request and return request"""
-
-        try:  # Python 3
-            from urllib.error import HTTPError
-            from urllib.request import urlopen
-        except ImportError:  # Python 2
-            from urllib2 import HTTPError, urlopen
-
-        log('Request URL: {url}', url=url)
-        filename = url.split('/')[-1]
-
-        try:
-            req = urlopen(url, timeout=5)
-            log('Response code: {code}', code=req.getcode())
-            if 400 <= req.getcode() < 600:
-                raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
-        except HTTPError:
-            ok_dialog(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
-            return None
-        return req
-
-    def _http_get(self, url):
-        """Perform an HTTP GET request and return content"""
-        req = self._http_request(url)
-        if req is None:
-            return None
-
-        content = req.read()
-        # NOTE: Do not log reponse (as could be large)
-        # log('Response: {response}', response=content)
-        return content.decode()
-
-    def _http_download(self, url, message=None, checksum=None, hash_alg='sha1', dl_size=None):
-        """Makes HTTP request and displays a progress dialog on download."""
-        if checksum:
-            from hashlib import sha1, md5
-            if hash_alg == 'sha1':
-                calc_checksum = sha1()
-            elif hash_alg == 'md5':
-                calc_checksum = md5()
-            else:
-                log('Invalid hash algorithm specified: {}'.format(hash_alg))
-                checksum = None
-
-        req = self._http_request(url)
-        if req is None:
-            return None
-
-        filename = url.split('/')[-1]
-        if not message:  # display "downloading [filename]"
-            message = localize(30015, filename=filename)  # Downloading file
-
-        self._download_path = os.path.join(self._temp_path(), filename)
-        total_length = float(req.info().get('content-length'))
-        progress = progress_dialog()
-        progress.create(localize(30014), message)  # Download in progress
-
-        chunk_size = 32 * 1024
-        with open(self._download_path, 'wb') as image:
-            size = 0
-            while True:
-                chunk = req.read(chunk_size)
-                if not chunk:
-                    break
-                image.write(chunk)
-                if checksum:
-                    calc_checksum.update(chunk)
-                size += len(chunk)
-                percent = int(size * 100 / total_length)
-                if progress.iscanceled():
-                    progress.close()
-                    req.close()
-                    return False
-                progress.update(percent)
-
-        if checksum and not calc_checksum.hexdigest() == checksum:
-            log('Download failed, checksums do not match!')
-            return False
-
-        from xbmcvfs import Stat
-        if dl_size and not Stat(self._download_path).st_size() == dl_size:
-            log('Download failed, filesize does not match!')
-            return False
-
-        progress.close()
-        req.close()
-        return True
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -539,12 +431,12 @@ class Helper:
         """Returns the latest available version of Widevine CDM/Chrome OS."""
         if eula:
             url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get(url)
+            versions = http_get(url)
             return versions.split()[-1]
 
         if 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
-            versions = self._http_get(url)
+            versions = http_get(url)
             return versions.split()[-1]
 
         devices = self._chromeos_config()
@@ -555,10 +447,11 @@ class Helper:
             return ''
         return arm_device['version']
 
-    def _chromeos_config(self):
+    @staticmethod
+    def _chromeos_config():
         """Parse the Chrome OS recovery configuration and put it in a dictionary"""
         url = config.CHROMEOS_RECOVERY_URL
-        conf = [line for line in self._http_get(url).split('\n\n') if 'hwidmatch=' in line]
+        conf = [line for line in http_get(url).split('\n\n') if 'hwidmatch=' in line]
 
         devices = []
         for device in conf:
@@ -627,11 +520,11 @@ class Helper:
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-        downloaded = self._http_download(url)
+        downloaded, self._download_path = http_download(url)
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
-            self._unzip(os.path.join(self._backup_path(), cdm_version))
+            unzip(self._download_path, os.path.join(self._backup_path(), cdm_version))
 
             progress.update(94, line1=localize(30049))  # Installing Widevine CDM
             self._install_cdm_from_backup(cdm_version)
@@ -672,7 +565,7 @@ class Helper:
 
             while required_diskspace >= self._diskspace():
                 if yesno_dialog(localize(30004), localize(30055)):  # Not enough space, alternative path?
-                    self._update_temp_path(browsesingle(3, localize(30909), 'files'))  # Temporary path
+                    update_temp_path(browsesingle(3, localize(30909), 'files'))  # Temporary path
                     continue
 
                 ok_dialog(localize(30004),  # Not enough free disk space
@@ -697,18 +590,18 @@ class Helper:
                 return False
 
             url = arm_device['url']
-            downloaded = self._http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
+            downloaded, self._download_path = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
             if downloaded:
                 from threading import Thread
                 from xbmc import sleep
                 progress = progress_dialog()
                 progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
                 bin_filename = url.split('/')[-1].replace('.zip', '')
-                bin_path = os.path.join(self._temp_path(), bin_filename)
+                bin_path = os.path.join(temp_path(), bin_filename)
 
                 progress.update(0, line1=localize(30045), line2=localize(30046, mins=0, secs=0), line3=localize(30047))  # Uncompressing image
                 unzip_result = []
-                unzip_thread = Thread(target=self._unzip, args=[self._temp_path(), bin_filename, unzip_result], name='ImageExtraction')
+                unzip_thread = Thread(target=unzip, args=[self._download_path, temp_path(), bin_filename, unzip_result], name='ImageExtraction')
                 unzip_thread.start()
 
                 time = 0
@@ -849,7 +742,7 @@ class Helper:
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded = self._http_download(url, message=localize(30025))  # Acquiring EULA
+            downloaded, self._download_path = http_download(url, message=localize(30025))  # Acquiring EULA
             if not downloaded:
                 return False
 
@@ -941,30 +834,6 @@ class Helper:
         self._update_widevine()
         return True
 
-    def _unzip(self, unzip_dir, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
-        """Unzip files to specified path"""
-        from xbmcvfs import exists, mkdirs
-
-        if not exists(unzip_dir):
-            mkdirs(unzip_dir)
-
-        from zipfile import ZipFile
-        zip_obj = ZipFile(self._download_path)
-        for filename in zip_obj.namelist():
-            if file_to_unzip and filename != file_to_unzip:
-                continue
-
-            # Detect and remove (dangling) symlinks before extraction
-            fullname = os.path.join(unzip_dir, filename)
-            if os.path.islink(fullname):
-                log('Remove (dangling) symlink at {symlink}', symlink=fullname)
-                os.unlink(fullname)
-
-            zip_obj.extract(filename, unzip_dir)
-            result.append(True)  # Pass by reference for Thread
-
-        return bool(result)
-
     def _unmount(self):
         """Unmount mountpoint if mounted"""
         while os.path.ismount(self._mnt_path()):
@@ -987,7 +856,7 @@ class Helper:
         if not self._has_widevine():
             rmtree(self._ia_cdm_path())
 
-        rmtree(self._temp_path())
+        rmtree(temp_path())
         return True
 
     def _supports_hls(self):

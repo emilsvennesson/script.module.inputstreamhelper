@@ -5,7 +5,7 @@
 from __future__ import absolute_import, division, unicode_literals
 import xbmc
 import xbmcaddon
-from .utils import from_unicode, to_unicode
+from .unicodes import from_unicode, to_unicode
 
 # NOTE: We need to add the add-on id in here explicitly !
 ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')

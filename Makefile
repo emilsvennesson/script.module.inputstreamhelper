@@ -1,10 +1,12 @@
 export PYTHONPATH := $(CURDIR)/lib:$(CURDIR)/test
 PYTHON := python
+KODI_PYTHON_ABIS := 3.0.0 2.25.0
 
 name = $(shell xmllint --xpath 'string(/addon/@id)' addon.xml)
 version = $(shell xmllint --xpath 'string(/addon/@version)' addon.xml)
 git_branch = $(shell git rev-parse --abbrev-ref HEAD)
 git_hash = $(shell git rev-parse --short HEAD)
+matrix = $(findstring $(shell xmllint --xpath 'string(/addon/requires/import[@addon="xbmc.python"]/@version)' addon.xml), $(word 1,$(KODI_PYTHON_ABIS)))
 
 zip_name = $(name)-$(version)-$(git_branch)-$(git_hash).zip
 include_files = addon.xml changelog.txt default.py LICENSE.txt README.md lib/ resources/
@@ -57,6 +59,15 @@ unit: clean
 run:
 	@echo -e "$(white)=$(blue) Run CLI$(reset)"
 	$(PYTHON) default.py
+
+multizip: clean
+	@-$(foreach abi,$(KODI_PYTHON_ABIS), \
+		echo "cd /addon/requires/import[@addon='xbmc.python']/@version\nset $(abi)\nsave\nbye" | xmllint --shell addon.xml; \
+		matrix=$(findstring $(abi), $(word 1,$(KODI_PYTHON_ABIS))); \
+		if [ $$matrix ]; then version=$(version)+matrix.1; else version=$(version); fi; \
+		echo "cd /addon/@version\nset $$version\nsave\nbye" | xmllint --shell addon.xml; \
+		make zip; \
+	)
 
 zip: clean
 	@echo -e "$(white)=$(blue) Building new package$(reset)"

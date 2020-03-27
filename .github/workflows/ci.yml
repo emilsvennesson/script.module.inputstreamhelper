@@ -1,0 +1,59 @@
+name: CI
+on:
+- pull_request
+- push
+jobs:
+  tests:
+    name: Add-on testing
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONPATH: ${{ github.workspace }}/lib:${{ github.workspace }}/tests
+    strategy:
+      fail-fast: false
+      matrix:
+#        max-parallel: 2
+        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8 ]
+    steps:
+    - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt-get install gettext
+        sudo pip install coverage --install-option="--install-scripts=/usr/bin"
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run tox
+      run: python -m tox -q -e flake8,py
+    - name: Run pylint
+      run: python -m pylint lib/ tests/
+    - name: Compare translations
+      run: make check-translations
+    # Python 2.7 and Python 3.5 are no longer supported by proxy.py
+    - name: Start proxy server, when supported
+      run: python -m proxy --hostname 127.0.0.1 --log-level DEBUG &
+      if: matrix.python-version == '3.6' || matrix.python-version == '3.7' || matrix.python-version == '3.8'
+      #if: contains(["3.6", "3.7", "3.8"], matrix.python-version)
+    - name: Run unit tests
+      run: coverage run -m unittest discover
+    - name: Run addon using cli
+      run: coverage run -a default.py
+    - name: Upload code coverage to CodeCov
+      uses: codecov/codecov-action@v1
+      continue-on-error: true
+    # FIXME: Requires changes from SonarSource/sonarcloud-github-action#9
+    - name: Analyze with SonarCloud
+      uses: dagwieers/sonarcloud-github-action@more-options
+      with:
+        organization: emilsvennesson
+        projectKey: emilsvennesson_script.module.inputstreamhelper
+        sources: lib/
+        tests: tests/
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      continue-on-error: true

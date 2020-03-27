@@ -35,8 +35,8 @@ class TestApi(unittest.TestCase):
 
     @staticmethod
     def test_check_inputstream():
-        if os.path.exists('test/cdm/widevine_config.json'):
-            os.remove('test/cdm/widevine_config.json')
+        if os.path.exists('tests/cdm/widevine_config.json'):
+            os.remove('tests/cdm/widevine_config.json')
         default.run(['default.py', 'check_inputstream', 'mpd', 'com.widevine.alpha'])
         default.run(['default.py', 'check_inputstream', 'hls', 'widevine'])
         default.run(['default.py', 'check_inputstream', 'hls'])

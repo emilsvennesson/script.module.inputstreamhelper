@@ -63,7 +63,7 @@ class Addon:
         """A stub implementation for the xbmcaddon Addon class setSetting() method"""
         self.settings[key] = value
         # NOTE: Disable actual writing as it is no longer needed for testing
-        # with open('test/userdata/addon_settings.json', 'w') as fd:
+        # with open('tests/userdata/addon_settings.json', 'w') as fd:
         #     json.dump(filtered_settings, fd, sort_keys=True, indent=4)
 
     def setSettingBool(self, key, value):

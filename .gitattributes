@@ -1,0 +1,11 @@
+.github/ export-ignore
+dist/ export-ignore
+tests/ export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+.pylintrc export-ignore
+codecov.yml export-ignore
+Makefile export-ignore
+requirements.txt export-ignore
+setup.py export-ignore
+tox.ini export-ignore

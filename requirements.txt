@@ -1,8 +1,8 @@
-codecov
+coverage
 kodi-addon-checker
 polib
-proxy.py==0.3
+proxy.py; python_version != '2.7'
 pylint
 setuptools >= 41
-tox-travis
+tox
 xmlschema==1.0.18; python_version == '2.7'

@@ -74,10 +74,10 @@ def global_settings():
     """Use the global_settings file"""
     import json
     try:
-        with open('test/userdata/global_settings.json') as f:
+        with open('tests/userdata/global_settings.json') as f:
             settings = json.load(f)
     except OSError as e:
-        print("Error: Cannot use 'test/userdata/global_settings.json' : %s" % e)
+        print("Error: Cannot use 'tests/userdata/global_settings.json' : %s" % e)
         settings = {
             'locale.language': 'resource.language.en_gb',
             'network.bandwidth': 0,
@@ -104,10 +104,10 @@ def addon_settings(addon_id=None):
     """Use the addon_settings file"""
     import json
     try:
-        with open('test/userdata/addon_settings.json') as f:
+        with open('tests/userdata/addon_settings.json') as f:
             settings = json.load(f)
     except OSError as e:
-        print("Error: Cannot use 'test/userdata/addon_settings.json' : %s" % e)
+        print("Error: Cannot use 'tests/userdata/addon_settings.json' : %s" % e)
         settings = {}
 
     if addon_id:

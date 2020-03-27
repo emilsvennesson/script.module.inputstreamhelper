@@ -5,12 +5,12 @@ __pycache__/
 *.py[cod]
 
 # Userdata
-test/cdm/
-test/userdata/addon_settings.json
-test/userdata/addon_data/
-test/userdata/cdm/
-test/userdata/backup/
-test/userdata/tmp/
+tests/cdm/
+tests/userdata/addon_settings.json
+tests/userdata/addon_data/
+tests/userdata/cdm/
+tests/userdata/backup/
+tests/userdata/tmp/
 
 # Temporary
 experiment/

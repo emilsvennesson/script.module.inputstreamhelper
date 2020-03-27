@@ -16,7 +16,7 @@ xbmcgui = __import__('xbmcgui')
 xbmcvfs = __import__('xbmcvfs')
 
 
-@unittest.skipIf(sys.version_info[0] < 3, 'Skipping proxy tests on Python 2')
+@unittest.skipIf(sys.version_info < (3, 6, 0), 'Skipping proxy tests on Python 3.5 and older')
 class LinuxProxyTests(unittest.TestCase):
 
     def setUp(self):

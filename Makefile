@@ -1,4 +1,4 @@
-export PYTHONPATH := $(CURDIR)/lib:$(CURDIR)/test
+export PYTHONPATH := $(CURDIR)/lib/:$(CURDIR)/tests/
 PYTHON := python
 KODI_PYTHON_ABIS := 3.0.0 2.25.0
 
@@ -20,45 +20,52 @@ blue = \e[1;34m
 white = \e[1;37m
 reset = \e[0;39m
 
-.PHONY: test
+all: check test build
+zip: build
+test: check test-unit test-run
 
-all: test zip
+check: check-tox check-pylint check-translations
 
-package: zip
-
-test: sanity unit
-
-sanity: tox pylint language
-
-tox:
+check-tox:
 	@echo -e "$(white)=$(blue) Starting sanity tox test$(reset)"
 	$(PYTHON) -m tox -q
 
-pylint:
+check-pylint:
 	@echo -e "$(white)=$(blue) Starting sanity pylint test$(reset)"
-	$(PYTHON) -m pylint -e useless-suppression lib/ test/
+	$(PYTHON) -m pylint -e useless-suppression lib/ tests/
 
-language:
+check-translations:
 	@echo -e "$(white)=$(blue) Starting language test$(reset)"
 	@-$(foreach lang,$(languages), \
 		msgcmp resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
 	)
 
-addon: clean
+check-addon: clean
 	@echo -e "$(white)=$(blue) Starting sanity addon tests$(reset)"
 	kodi-addon-checker . --branch=krypton
 	kodi-addon-checker . --branch=leia
 
-unit: clean
-	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
+kill-proxy:
 	-pkill -ef '$(PYTHON) -m proxy'
-	$(PYTHON) -m proxy &
-	$(PYTHON) -m unittest discover
+
+
+unit: test-unit
+
+test-unit: clean kill-proxy
+	@echo -e "$(white)=$(blue) Starting unit tests$(reset)"
+	-$(PYTHON) -m proxy --hostname 127.0.0.1 --log-level DEBUG &
+	$(PYTHON) -m unittest discover -v
 	pkill -ef '$(PYTHON) -m proxy'
 
-run:
+test-run:
 	@echo -e "$(white)=$(blue) Run CLI$(reset)"
 	$(PYTHON) default.py
+
+build: clean
+	@echo -e "$(white)=$(blue) Building new package$(reset)"
+	@rm -f ../$(zip_name)
+	cd ..; zip -r $(zip_name) $(include_paths) -x $(exclude_files)
+	@echo -e "$(white)=$(blue) Successfully wrote package as: $(white)../$(zip_name)$(reset)"
 
 multizip: clean
 	@-$(foreach abi,$(KODI_PYTHON_ABIS), \
@@ -69,19 +76,10 @@ multizip: clean
 		make zip; \
 	)
 
-zip: clean
-	@echo -e "$(white)=$(blue) Building new package$(reset)"
-	@rm -f ../$(zip_name)
-	cd ..; zip -r $(zip_name) $(include_paths) -x $(exclude_files)
-	@echo -e "$(white)=$(blue) Successfully wrote package as: $(white)../$(zip_name)$(reset)"
-
-codecov:
-	@echo -e "$(white)=$(blue) Test codecov.yml syntax$(reset)"
-	curl --data-binary @.github/codecov.yml https://codecov.io/validate
-
 clean:
 	@echo -e "$(white)=$(blue) Cleaning up$(reset)"
 	find . -name '*.py[cod]' -type f -delete
 	find . -name '__pycache__' -type d -delete
-	find test/userdata/ -mindepth 1 -not -name '*settings.json' -delete
-	rm -rf .pytest_cache/ .tox/ *.log lib/inputstreamhelper.egg-info/
+	find tests/userdata/ -mindepth 1 -not -name '*settings.json' -delete
+	rm -rf .pytest_cache/ .tox/ lib/inputstreamhelper.egg-info/
+	rm -f *.log

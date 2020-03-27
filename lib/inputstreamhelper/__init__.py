@@ -523,13 +523,13 @@ class Helper:
         downloaded, self._download_path = http_download(url)
         if downloaded:
             progress = progress_dialog()
-            progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+            progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
             unzip(self._download_path, os.path.join(self._backup_path(), cdm_version))
 
-            progress.update(94, line1=localize(30049))  # Installing Widevine CDM
+            progress.update(94, message=localize(30049))  # Installing Widevine CDM
             self._install_cdm_from_backup(cdm_version)
 
-            progress.update(97, line1=localize(30050))  # Finishing
+            progress.update(97, message=localize(30050))  # Finishing
             self._cleanup()
             if not self._widevine_eula():
                 return False
@@ -537,7 +537,7 @@ class Helper:
             if self._has_widevine():
                 wv_check = self._check_widevine()
                 if wv_check:
-                    progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
+                    progress.update(100, message=localize(30051))  # Widevine CDM successfully installed.
                     notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
                 progress.close()
                 return wv_check
@@ -595,11 +595,17 @@ class Helper:
                 from threading import Thread
                 from xbmc import sleep
                 progress = progress_dialog()
-                progress.create(heading=localize(30043), line1=localize(30044))  # Extracting Widevine CDM
+                progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
                 bin_filename = url.split('/')[-1].replace('.zip', '')
                 bin_path = os.path.join(temp_path(), bin_filename)
 
-                progress.update(0, line1=localize(30045), line2=localize(30046, mins=0, secs=0), line3=localize(30047))  # Uncompressing image
+                progress.update(
+                    0,
+                    message='{line1}\n{line2}\n{line3}'.format(
+                        line1=localize(30045),  # Uncompressing image
+                        line2=localize(30046, mins=0, secs=0),  # This may take several minutes
+                        line3=localize(30047))  # Please do not interrupt this process
+                )
                 unzip_result = []
                 unzip_thread = Thread(target=unzip, args=[self._download_path, temp_path(), bin_filename, unzip_result], name='ImageExtraction')
                 unzip_thread.start()
@@ -613,7 +619,13 @@ class Helper:
                     remaining -= offset
                     time += 1
                     sleep(1000)
-                    progress.update(int(percent), line2=localize(30046, mins=time // 60, secs=time % 60))
+                    progress.update(
+                        int(percent),
+                        message='{line1}\n{line2}\n{line3}'.format(
+                            line1=localize(30045),  # Uncompressing image
+                            line2=localize(30046, mins=time // 60, secs=time % 60),  # This may take several minutes
+                            line3=localize(30047))  # Please do not interrupt this process
+                    )
 
                 success = [
                     bool(unzip_result),  # Passed by reference
@@ -624,27 +636,27 @@ class Helper:
                 ]
                 if all(success):
                     import json
-                    progress.update(96, line1=localize(30048))  # Extracting Widevine CDM
+                    progress.update(96, message=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
                     json_file = os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
                     with open(json_file, 'w') as config_file:
                         config_file.write(json.dumps(devices, indent=4))
 
-                    progress.update(97, line1=localize(30049))  # Installing Widevine CDM
+                    progress.update(97, message=localize(30049))  # Installing Widevine CDM
                     self._install_cdm_from_backup(arm_device['version'])
 
-                    progress.update(98, line1=localize(30050))  # Finishing
+                    progress.update(98, message=localize(30050))  # Finishing
                     self._cleanup()
                     if self._has_widevine():
                         set_setting('chromeos_version', arm_device['version'])
                         wv_check = self._check_widevine()
                         if wv_check:
-                            progress.update(100, line1=localize(30051))  # Widevine CDM successfully installed.
+                            progress.update(100, message=localize(30051))  # Widevine CDM successfully installed.
                             notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
                         progress.close()
                         return wv_check
                 else:
-                    progress.update(100, line1=localize(30050))  # Finishing
+                    progress.update(100, message=localize(30050))  # Finishing
                     self._cleanup()
 
                 progress.close()

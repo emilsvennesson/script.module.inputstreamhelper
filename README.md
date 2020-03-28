@@ -1,5 +1,5 @@
 [![GitHub release](https://img.shields.io/github/release/emilsvennesson/script.module.inputstreamhelper.svg)](https://github.com/emilsvennesson/script.module.inputstreamhelper/releases)
-[![Build Status](https://travis-ci.org/emilsvennesson/script.module.inputstreamhelper.svg?branch=master)](https://travis-ci.org/emilsvennesson/script.module.inputstreamhelper)
+[![CI](https://github.com/emilsvennesson/script.module.inputstreamhelper/workflows/CI/badge.svg)](https://github.com/emilsvennesson/script.module.inputstreamhelper/actions?query=workflow:CI)
 [![Codecov status](https://img.shields.io/codecov/c/github/emilsvennesson/script.module.inputstreamhelper/master)](https://codecov.io/gh/emilsvennesson/script.module.inputstreamhelper/branch/master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Contributors](https://img.shields.io/github/contributors/emilsvennesson/script.module.inputstreamhelper.svg)](https://github.com/emilsvennesson/script.module.inputstreamhelper/graphs/contributors)

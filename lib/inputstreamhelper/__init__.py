@@ -21,6 +21,18 @@ class InputStreamException(Exception):
     """Stub Exception"""
 
 
+def cleanup_decorator(func):
+    """Decorator which runs cleanup before and after a function"""
+
+    def clean_before_after(self, *args, **kwargs):  # pylint: disable=missing-docstring
+        # pylint only complains about a missing docstring on py2.7?
+        self.cleanup()
+        result = func(self, *args, **kwargs)
+        self.cleanup()
+        return result
+    return clean_before_after
+
+
 class Helper:
     """The main InputStream Helper class"""
 
@@ -488,11 +500,11 @@ class Helper:
         log('Installed CDM version {version} from backup', version=version)
         self._remove_old_backups(self._backup_path())
 
-    def _install_widevine_x86(self):
+    def _install_widevine_x86(self, backup_path):
         """Install Widevine CDM on x86 based architectures."""
+        cdm_version = self._latest_widevine_version()
 
         if not store('download_path'):
-            cdm_version = self._latest_widevine_version()
             cdm_os = config.WIDEVINE_OS_MAP[system_os()]
             cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
@@ -504,28 +516,13 @@ class Helper:
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
-            unzip(store('download_path'), os.path.join(self._backup_path(), cdm_version))
+            unzip(store('download_path'), os.path.join(backup_path, cdm_version))
 
-            progress.update(94, message=localize(30049))  # Installing Widevine CDM
-            self._install_cdm_from_backup(cdm_version)
-
-            progress.update(97, message=localize(30050))  # Finishing
-            self._cleanup()
-
-            if self._has_widevine():
-                wv_check = self._check_widevine()
-                if wv_check:
-                    progress.update(100, message=localize(30051))  # Widevine CDM successfully installed.
-                    notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
-                progress.close()
-                return wv_check
-
-            progress.close()
-            ok_dialog(localize(30004), localize(30005))  # An error occurred
+            return (progress, cdm_version)
 
         return False
 
-    def _install_widevine_arm(self):  # pylint: disable=too-many-statements
+    def _install_widevine_arm(self, backup_path):  # pylint: disable=too-many-statements
         """Installs Widevine CDM on ARM-based architectures."""
         root_cmds = ['mount', 'umount', 'losetup', 'modprobe']
         devices = self._chromeos_config()
@@ -608,54 +605,58 @@ class Helper:
                 if bool(unzip_result) and self._check_loop() and self._set_loop_dev() and self._losetup(bin_path) and self._mnt_loop_dev():
                     import json
                     progress.update(96, message=localize(30048))  # Extracting Widevine CDM
-                    self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
-                    json_file = os.path.join(self._backup_path(), arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
+                    self._extract_widevine_from_img(os.path.join(backup_path, arm_device['version']))
+                    json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
                     with open(json_file, 'w') as config_file:
                         config_file.write(json.dumps(devices, indent=4))
 
-                    progress.update(97, message=localize(30049))  # Installing Widevine CDM
-                    self._install_cdm_from_backup(arm_device['version'])
-
-                    progress.update(98, message=localize(30050))  # Finishing
-                    self._cleanup()
-                    if self._has_widevine():
-                        set_setting('chromeos_version', arm_device['version'])
-                        wv_check = self._check_widevine()
-                        if wv_check:
-                            progress.update(100, message=localize(30051))  # Widevine CDM successfully installed.
-                            notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
-                        progress.close()
-                        return wv_check
-                else:
-                    progress.update(100, message=localize(30050))  # Finishing
-                    self._cleanup()
-
+                    return (progress, arm_device['version'])
                 progress.close()
-                ok_dialog(localize(30004), localize(30005))  # An error occurred
 
         return False
 
+    def install_and_finish(self, progress, version):
+        """Installs the cdm from backup and runs checks"""
+
+        progress.update(97, message=localize(30049))  # Installing Widevine CDM
+        self._install_cdm_from_backup(version)
+
+        progress.update(98, message=localize(30050))  # Finishing
+        if self._has_widevine():
+            wv_check = self._check_widevine()
+            if wv_check:
+                progress.update(100, message=localize(30051))  # Widevine CDM successfully installed.
+                notification(localize(30037), localize(30051))  # Success! Widevine CDM successfully installed.
+            progress.close()
+            return wv_check
+
+        progress.close()
+        return False
+
+    @cleanup_decorator
     def install_widevine(self):
         """Wrapper function that calls Widevine installer method depending on architecture"""
         if not self._supports_widevine():
             return False
 
-        # Clean up in case anything went wrong the last time.
-        self._cleanup()
-
         if not self._widevine_eula():
             return False
 
         if 'x86' in self._arch():
-            result = self._install_widevine_x86()
+            result = self._install_widevine_x86(self._backup_path())
         else:
-            result = self._install_widevine_arm()
-        if result:
+            result = self._install_widevine_arm(self._backup_path())
+        if not result:
+            return result
+
+        if self.install_and_finish(*result):
             from datetime import datetime
             from time import mktime
             set_setting('last_update', mktime(datetime.utcnow().timetuple()))
+            return True
 
-        return result
+        ok_dialog(localize(30004), localize(30005))  # An error occurred
+        return False
 
     def remove_widevine(self):
         """Removes Widevine CDM"""
@@ -832,7 +833,7 @@ class Helper:
             if not umount_output['success']:
                 break
 
-    def _cleanup(self):
+    def cleanup(self):
         """Clean up function after Widevine CDM installation"""
         from shutil import rmtree
         self._unmount()
@@ -943,7 +944,7 @@ class Helper:
             text += ' - ' + localize(30823, path=self._ia_cdm_path()) + '\n'
 
             if self._arch() in ('arm', 'arm64'):  # Chrome OS version
-                text += ' - ' + localize(30824, version=get_setting('chromeos_version')) + '\n'
+                text += ' - ' + localize(30824, version=self._select_best_chromeos_image(self._load_widevine_config())['version']) + '\n'
 
         text += '\n'
 

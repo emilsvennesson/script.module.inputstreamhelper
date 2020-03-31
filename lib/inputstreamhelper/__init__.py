@@ -9,7 +9,7 @@ from .kodiutils import (addon_profile, addon_version, browsesingle, get_proxies,
                         get_setting_float, get_setting_int, jsonrpc, kodi_to_ascii, kodi_version, localize, log, notification,
                         ok_dialog, progress_dialog, select_dialog, set_setting, set_setting_bool, textviewer,
                         translate_path, yesno_dialog)
-from .utils import http_get, http_download, temp_path, unzip, update_temp_path
+from .utils import http_get, http_download, store, system_os, temp_path, unzip, update_temp_path
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -21,31 +21,11 @@ class InputStreamException(Exception):
     """Stub Exception"""
 
 
-def system_os():
-    """Get system platform, and remember this information"""
-
-    # If it wasn't stored before, get the correct value
-    if not hasattr(system_os, 'name'):
-        from xbmc import getCondVisibility
-        if getCondVisibility('system.platform.android'):
-            system_os.name = 'Android'
-        else:
-            from platform import system
-            system_os.name = system()
-
-    # Return the stored value
-    return system_os.name
-
-
 class Helper:
     """The main InputStream Helper class"""
 
     def __init__(self, protocol, drm=None):
         """Initialize InputStream Helper class"""
-        self._download_path = None
-        self._loop_dev = None
-        self._modprobe_loop = False
-        self._attached_loop_dev = False
 
         self.protocol = protocol
         self.drm = drm
@@ -282,7 +262,7 @@ class Helper:
             log('loop is built in the kernel.')
             return True  # assume loop is built in the kernel
 
-        self._modprobe_loop = True
+        store('modprobe_loop', True)
         cmd = ['modprobe', '-q', 'loop']
         output = self._run_cmd(cmd, sudo=True)
         return output['success']
@@ -292,8 +272,8 @@ class Helper:
         cmd = ['losetup', '-f']
         output = self._run_cmd(cmd, sudo=False)
         if output['success']:
-            self._loop_dev = output['output'].strip()
-            log('Found free loop device: {device}', device=self._loop_dev)
+            store('loop_dev', output['output'].strip())
+            log('Found free loop device: {device}', device=store('loop_dev'))
             return True
 
         log('Failed to find free loop device.')
@@ -301,17 +281,17 @@ class Helper:
 
     def _losetup(self, bin_path):
         """Setup Chrome OS loop device."""
-        cmd = ['losetup', '-o', self._chromeos_offset(bin_path), self._loop_dev, bin_path]
+        cmd = ['losetup', '-o', self._chromeos_offset(bin_path), store('loop_dev'), bin_path]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
-            self._attached_loop_dev = True
+            store('attached_loop_dev', True)
             return True
 
         return False
 
     def _mnt_loop_dev(self):
         """Mount loop device to self._mnt_path()"""
-        cmd = ['mount', '-t', 'ext2', '-o', 'ro', self._loop_dev, self._mnt_path()]
+        cmd = ['mount', '-t', 'ext2', '-o', 'ro', store('loop_dev'), self._mnt_path()]
         output = self._run_cmd(cmd, sudo=True)
         if output['success']:
             return True
@@ -520,11 +500,11 @@ class Helper:
         cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-        downloaded, self._download_path = http_download(url)
+        downloaded = http_download(url)
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
-            unzip(self._download_path, os.path.join(self._backup_path(), cdm_version))
+            unzip(store('download_path'), os.path.join(self._backup_path(), cdm_version))
 
             progress.update(94, message=localize(30049))  # Installing Widevine CDM
             self._install_cdm_from_backup(cdm_version)
@@ -590,7 +570,7 @@ class Helper:
                 return False
 
             url = arm_device['url']
-            downloaded, self._download_path = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
+            downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
             if downloaded:
                 from threading import Thread
                 from xbmc import sleep
@@ -607,7 +587,7 @@ class Helper:
                         line3=localize(30047))  # Please do not interrupt this process
                 )
                 unzip_result = []
-                unzip_thread = Thread(target=unzip, args=[self._download_path, temp_path(), bin_filename, unzip_result], name='ImageExtraction')
+                unzip_thread = Thread(target=unzip, args=[store('download_path'), temp_path(), bin_filename, unzip_result], name='ImageExtraction')
                 unzip_thread.start()
 
                 time = 0
@@ -627,14 +607,7 @@ class Helper:
                             line3=localize(30047))  # Please do not interrupt this process
                     )
 
-                success = [
-                    bool(unzip_result),  # Passed by reference
-                    self._check_loop(),
-                    self._set_loop_dev(),
-                    self._losetup(bin_path),
-                    self._mnt_loop_dev(),
-                ]
-                if all(success):
+                if bool(unzip_result) and self._check_loop() and self._set_loop_dev() and self._losetup(bin_path) and self._mnt_loop_dev():
                     import json
                     progress.update(96, message=localize(30048))  # Extracting Widevine CDM
                     self._extract_widevine_from_img(os.path.join(self._backup_path(), arm_device['version']))
@@ -754,12 +727,12 @@ class Helper:
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded, self._download_path = http_download(url, message=localize(30025))  # Acquiring EULA
+            downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
             if not downloaded:
                 return False
 
             from zipfile import ZipFile
-            with ZipFile(self._download_path) as archive:
+            with ZipFile(store('download_path')) as archive:
                 with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
                     eula = file_obj.read().decode().strip().replace('\n', ' ')
 
@@ -858,12 +831,13 @@ class Helper:
         """Clean up function after Widevine CDM installation"""
         from shutil import rmtree
         self._unmount()
-        if self._attached_loop_dev:
-            cmd = ['losetup', '-d', self._loop_dev]
+        if store('attached_loop_dev'):
+            cmd = ['losetup', '-d', store('loop_dev')]
             unattach_output = self._run_cmd(cmd, sudo=True)
             if unattach_output['success']:
-                self._loop_dev = False
-        if self._modprobe_loop:
+                store('loop_dev', False)
+                store('attached_loop_dev', False)
+        if store('modprobe_loop'):
             notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not self._has_widevine():
             rmtree(self._ia_cdm_path())

@@ -409,12 +409,7 @@ class Helper:
 
     def _latest_widevine_version(self, eula=False):
         """Returns the latest available version of Widevine CDM/Chrome OS."""
-        if eula:
-            url = config.WIDEVINE_VERSIONS_URL
-            versions = http_get(url)
-            return versions.split()[-1]
-
-        if 'x86' in self._arch():
+        if eula or 'x86' in self._arch():
             url = config.WIDEVINE_VERSIONS_URL
             versions = http_get(url)
             return versions.split()[-1]
@@ -495,12 +490,17 @@ class Helper:
 
     def _install_widevine_x86(self):
         """Install Widevine CDM on x86 based architectures."""
-        cdm_version = self._latest_widevine_version()
-        cdm_os = config.WIDEVINE_OS_MAP[system_os()]
-        cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
-        url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-        downloaded = http_download(url)
+        if not store('download_path'):
+            cdm_version = self._latest_widevine_version()
+            cdm_os = config.WIDEVINE_OS_MAP[system_os()]
+            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
+            url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
+
+            downloaded = http_download(url)
+        else:
+            downloaded = True
+
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
@@ -511,8 +511,6 @@ class Helper:
 
             progress.update(97, message=localize(30050))  # Finishing
             self._cleanup()
-            if not self._widevine_eula():
-                return False
 
             if self._has_widevine():
                 wv_check = self._check_widevine()
@@ -538,7 +536,7 @@ class Helper:
             return ''
         required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
         if yesno_dialog(localize(30001),  # Due to distributing issues, this takes a long time
-                        localize(30006, diskspace=self._sizeof_fmt(required_diskspace))) and self._widevine_eula():
+                        localize(30006, diskspace=self._sizeof_fmt(required_diskspace))):
             if system_os() != 'Linux':
                 ok_dialog(localize(30004), localize(30019, os=system_os()))
                 return False
@@ -645,6 +643,9 @@ class Helper:
         # Clean up in case anything went wrong the last time.
         self._cleanup()
 
+        if not self._widevine_eula():
+            return False
+
         if 'x86' in self._arch():
             result = self._install_widevine_x86()
         else:
@@ -720,21 +721,25 @@ class Helper:
 
     def _widevine_eula(self):
         """Displays the Widevine EULA and prompts user to accept it."""
-        if os.path.exists(os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)):
-            license_file = os.path.join(self._ia_cdm_path(), config.WIDEVINE_LICENSE_FILE)
-            with open(license_file, 'r') as file_obj:
-                eula = file_obj.read().strip().replace('\n', ' ')
+
+        cdm_version = self._latest_widevine_version(eula=True)
+        if 'x86' in self._arch():
+            cdm_os = config.WIDEVINE_OS_MAP[system_os()]
+            cdm_arch = config.WIDEVINE_ARCH_MAP_X86[self._arch()]
         else:  # grab the license from the x86 files
             log('Acquiring Widevine EULA from x86 files.')
-            url = config.WIDEVINE_DOWNLOAD_URL.format(version=self._latest_widevine_version(eula=True), os='mac', arch='x64')
-            downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
-            if not downloaded:
-                return False
+            cdm_os = 'mac'
+            cdm_arch = 'x64'
 
-            from zipfile import ZipFile
-            with ZipFile(store('download_path')) as archive:
-                with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
-                    eula = file_obj.read().decode().strip().replace('\n', ' ')
+        url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
+        downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
+        if not downloaded:
+            return False
+
+        from zipfile import ZipFile
+        with ZipFile(store('download_path')) as archive:
+            with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
+                eula = file_obj.read().decode().strip().replace('\n', ' ')
 
         return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
 

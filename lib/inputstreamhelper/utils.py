@@ -116,7 +116,8 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
     progress.close()
     req.close()
-    return (True, download_path)
+    store('download_path', download_path)
+    return True
 
 
 def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
@@ -142,3 +143,32 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
         result.append(True)  # Pass by reference for Thread
 
     return bool(result)
+
+
+def system_os():
+    """Get system platform, and remember this information"""
+
+    # If it wasn't stored before, get the correct value
+    if not store('system_os'):
+        from xbmc import getCondVisibility
+        if getCondVisibility('system.platform.android'):
+            store('system_os', 'Android')
+        else:
+            from platform import system
+            store('system_os', system())
+
+    # Return the stored value
+    return store('system_os')
+
+
+def store(name, val=None):
+    """Store arbitrary value across functions"""
+
+    if val is not None:
+        setattr(store, name, val)
+        log('Stored {} in {}'.format(val, name))
+        return val
+
+    if not hasattr(store, name):
+        return None
+    return getattr(store, name)

@@ -4,6 +4,8 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
+
+from . import config
 from .kodiutils import get_setting, localize, log, ok_dialog, progress_dialog, set_setting, translate_path
 
 
@@ -172,3 +174,83 @@ def store(name, val=None):
     if not hasattr(store, name):
         return None
     return getattr(store, name)
+
+
+def diskspace():
+    """Return the free disk space available (in bytes) in temp_path."""
+    statvfs = os.statvfs(temp_path())
+    return statvfs.f_frsize * statvfs.f_bavail
+
+
+def cmd_exists(cmd):
+    """Check whether cmd exists on system."""
+    # https://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+    import subprocess
+    return subprocess.call(['type ' + cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
+
+def run_cmd(cmd, sudo=False, shell=False):
+    """Run subprocess command and return if it succeeds as a bool"""
+    from .unicodes import to_unicode
+    import subprocess
+    env = os.environ.copy()
+    env['LANG'] = 'C'
+    output = ''
+    success = False
+    if sudo and os.getuid() != 0 and cmd_exists('sudo'):
+        cmd.insert(0, 'sudo')
+
+    try:
+        output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT, env=env))
+    except subprocess.CalledProcessError as error:
+        output = to_unicode(error.output)
+        log('{cmd} cmd failed.', cmd=cmd)
+    except OSError as error:
+        log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
+    else:
+        success = True
+        log('{cmd} cmd executed successfully.', cmd=cmd)
+
+    if output.rstrip():
+        log('{cmd} cmd output:\n{output}', cmd=cmd, output=output)
+    if 'sudo' in cmd:
+        subprocess.call(['sudo', '-k'])  # reset timestamp
+
+    return {
+        'output': output,
+        'success': success
+    }
+
+
+def sizeof_fmt(num, suffix='B'):
+    """Return size of file in a human readable string."""
+    # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+
+def arch():
+    """Map together and return the system architecture."""
+    from platform import architecture, machine
+    sys_arch = machine()
+    if sys_arch == 'aarch64':
+        import struct
+        if struct.calcsize('P') * 8 == 32:
+            # Detected 64-bit kernel in 32-bit userspace, use 32-bit arm widevine
+            sys_arch = 'arm'
+    if sys_arch == 'AMD64':
+        sys_arch_bit = architecture()[0]
+        if sys_arch_bit == '32bit':
+            sys_arch = 'x86'  # else, sys_arch = AMD64
+    elif 'armv' in sys_arch:
+        import re
+        arm_version = re.search(r'\d+', sys_arch.split('v')[1])
+        if arm_version:
+            sys_arch = 'armv' + arm_version.group()
+    if sys_arch in config.ARCH_MAP:
+        return config.ARCH_MAP[sys_arch]
+
+    return sys_arch

@@ -63,6 +63,12 @@ Please report any issues or bug reports on the [GitHub Issues](https://github.co
 This module is licensed under the **The MIT License**. Please see the [LICENSE.txt](LICENSE.txt) file for details.
 
 ## Releases
+## v0.4.5 (2020-04-07)
+- Added Spanish and Romanian translations (@roliverosc, @tmihai20)
+- Added support for Kodi 19 Matrix "pre-release" builds (@mediaminister)
+- Fix Widevine backups when using an external drive (@horstle)
+- Various fixes for Widevine installation on ARM devices (@horstle)
+
 ## v0.4.4 (2020-03-01)
 - Added option to restore a previously installed Widevine version (@horstle)
 - Improve progress bar when extracting Widevine on ARM devices (@dagwieers)

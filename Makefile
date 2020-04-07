@@ -8,7 +8,12 @@ git_branch = $(shell git rev-parse --abbrev-ref HEAD)
 git_hash = $(shell git rev-parse --short HEAD)
 matrix = $(findstring $(shell xmllint --xpath 'string(/addon/requires/import[@addon="xbmc.python"]/@version)' addon.xml), $(word 1,$(KODI_PYTHON_ABIS)))
 
-zip_name = $(name)-$(version)-$(git_branch)-$(git_hash).zip
+ifdef release
+	zip_name = $(name)-$(version).zip
+else
+	zip_name = $(name)-$(version)-$(git_branch)-$(git_hash).zip
+endif
+
 include_files = addon.xml changelog.txt default.py LICENSE.txt README.md lib/ resources/
 include_paths = $(patsubst %,$(name)/%,$(include_files))
 exclude_files = \*.new \*.orig \*.pyc \*.pyo

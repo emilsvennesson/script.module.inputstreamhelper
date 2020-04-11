@@ -16,7 +16,7 @@ addon_id = metadata.firstChild.getAttribute('id')
 setup(
     name='inputstreamhelper',
     version=addon_version,
-    url='https://github.com/tamland/kodi-plugin-routing',
+    url='https://github.com/emilsvennesson/script.module.inputstreamhelper',
     author='Emil Svennesson',
     description='Kodi InputStream Helper',
     long_description=open(os.path.join(project_dir, 'README.md')).read(),

@@ -6,12 +6,11 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from . import config
-from .kodiutils import get_setting, localize, log, ok_dialog, progress_dialog, set_setting, translate_path
+from .kodiutils import copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
 
 
 def temp_path():
     """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
-    from xbmcvfs import exists, mkdirs
     tmp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
     if not exists(tmp_path):
         mkdirs(tmp_path)
@@ -38,12 +37,12 @@ def _http_request(url):
     except ImportError:  # Python 2
         from urllib2 import HTTPError, urlopen
 
-    log('Request URL: {url}', url=url)
+    log(0, 'Request URL: {url}', url=url)
     filename = url.split('/')[-1]
 
     try:
         req = urlopen(url, timeout=5)
-        log('Response code: {code}', code=req.getcode())
+        log(0, 'Response code: {code}', code=req.getcode())
         if 400 <= req.getcode() < 600:
             raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
     except HTTPError:
@@ -60,7 +59,7 @@ def http_get(url):
 
     content = req.read()
     # NOTE: Do not log reponse (as could be large)
-    # log('Response: {response}', response=content)
+    # log(0, 'Response: {response}', response=content)
     return content.decode()
 
 
@@ -73,7 +72,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
         elif hash_alg == 'md5':
             calc_checksum = md5()
         else:
-            log('Invalid hash algorithm specified: {}'.format(hash_alg))
+            log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
             checksum = None
 
     req = _http_request(url)
@@ -108,12 +107,11 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             progress.update(percent)
 
     if checksum and not calc_checksum.hexdigest() == checksum:
-        log('Download failed, checksums do not match!')
+        log(4, 'Download failed, checksums do not match!')
         return False
 
-    from xbmcvfs import Stat
-    if dl_size and not Stat(download_path).st_size() == dl_size:
-        log('Download failed, filesize does not match!')
+    if dl_size and not stat_file(download_path).st_size() == dl_size:
+        log(4, 'Download failed, filesize does not match!')
         return False
 
     progress.close()
@@ -124,7 +122,6 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
 def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
     """Unzip files to specified path"""
-    from xbmcvfs import exists, mkdirs
 
     if not exists(destination):
         mkdirs(destination)
@@ -138,8 +135,8 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
         # Detect and remove (dangling) symlinks before extraction
         fullname = os.path.join(destination, filename)
         if os.path.islink(fullname):
-            log('Remove (dangling) symlink at {symlink}', symlink=fullname)
-            os.unlink(fullname)
+            log(3, 'Remove (dangling) symlink at {symlink}', symlink=fullname)
+            delete(fullname)
 
         zip_obj.extract(filename, destination)
         result.append(True)  # Pass by reference for Thread
@@ -168,7 +165,7 @@ def store(name, val=None):
 
     if val is not None:
         setattr(store, name, val)
-        log('Stored {} in {}'.format(val, name))
+        log(0, 'Stored {} in {}'.format(val, name))
         return val
 
     if not hasattr(store, name):
@@ -204,15 +201,15 @@ def run_cmd(cmd, sudo=False, shell=False):
         output = to_unicode(subprocess.check_output(cmd, shell=shell, stderr=subprocess.STDOUT, env=env))
     except subprocess.CalledProcessError as error:
         output = to_unicode(error.output)
-        log('{cmd} cmd failed.', cmd=cmd)
+        log(4, '{cmd} cmd failed.', cmd=cmd)
     except OSError as error:
-        log('{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
+        log(4, '{cmd} cmd doesn\'t exist. {error}', cmd=cmd, error=error)
     else:
         success = True
-        log('{cmd} cmd executed successfully.', cmd=cmd)
+        log(0, '{cmd} cmd executed successfully.', cmd=cmd)
 
     if output.rstrip():
-        log('{cmd} cmd output:\n{output}', cmd=cmd, output=output)
+        log(0, '{cmd} cmd output:\n{output}', cmd=cmd, output=output)
     if 'sudo' in cmd:
         subprocess.call(['sudo', '-k'])  # reset timestamp
 
@@ -254,3 +251,18 @@ def arch():
         return config.ARCH_MAP[sys_arch]
 
     return sys_arch
+
+
+def hardlink(src, dest):
+    """Hardlink a file when possible, copy when needed"""
+    from os import link
+
+    if exists(dest):
+        delete(dest)
+
+    try:
+        link(src, dest)
+    except (AttributeError, OSError):
+        return copy(src, dest)
+    log(2, "Hardlink file '{src}' to '{dest}'.", src=src, dest=dest)
+    return True

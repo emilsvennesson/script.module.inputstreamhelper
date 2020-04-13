@@ -237,6 +237,10 @@ msgctxt "#30057"
 msgid "Choose a backup to restore"
 msgstr ""
 
+msgctxt "#30058"
+msgid "Calculating checksum for {filename}"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

@@ -63,8 +63,51 @@ def http_get(url):
     return content.decode()
 
 
+def chunked_read(readable_obj, chunk_size=32*1024):
+    """Read an object in chunks, saving memory"""
+    while True:
+        chunk = readable_obj.read(chunk_size)
+        if not chunk:
+            break
+        yield chunk
+
+
+def after_download_check(dl_size, download_path, checksum=None, calc_checksum=None):
+    """Checks download size and checksum if available"""
+    empty_hashes = ('da39a3ee5e6b4b0d3255bfef95601890afd80709', 'd41d8cd98f00b204e9800998ecf8427e')
+    if checksum and calc_checksum.hexdigest() in empty_hashes:
+        with open(download_path, 'rb') as dl_file:
+            message = localize(30058, filename=os.path.basename(download_path))  # Calculating checksum
+            progress = progress_dialog()
+            progress.create(localize(30014), message)  # Download in progress
+
+            chunk_size = 32*1024
+            size = 0
+            for chunk in chunked_read(dl_file, chunk_size=chunk_size):
+                if progress.iscanceled():
+                    progress.close()
+                    raise KeyboardInterrupt
+
+                size += len(chunk)
+                percent = int(100 * size / dl_size)
+                progress.update(percent)
+                calc_checksum.update(chunk)
+        progress.close()
+
+    if checksum and not calc_checksum.hexdigest() == checksum:
+        log(4, 'Download failed, checksums do not match!')
+        return False
+
+    if not stat_file(download_path).st_size() == dl_size:
+        log(4, 'Download failed, filesize does not match!')
+        return False
+
+    return True
+
+
 def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None):
     """Makes HTTP request and displays a progress dialog on download."""
+    calc_checksum = None
     if checksum:
         from hashlib import sha1, md5
         if hash_alg == 'sha1':
@@ -75,26 +118,26 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
             checksum = None
 
+    filename = url.split('/')[-1]
+    download_path = os.path.join(temp_path(), filename)
+    if exists(download_path) and dl_size and after_download_check(dl_size, download_path, checksum, calc_checksum):
+        store('download_path', download_path)
+        return True
+
     req = _http_request(url)
     if req is None:
         return None
 
-    filename = url.split('/')[-1]
     if not message:  # display "downloading [filename]"
         message = localize(30015, filename=filename)  # Downloading file
 
-    download_path = os.path.join(temp_path(), filename)
     total_length = float(req.info().get('content-length'))
     progress = progress_dialog()
     progress.create(localize(30014), message)  # Download in progress
 
-    chunk_size = 32 * 1024
     with open(download_path, 'wb') as image:
         size = 0
-        while True:
-            chunk = req.read(chunk_size)
-            if not chunk:
-                break
+        for chunk in chunked_read(req):
             image.write(chunk)
             if checksum:
                 calc_checksum.update(chunk)
@@ -103,15 +146,12 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             if progress.iscanceled():
                 progress.close()
                 req.close()
-                return False
+                raise KeyboardInterrupt
             progress.update(percent)
 
-    if checksum and not calc_checksum.hexdigest() == checksum:
-        log(4, 'Download failed, checksums do not match!')
-        return False
-
-    if dl_size and not stat_file(download_path).st_size() == dl_size:
-        log(4, 'Download failed, filesize does not match!')
+    if not dl_size:
+        dl_size = total_length
+    if not after_download_check(dl_size, download_path, checksum, calc_checksum):
         return False
 
     progress.close()
@@ -144,6 +184,21 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
     return bool(result)
 
 
+def p7unzip(source, destination=temp_path(), file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
+    """Unzip file to specified path using p7zip"""
+    if not exists(destination):
+        mkdirs(destination)
+
+    cmd = ['7z', 'e', '-y', '-o' + destination, source]
+    if file_to_unzip:
+        cmd.append(file_to_unzip)
+
+    output = run_cmd(cmd)
+
+    result.append(output['success'])
+    return bool(result)
+
+
 def system_os():
     """Get system platform, and remember this information"""
 
@@ -166,7 +221,7 @@ def store(name, val=None):
 
     if val is not None:
         setattr(store, name, val)
-        log(0, 'Stored {} in {}'.format(val, name))
+        log(0, 'Stored {value} in {name}', value=val, name=name)
         return val
 
     if not hasattr(store, name):
@@ -225,9 +280,9 @@ def sizeof_fmt(num, suffix='B'):
     # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
-            return "%3.1f%s%s" % (num, unit, suffix)
+            return "{:3.1f}{}{}".format(num, unit, suffix)
         num /= 1024.0
-    return "%.1f%s%s" % (num, 'Yi', suffix)
+    return "{:.1f}{}{}".format(num, 'Yi', suffix)
 
 
 def arch():

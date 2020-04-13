@@ -10,7 +10,7 @@ from .kodiutils import (addon_version, delete, exists, get_proxies, get_setting,
                         kodi_to_ascii, kodi_version, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, http_download, run_cmd, store, system_os, temp_path, unzip
-from .widevine.arm import install_widevine_arm, select_best_chromeos_image, unmount
+from .widevine.arm import install_widevine_arm, select_best_chromeos_image, unmount, mnt_path
 from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_widevine_version,
                                 load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
 
@@ -177,7 +177,10 @@ class Helper:
             cdm_arch = config.WIDEVINE_ARCH_MAP_X86[arch()]
             url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
 
-            downloaded = http_download(url)
+            try:
+                downloaded = http_download(url)
+            except KeyboardInterrupt:
+                return False
         else:
             downloaded = True
 
@@ -323,13 +326,7 @@ class Helper:
     def cleanup():
         """Clean up function after Widevine CDM installation"""
         from shutil import rmtree
-        unmount()
-        if store('attached_loop_dev'):
-            cmd = ['losetup', '-d', store('loop_dev')]
-            unattach_output = run_cmd(cmd, sudo=True)
-            if unattach_output['success']:
-                store('loop_dev', False)
-                store('attached_loop_dev', False)
+        unmount(mnt_path())
         if store('modprobe_loop'):
             notification(localize(30035), localize(30036))  # Unload by hand in CLI
         if not has_widevinecdm():

@@ -8,7 +8,7 @@ import os
 from .. import config
 from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, translate_path, yesno_dialog
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, run_cmd, store, system_os
-
+from .arm import chromeos_config, select_best_chromeos_image
 
 def install_cdm_from_backup(version):
     """Copies files from specified backup version to cdm dir"""
@@ -36,7 +36,10 @@ def widevine_eula():
         cdm_arch = 'x64'
 
     url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
-    downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
+    try:
+        downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
+    except KeyboardInterrupt:
+        return False
     if not downloaded:
         return False
 
@@ -152,7 +155,6 @@ def latest_widevine_version(eula=False):
         versions = http_get(url)
         return versions.split()[-1]
 
-    from .arm import chromeos_config, select_best_chromeos_image
     devices = chromeos_config()
     arm_device = select_best_chromeos_image(devices)
     if arm_device is None:
@@ -176,7 +178,6 @@ def remove_old_backups(bpath):
     if 'x86' in arch():
         installed_version = load_widevine_config()['version']
     else:
-        from .arm import select_best_chromeos_image
         installed_version = select_best_chromeos_image(load_widevine_config())['version']
 
     while len(versions) > max_backups + 1:

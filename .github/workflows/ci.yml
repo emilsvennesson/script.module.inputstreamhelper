@@ -31,8 +31,11 @@ jobs:
       run: python -m tox -q -e flake8,py
     - name: Run pylint
       run: python -m pylint lib/ tests/
-    - name: Compare translations
+    - name: Compare translation strings
       run: make check-translations
+    - name: Check for untranslated strings
+      run: make check-untranslated
+      continue-on-error: true
     # Python 2.7 and Python 3.5 are no longer supported by proxy.py
     - name: Start proxy server, when supported
       run: python -m proxy --hostname 127.0.0.1 --log-level DEBUG &

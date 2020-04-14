@@ -42,6 +42,12 @@ check-pylint:
 check-translations:
 	@echo -e "$(white)=$(blue) Starting language test$(reset)"
 	@-$(foreach lang,$(languages), \
+		msgcmp --use-untranslated resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
+	)
+
+check-untranslated:
+	@echo -e "$(white)=$(blue) Starting language test$(reset)"
+	@-$(foreach lang,$(languages), \
 		msgcmp resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
 	)
 

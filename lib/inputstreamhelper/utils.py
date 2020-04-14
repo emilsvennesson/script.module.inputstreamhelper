@@ -147,17 +147,18 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
 def system_os():
     """Get system platform, and remember this information"""
 
-    # If it wasn't stored before, get the correct value
-    if not store('system_os'):
-        from xbmc import getCondVisibility
-        if getCondVisibility('system.platform.android'):
-            store('system_os', 'Android')
-        else:
-            from platform import system
-            store('system_os', system())
+    if hasattr(system_os, 'cached'):
+        return getattr(system_os, 'cached')
 
-    # Return the stored value
-    return store('system_os')
+    from xbmc import getCondVisibility
+    if getCondVisibility('system.platform.android'):
+        sys_name = 'Android'
+    else:
+        from platform import system
+        sys_name = system()
+
+    system_os.cached = sys_name
+    return sys_name
 
 
 def store(name, val=None):

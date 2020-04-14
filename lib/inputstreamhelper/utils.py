@@ -231,7 +231,11 @@ def sizeof_fmt(num, suffix='B'):
 
 
 def arch():
-    """Map together and return the system architecture."""
+    """Map together, cache and return the system architecture"""
+
+    if hasattr(arch, 'cached'):
+        return getattr(arch, 'cached')
+
     from platform import architecture, machine
     sys_arch = machine()
     if sys_arch == 'aarch64':
@@ -239,18 +243,24 @@ def arch():
         if struct.calcsize('P') * 8 == 32:
             # Detected 64-bit kernel in 32-bit userspace, use 32-bit arm widevine
             sys_arch = 'arm'
-    if sys_arch == 'AMD64':
+
+    elif sys_arch == 'AMD64':
         sys_arch_bit = architecture()[0]
         if sys_arch_bit == '32bit':
             sys_arch = 'x86'  # else, sys_arch = AMD64
+
     elif 'armv' in sys_arch:
         import re
         arm_version = re.search(r'\d+', sys_arch.split('v')[1])
         if arm_version:
             sys_arch = 'armv' + arm_version.group()
-    if sys_arch in config.ARCH_MAP:
-        return config.ARCH_MAP[sys_arch]
 
+    if sys_arch in config.ARCH_MAP:
+        sys_arch = config.ARCH_MAP[sys_arch]
+
+    log(0, 'Found system architecture {arch}', arch=sys_arch)
+
+    arch.cached = sys_arch
     return sys_arch
 
 

@@ -19,7 +19,7 @@ def temp_path():
 
 
 def update_temp_path(new_temp_path):
-    """"Updates temp_path and merges files."""
+    """"Updates temp_path and merges files"""
     old_temp_path = temp_path()
 
     set_setting('temp_path', new_temp_path)
@@ -64,7 +64,7 @@ def http_get(url):
 
 
 def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None):
-    """Makes HTTP request and displays a progress dialog on download."""
+    """Makes HTTP request and displays a progress dialog on download"""
     if checksum:
         from hashlib import sha1, md5
         if hash_alg == 'sha1':
@@ -175,7 +175,7 @@ def store(name, val=None):
 
 
 def diskspace():
-    """Return the free disk space available (in bytes) in temp_path."""
+    """Return the free disk space available (in bytes) in temp_path"""
     statvfs = os.statvfs(temp_path())
     return statvfs.f_frsize * statvfs.f_bavail
 
@@ -221,7 +221,7 @@ def run_cmd(cmd, sudo=False, shell=False):
 
 
 def sizeof_fmt(num, suffix='B'):
-    """Return size of file in a human readable string."""
+    """Return size of file in a human readable string"""
     # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:

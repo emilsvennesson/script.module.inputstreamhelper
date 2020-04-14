@@ -272,14 +272,18 @@ msgid "Widevine version: [B]Built into Android[/B]"
 msgstr "Widevine verzija: [B]Ugrađen u Android[/B]"
 
 msgctxt "#30822"
+msgid "Widevine version: [B]{version} [COLOR gray](supplied by vendor)[/COLOR][/B]"
+msgstr ""
+
+msgctxt "#30823"
 msgid "Widevine version: [B]{version}[/B] [COLOR gray](last updated on [B]{date}[/B])[/COLOR]"
 msgstr "Widevine verzija: [B]{version}[/B] [COLOR gray](zadnja nadogradnja [B]{date}[/B])[/COLOR]"
 
-msgctxt "#30823"
+msgctxt "#30824"
 msgid "Widevine CDM path: [B]{path}[/B]"
 msgstr "Widevine CDM mapa: [B]{path}[/B]"
 
-msgctxt "#30824"
+msgctxt "#30825"
 msgid "Chrome OS version: [B]{version}[/B]"
 msgstr "Chrome OS verzija: [B]{version}[/B]"
 

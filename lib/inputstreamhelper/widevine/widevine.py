@@ -6,7 +6,8 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from .. import config
-from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, translate_path, yesno_dialog
+from ..kodiutils import (addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, samefile, translate_path,
+                         yesno_dialog)
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, run_cmd, store, system_os
 
 
@@ -80,10 +81,17 @@ def widevinecdm_path():
     return os.path.join(ia_cdm_path(), widevinecdm_filename)
 
 
+def vendor_widevinecdm_path():
+    """Get full vendor Widevine CDM path"""
+    return '{0}_vendor{1}'.format(*os.path.splitext(widevinecdm_path()))
+
+
 def has_widevinecdm():
     """Whether a Widevine CDM is installed on the system"""
     if system_os() == 'Android':  # Widevine CDM is built into Android
         return True
+
+    hardlink_vendor_widevinecdm()  # If vendor Widevine is present, hardlink into place
 
     widevinecdm = widevinecdm_path()
     if widevinecdm is None:
@@ -93,6 +101,24 @@ def has_widevinecdm():
         return False
     log(0, 'Found Widevine CDM at {path}', path=widevinecdm)
     return True
+
+
+def has_vendor_widevinecdm():
+    """Whether the system has a vendor-supplied widevine CDM"""
+    if not exists(vendor_widevinecdm_path()):
+        return False
+    return True
+
+
+def hardlink_vendor_widevinecdm():
+    """Hardlink vendor Widevine into place"""
+    vendor_widevinecdm = vendor_widevinecdm_path()
+    if not exists(vendor_widevinecdm):
+        return
+    widevinecdm = widevinecdm_path()
+    if exists(widevinecdm) and samefile(vendor_widevinecdm, widevinecdm):
+        return
+    hardlink(vendor_widevinecdm, widevinecdm)
 
 
 def ia_cdm_path():

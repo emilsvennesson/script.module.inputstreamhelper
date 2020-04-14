@@ -25,6 +25,14 @@ def Stat(path):
             """The constructor xbmcvfs stat class"""
             self._stat = os.stat(path)
 
+        def st_dev(self):
+            ''' The xbmcvfs stat class st_dev method '''
+            return self._stat.st_dev
+
+        def st_ino(self):
+            ''' The xbmcvfs stat class st_ino method '''
+            return self._stat.st_ino
+
         def st_mtime(self):
             """The xbmcvfs stat class st_mtime method"""
             return self._stat.st_mtime

@@ -6,13 +6,14 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from . import config
-from .kodiutils import (addon_version, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
-                        kodi_to_ascii, kodi_version, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
+from .kodiutils import (addon_version, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int,
+                        jsonrpc, kodi_to_ascii, kodi_version, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, http_download, run_cmd, store, system_os, temp_path, unzip
 from .widevine.arm import install_widevine_arm, select_best_chromeos_image, unmount
-from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_widevine_version,
-                                load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
+from .widevine.widevine import (backup_path, has_vendor_widevinecdm, has_widevinecdm, ia_cdm_path, install_cdm_from_backup,
+                                latest_widevine_version, load_widevine_config, missing_widevine_libs, widevine_config_path,
+                                widevine_eula, widevinecdm_path)
 
 # NOTE: Work around issue caused by platform still using os.popen()
 #       This helps to survive 'IOError: [Errno 10] No child processes'
@@ -300,6 +301,9 @@ class Helper:
         if system_os() == 'Android':  # no checks needed for Android
             return True
 
+        if has_vendor_widevinecdm():  # no checks needed for vendor-supplied Widevine
+            return True
+
         if not exists(widevine_config_path()):
             log(4, 'Widevine or Chrome OS recovery.conf is missing. Reinstall is required.')
             ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
@@ -424,14 +428,19 @@ class Helper:
         text += localize(30820) + '\n'  # Widevine information
         if system_os() == 'Android':
             text += ' - ' + localize(30821) + '\n'
+        elif has_vendor_widevinecdm():
+            text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path())) + '\n'
         else:
             from datetime import datetime
-            wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M") if get_setting_float('last_update', 0.0) else 'Never'
-            text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
-            text += ' - ' + localize(30823, path=ia_cdm_path()) + '\n'
+            if get_setting_float('last_update', 0.0):
+                wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M")
+            else:
+                wv_updated = 'Never'
+            text += ' - ' + localize(30823, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
+            text += ' - ' + localize(30824, path=ia_cdm_path()) + '\n'
 
             if arch() in ('arm', 'arm64'):  # Chrome OS version
-                text += ' - ' + localize(30824, version=select_best_chromeos_image(load_widevine_config())['version']) + '\n'
+                text += ' - ' + localize(30825, version=select_best_chromeos_image(load_widevine_config())['version']) + '\n'
 
         text += '\n'
 

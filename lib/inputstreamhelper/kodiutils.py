@@ -56,17 +56,17 @@ def get_addon_info(key):
 
 
 def addon_id():
-    """Cache and return add-on ID"""
+    """Return add-on ID"""
     return get_addon_info('id')
 
 
 def addon_profile():
-    """Cache and return add-on profile"""
+    """Return add-on profile"""
     return translate_path(ADDON.getAddonInfo('profile'))
 
 
 def addon_version():
-    """Cache and return add-on version"""
+    """Return add-on version"""
     return get_addon_info('version')
 
 
@@ -309,6 +309,31 @@ def kodi_to_ascii(string):
     string = string.replace('[COLOR yellow]', '')
     string = string.replace('[/COLOR]', '')
     return string
+
+
+def samefile(src, dest):
+    """Check if file is identical"""
+    stat_src = stat_file(src)
+    stat_dest = stat_file(dest)
+    # Check if this is a hardlink
+    if (stat_src.st_dev(), stat_src.st_ino()) == (stat_dest.st_dev(), stat_dest.st_ino()):
+        return True
+
+    # Check file sizes
+    if stat_src.st_size() != stat_dest.st_size():
+        return False
+
+    # Check if this is a symlink
+    from os.path import samefile as opsamefile
+    if opsamefile(src, dest):
+        return True
+
+    # Otherwise compare content (may be slow)
+    with open(src, 'r') as srcfd, open(dest, 'r') as destfd:
+        if srcfd.read() == destfd.read():
+            return True
+
+    return False
 
 
 def copy(src, dest):

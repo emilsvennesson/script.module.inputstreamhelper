@@ -196,7 +196,8 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
             return False
 
         url = arm_device['url']
-        downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
+        # Downloading the recovery image
+        downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))
         if downloaded:
             from threading import Thread
             from xbmc import sleep

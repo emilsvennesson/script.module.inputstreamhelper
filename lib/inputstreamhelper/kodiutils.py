@@ -18,13 +18,17 @@ class progress_dialog(DialogProgress, object):  # pylint: disable=invalid-name,u
     def create(self, heading, message=''):  # pylint: disable=arguments-differ
         """Create and show a progress dialog"""
         if kodi_version_major() < 19:
-            return super(progress_dialog, self).create(heading, line1=message)
+            lines = message.split('\n', 2)
+            line1, line2, line3 = (lines + [None] * (3-len(lines)))
+            return super(progress_dialog, self).create(heading, line1=line1, line2=line2, line3=line3)
         return super(progress_dialog, self).create(heading, message=message)
 
     def update(self, percent, message=''):  # pylint: disable=arguments-differ
         """Update the progress dialog"""
         if kodi_version_major() < 19:
-            return super(progress_dialog, self).update(percent, line1=message)
+            lines = message.split('\n', 2)
+            line1, line2, line3 = (lines + [None] * (3-len(lines)))
+            return super(progress_dialog, self).update(percent, line1=line1, line2=line2, line3=line3)
         return super(progress_dialog, self).update(percent, message=message)
 
 

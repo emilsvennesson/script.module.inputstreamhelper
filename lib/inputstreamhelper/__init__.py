@@ -142,6 +142,13 @@ class Helper:
             ok_dialog(localize(30004), localize(30007, arch=arch()))  # Widevine not available on this architecture
             return False
 
+        if arch() == 'arm64' and system_os() != 'Android':
+            import struct
+            if struct.calcsize('P') * 8 == 64:
+                log('Unsupported 64-bit userspace found. User needs 32-bit userspace on {arch}', arch=arch())
+                ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
+                return False
+
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:
             log(4, 'Unsupported Widevine OS found: {os}', os=system_os())
             ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine

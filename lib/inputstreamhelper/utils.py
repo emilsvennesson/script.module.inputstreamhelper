@@ -238,13 +238,7 @@ def arch():
 
     from platform import architecture, machine
     sys_arch = machine()
-    if sys_arch == 'aarch64':
-        import struct
-        if struct.calcsize('P') * 8 == 32:
-            # Detected 64-bit kernel in 32-bit userspace, use 32-bit arm widevine
-            sys_arch = 'arm'
-
-    elif sys_arch == 'AMD64':
+    if sys_arch == 'AMD64':
         sys_arch_bit = architecture()[0]
         if sys_arch_bit == '32bit':
             sys_arch = 'x86'  # else, sys_arch = AMD64

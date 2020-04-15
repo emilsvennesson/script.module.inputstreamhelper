@@ -141,12 +141,6 @@ def missing_widevine_libs():
             log(0, 'There are no missing Widevine libraries! :-)')
             return None
 
-    if arch() == 'arm64':
-        import struct
-        if struct.calcsize('P') * 8 == 64:
-            log(4, 'ARM64 ldd check failed. User needs 32-bit userspace.')
-            ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
-
     log(4, 'Failed to check for missing Widevine libraries.')
     return None
 

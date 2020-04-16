@@ -145,7 +145,7 @@ class Helper:
         if arch() == 'arm64' and system_os() != 'Android':
             import struct
             if struct.calcsize('P') * 8 == 64:
-                log('Unsupported 64-bit userspace found. User needs 32-bit userspace on {arch}', arch=arch())
+                log(4, 'Unsupported 64-bit userspace found. User needs 32-bit userspace on {arch}', arch=arch())
                 ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
                 return False
 

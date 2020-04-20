@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 import platform
 import inputstreamhelper
+from test_utils import delete_cached
 
 xbmc = __import__('xbmc')
 xbmcaddon = __import__('xbmcaddon')
@@ -16,6 +17,9 @@ xbmcvfs = __import__('xbmcvfs')
 
 
 class WindowsX64Tests(unittest.TestCase):
+
+    def setUp(self):
+        delete_cached()
 
     def test_check_inputstream_mpd(self):
         inputstreamhelper.system_os = lambda: 'Windows'

@@ -18,6 +18,7 @@ xbmcvfs = __import__('xbmcvfs')
 class AndroidARMTests(unittest.TestCase):
 
     def test_check_inputstream_mpd(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'arm'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
@@ -26,6 +27,7 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_hls_again(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'armv7'
         is_helper = inputstreamhelper.Helper('hls', drm='com.widevine.alpha')
@@ -33,6 +35,7 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'armv8'
         is_helper = inputstreamhelper.Helper('rtmp')
@@ -40,6 +43,7 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_disabled(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'arm'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')

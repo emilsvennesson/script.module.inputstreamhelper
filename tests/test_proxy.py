@@ -29,6 +29,7 @@ class LinuxProxyTests(unittest.TestCase):
         xbmc.settings['network.usehttpproxy'] = False
 
     def test_check_inputstream_mpd(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
@@ -37,6 +38,7 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_hls_again(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'AMD64'
         platform.architecture = lambda: ['64bit', '']
@@ -45,6 +47,7 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('rtmp')
@@ -52,6 +55,7 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_disabled(self):
+        inputstreamhelper.utils.delete_cached([inputstreamhelper.system_os, inputstreamhelper.arch])
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')

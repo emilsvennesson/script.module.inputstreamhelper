@@ -144,20 +144,40 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
     return bool(result)
 
 
+def set_cached(obj, value):
+    """Set cached property"""
+    obj.cached = value
+
+
+def get_cached(obj):
+    """Get cached property"""
+    if hasattr(obj, 'cached'):
+        return getattr(obj, 'cached')
+    return None
+
+
+def delete_cached(obj):
+    """Delete cached property from one or more objects"""
+    if not isinstance(obj, list):
+        obj = list(obj)
+    for item in obj:
+        if hasattr(item, 'cached'):
+            del item.cached
+
+
 def system_os():
     """Get system platform, and remember this information"""
 
-    if hasattr(system_os, 'cached'):
-        return getattr(system_os, 'cached')
+    sys_name = get_cached(system_os)
+    if not sys_name:
+        from xbmc import getCondVisibility
+        if getCondVisibility('system.platform.android'):
+            sys_name = 'Android'
+        else:
+            from platform import system
+            sys_name = system()
+        set_cached(system_os, sys_name)
 
-    from xbmc import getCondVisibility
-    if getCondVisibility('system.platform.android'):
-        sys_name = 'Android'
-    else:
-        from platform import system
-        sys_name = system()
-
-    system_os.cached = sys_name
     return sys_name
 
 
@@ -233,28 +253,28 @@ def sizeof_fmt(num, suffix='B'):
 def arch():
     """Map together, cache and return the system architecture"""
 
-    if hasattr(arch, 'cached'):
-        return getattr(arch, 'cached')
+    sys_arch = get_cached(arch)
 
-    from platform import architecture, machine
-    sys_arch = machine()
-    if sys_arch == 'AMD64':
-        sys_arch_bit = architecture()[0]
-        if sys_arch_bit == '32bit':
-            sys_arch = 'x86'  # else, sys_arch = AMD64
+    if not sys_arch:
+        from platform import architecture, machine
+        sys_arch = machine()
+        if sys_arch == 'AMD64':
+            sys_arch_bit = architecture()[0]
+            if sys_arch_bit == '32bit':
+                sys_arch = 'x86'  # else, sys_arch = AMD64
 
-    elif 'armv' in sys_arch:
-        import re
-        arm_version = re.search(r'\d+', sys_arch.split('v')[1])
-        if arm_version:
-            sys_arch = 'armv' + arm_version.group()
+        elif 'armv' in sys_arch:
+            import re
+            arm_version = re.search(r'\d+', sys_arch.split('v')[1])
+            if arm_version:
+                sys_arch = 'armv' + arm_version.group()
 
-    if sys_arch in config.ARCH_MAP:
-        sys_arch = config.ARCH_MAP[sys_arch]
+        if sys_arch in config.ARCH_MAP:
+            sys_arch = config.ARCH_MAP[sys_arch]
 
-    log(0, 'Found system architecture {arch}', arch=sys_arch)
+        log(0, 'Found system architecture {arch}', arch=sys_arch)
+        set_cached(arch, sys_arch)
 
-    arch.cached = sys_arch
     return sys_arch
 
 

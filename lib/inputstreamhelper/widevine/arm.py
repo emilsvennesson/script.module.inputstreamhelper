@@ -162,7 +162,8 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
         log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
         ok_dialog(localize(30004), localize(30005))
         return ''
-    required_diskspace = int(arm_device['filesize']) + int(arm_device['zipfilesize'])
+    # Estimated required disk space: takes into account an extra 20 MiB buffer
+    required_diskspace = 20971520 + int(arm_device['zipfilesize']) + int(arm_device['filesize'])
     if yesno_dialog(localize(30001),  # Due to distributing issues, this takes a long time
                     localize(30006, diskspace=sizeof_fmt(required_diskspace))):
         if system_os() != 'Linux':

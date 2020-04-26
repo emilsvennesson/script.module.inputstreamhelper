@@ -5,6 +5,7 @@
 from __future__ import absolute_import, division, unicode_literals
 import os
 from time import time
+from struct import unpack, calcsize
 
 from .. import config
 from ..kodiutils import browsesingle, copy, exists, localize, log, mkdir, ok_dialog, open_file, progress_dialog, yesno_dialog
@@ -21,25 +22,50 @@ def mnt_path():
     return mount_path
 
 
-def chromeos_offset(bin_path):
-    """Calculate the Chrome OS losetup start offset using fdisk/parted."""
-    if cmd_exists('fdisk'):
-        cmd = ['fdisk', bin_path, '-l']
-    else:  # parted
-        cmd = ['parted', '-s', bin_path, 'unit s print']
+def gpt_header(bytestream):
+    """Returns the needed parts of the GPT header, can be easily expanded if necessary"""
+    header_fmt = '<8s4sII4x4Q16sQ3I'
+    header_size = calcsize(header_fmt)
 
-    output = run_cmd(cmd, sudo=False)
-    if output['success']:
-        import re
-        for line in output['output'].splitlines():
-            partition_data = re.match(r'^\s?(3|.+bin3)\s+(\d+)s?\s+\d+', line)
-            if partition_data:
-                if partition_data.group(1) == '3' or partition_data.group(1).endswith('.bin3'):
-                    offset = int(partition_data.group(2))
-                    return str(offset * config.CHROMEOS_BLOCK_SIZE)
+    # GPT Header entries: signature, revision, header_size, header_crc32, (reserved 4x skipped,) current_lba, backup_lba,
+    #                     first_usable_lba, last_usable_lba, disk_guid, start_lba_part_entries, num_part_entries,
+    #                     size_part_entry, crc32_part_entries
+    _, _, _, _, _, _, _, _, _, start_lba_part_entries, num_part_entries, size_part_entry, _ = unpack(header_fmt, bytestream.read(header_size))
+    bytestream.read(config.CHROMEOS_BLOCK_SIZE - header_size)  # go to LBA 2
 
-    log(4, 'Failed to calculate losetup offset.')
-    return '0'
+    return (start_lba_part_entries, num_part_entries, size_part_entry)
+
+
+def chromeos_offset(bytestream):
+    """Calculate the Chrome OS losetup start offset"""
+    lba_size = config.CHROMEOS_BLOCK_SIZE
+    part_format = '<16s16sQQQ72s'
+    bytestream.read(lba_size)  # skip MBR
+    entries_start, entries_num, entry_size = gpt_header(bytestream)
+
+    if not entries_start == 2:
+        if entries_start < 2:
+            log(4, 'GPT partition entries start too early')
+            return 0
+        bytestream.read((entries_start - 2) * lba_size)
+
+    if not calcsize(part_format) == entry_size:
+        log(4, 'Partition table entries are not 128 bytes long')
+        return 0
+
+    for index in range(1, entries_num+1):  # pylint: disable=unused-variable
+        #Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
+        _, _, first_lba, _, _, part_name = unpack(part_format, bytestream.read(entry_size))
+        part_name = part_name.decode('utf-16').strip('\x00')
+        if part_name == 'ROOT-A':
+            offset = first_lba * lba_size
+            break
+
+    if not offset:
+        log(4, 'Failed to calculate losetup offset.')
+        return 0
+
+    return offset
 
 
 def check_loop():
@@ -69,7 +95,10 @@ def set_loop_dev():
 
 def losetup(bin_path):
     """Setup Chrome OS loop device."""
-    cmd = ['losetup', '-o', chromeos_offset(bin_path), store('loop_dev'), bin_path]
+    with open(bin_path, 'rb') as cos_image:
+        cos_offset = str(chromeos_offset(cos_image))
+
+    cmd = ['losetup', '-o', cos_offset, store('loop_dev'), bin_path]
     output = run_cmd(cmd, sudo=True)
     if output['success']:
         store('attached_loop_dev', True)

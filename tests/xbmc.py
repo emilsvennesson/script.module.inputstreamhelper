@@ -12,6 +12,7 @@ import json
 import time
 import weakref
 from xbmcextra import ADDON_ID, GLOBAL_SETTINGS as settings, LANGUAGE
+from inputstreamhelper.unicodes import to_unicode
 
 LOGLEVELS = ['Debug', 'Info', 'Notice', 'Warning', 'Error', 'Severe', 'Fatal', 'None']
 LOGDEBUG = 0
@@ -269,7 +270,7 @@ def log(msg, level=0):
         color1 = '\033[33;1m'
     elif level == 0:
         color2 = '\033[30;1m'
-    print('{color1}{name}: {color2}{msg}\033[39;0m'.format(name=name, color1=color1, color2=color2, msg=str(msg)))
+    print('{color1}{name}: {color2}{msg}\033[39;0m'.format(name=name, color1=color1, color2=color2, msg=to_unicode(msg)))
 
 
 def setContent(self, content):
@@ -287,9 +288,9 @@ def translatePath(path):
     if path.startswith('special://home'):
         return path.replace('special://home', os.path.join(os.getcwd(), 'tests/'))
     if path.startswith('special://masterprofile'):
-        return path.replace('special://masterprofile', os.path.join(os.getcwd(), 'tests/userdata/'))
+        return path.replace('special://masterprofile', os.path.join(os.getcwd(), 'tests/userdata'))
     if path.startswith('special://profile'):
-        return path.replace('special://profile', os.path.join(os.getcwd(), 'tests/userdata/'))
+        return path.replace('special://profile', os.path.join(os.getcwd(), 'tests/userdata'))
     if path.startswith('special://userdata'):
-        return path.replace('special://userdata', os.path.join(os.getcwd(), 'tests/userdata/'))
+        return path.replace('special://userdata', os.path.join(os.getcwd(), 'tests/userdata'))
     return path

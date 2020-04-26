@@ -7,7 +7,7 @@ import os
 
 from . import config
 from .kodiutils import copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
-
+from .unicodes import from_unicode
 
 def temp_path():
     """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
@@ -176,7 +176,8 @@ def store(name, val=None):
 
 def diskspace():
     """Return the free disk space available (in bytes) in temp_path."""
-    statvfs = os.statvfs(temp_path())
+    # Python 2.7: os.statvfs() not working well with unicode paths https://bugs.python.org/issue18695
+    statvfs = os.statvfs(from_unicode(temp_path()))
     return statvfs.f_frsize * statvfs.f_bavail
 
 

@@ -6,7 +6,6 @@
 # pylint: disable=invalid-name
 
 from __future__ import absolute_import, division, print_function, unicode_literals
-from xbmc import getLocalizedString
 from xbmcextra import ADDON_ID, ADDON_INFO, addon_settings
 
 
@@ -28,6 +27,7 @@ class Addon:
     @staticmethod
     def getLocalizedString(msgctxt):
         """A working implementation for the xbmcaddon Addon class getLocalizedString() method"""
+        from xbmc import getLocalizedString
         return getLocalizedString(msgctxt)
 
     def getSetting(self, key):

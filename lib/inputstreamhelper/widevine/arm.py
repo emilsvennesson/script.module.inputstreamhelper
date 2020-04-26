@@ -250,8 +250,8 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
 
 def extract_widevine_from_img(backup_path):
     """Extract the Widevine CDM binary from the mounted Chrome OS image"""
-    for root, _, files in os.walk(str(mnt_path())):
-        if str('libwidevinecdm.so') not in files:
+    for root, _, files in os.walk(mnt_path()):
+        if 'libwidevinecdm.so' not in files:
             continue
         cdm_path = os.path.join(root, 'libwidevinecdm.so')
         log(0, 'Found libwidevinecdm.so in {path}', path=cdm_path)

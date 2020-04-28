@@ -90,6 +90,11 @@ Please report any issues or bug reports on the [GitHub Issues](https://github.co
 This module is licensed under the **The MIT License**. Please see the [LICENSE.txt](LICENSE.txt) file for details.
 
 ## Releases
+## v0.4.6 (2020-04-29)
+- Compatibility fixes for Kodi 19 Matrix "pre-release" builds (@mediaminister)
+- Optimize Widevine CDM detection (@dagwieers)
+- Minor fixes for Widevine installation on ARM devices (@dagwieers @mediaminister @horstle)
+
 ## v0.4.5 (2020-04-07)
 - Added Spanish and Romanian translations (@roliverosc, @tmihai20)
 - Added support for Kodi 19 Matrix "pre-release" builds (@mediaminister)

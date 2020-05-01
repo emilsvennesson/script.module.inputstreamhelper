@@ -261,14 +261,13 @@ def arch():
 
 def hardlink(src, dest):
     """Hardlink a file when possible, copy when needed"""
-    from os import link
-
     if exists(dest):
         delete(dest)
 
     try:
+        from os import link
         link(src, dest)
-    except (AttributeError, OSError):
+    except (AttributeError, OSError, ImportError):
         return copy(src, dest)
     log(2, "Hardlink file '{src}' to '{dest}'.", src=src, dest=dest)
     return True

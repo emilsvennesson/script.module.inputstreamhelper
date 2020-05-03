@@ -7,7 +7,7 @@ import os
 
 from . import config
 from .kodiutils import copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
-from .unicodes import from_unicode
+from .unicodes import compat_path, from_unicode, to_unicode
 
 
 def temp_path():
@@ -90,7 +90,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     progress.create(localize(30014), message)  # Download in progress
 
     chunk_size = 32 * 1024
-    with open(download_path, 'wb') as image:
+    with open(compat_path(download_path), 'wb') as image:
         size = 0
         while True:
             chunk = req.read(chunk_size)
@@ -128,18 +128,18 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
         mkdirs(destination)
 
     from zipfile import ZipFile
-    zip_obj = ZipFile(source)
+    zip_obj = ZipFile(compat_path(source))
     for filename in zip_obj.namelist():
         if file_to_unzip and filename != file_to_unzip:
             continue
 
         # Detect and remove (dangling) symlinks before extraction
         fullname = os.path.join(destination, filename)
-        if os.path.islink(fullname):
+        if os.path.islink(compat_path(fullname)):
             log(3, 'Remove (dangling) symlink at {symlink}', symlink=fullname)
             delete(fullname)
 
-        zip_obj.extract(filename, destination)
+        zip_obj.extract(filename, compat_path(destination))
         result.append(True)  # Pass by reference for Thread
 
     return bool(result)
@@ -177,8 +177,7 @@ def store(name, val=None):
 
 def diskspace():
     """Return the free disk space available (in bytes) in temp_path."""
-    # Python 2.7: os.statvfs() not working well with unicode paths https://bugs.python.org/issue18695
-    statvfs = os.statvfs(from_unicode(temp_path()))
+    statvfs = os.statvfs(compat_path(temp_path()))
     return statvfs.f_frsize * statvfs.f_bavail
 
 
@@ -191,7 +190,6 @@ def cmd_exists(cmd):
 
 def run_cmd(cmd, sudo=False, shell=False):
     """Run subprocess command and return if it succeeds as a bool"""
-    from .unicodes import to_unicode
     import subprocess
     env = os.environ.copy()
     env['LANG'] = 'C'
@@ -213,7 +211,7 @@ def run_cmd(cmd, sudo=False, shell=False):
 
     if output.rstrip():
         log(0, '{cmd} cmd output:\n{output}', cmd=cmd, output=output)
-    if 'sudo' in cmd:
+    if from_unicode('sudo') in cmd:
         subprocess.call(['sudo', '-k'])  # reset timestamp
 
     return {
@@ -267,8 +265,14 @@ def hardlink(src, dest):
 
     try:
         from os import link
-        link(src, dest)
+        link(compat_path(src), compat_path(dest))
     except (AttributeError, OSError, ImportError):
         return copy(src, dest)
     log(2, "Hardlink file '{src}' to '{dest}'.", src=src, dest=dest)
     return True
+
+
+def remove_tree(path):
+    """Remove an entire directory tree"""
+    from shutil import rmtree
+    rmtree(compat_path(path))

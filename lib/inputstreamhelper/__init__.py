@@ -431,7 +431,9 @@ class Helper:
             text += ' - ' + localize(30823, path=ia_cdm_path()) + '\n'
 
             if arch() in ('arm', 'arm64'):  # Chrome OS version
-                text += ' - ' + localize(30824, version=select_best_chromeos_image(load_widevine_config())['version']) + '\n'
+                wv_cfg = load_widevine_config()
+                if wv_cfg:
+                    text += ' - ' + localize(30824, version=select_best_chromeos_image(wv_cfg)['version']) + '\n'
 
         text += '\n'
 

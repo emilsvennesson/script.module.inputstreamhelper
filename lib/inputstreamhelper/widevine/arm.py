@@ -217,12 +217,12 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
 
             from zipfile import ZipFile
 
-            with ZipFile(store('download_path')) as zip_obj:
+            with ZipFile(compat_path(store('download_path'))) as zip_obj:
                 bin_size = zip_obj.getinfo(bin_filename).file_size
                 chunksize = 1024**2
 
                 with zip_obj.open(bin_filename) as member:
-                    with open_file(bin_path, 'wb') as bin_file:
+                    with open(bin_path, 'wb') as bin_file:
                         bytes_to_read = bin_size
                         while bytes_to_read > 0:
                             chunk = member.read(chunksize)

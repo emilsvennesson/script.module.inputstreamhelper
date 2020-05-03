@@ -101,7 +101,7 @@ class Helper:
         if not path or not exists(path):
             return '(Not found)'
         import re
-        with open(path, 'rb') as library:
+        with open(compat_path(path), 'rb') as library:
             match = re.search(br'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', library.read())
         if not match:
             return '(Undetected)'

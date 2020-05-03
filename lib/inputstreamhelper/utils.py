@@ -4,6 +4,7 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
+from time import time
 
 from . import config
 from .kodiutils import copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
@@ -87,8 +88,14 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     download_path = os.path.join(temp_path(), filename)
     total_length = float(req.info().get('content-length'))
     progress = progress_dialog()
-    progress.create(localize(30014), message)  # Download in progress
+    progress.create(
+        localize(30014),  # Download in progress
+        message='{line1}\n{line2}'.format(
+            line1=message,
+            line2=localize(30058, mins=0, secs=0))  # Time remaining
+    )
 
+    starttime = time()
     chunk_size = 32 * 1024
     with open(compat_path(download_path), 'wb') as image:
         size = 0
@@ -101,11 +108,17 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
                 calc_checksum.update(chunk)
             size += len(chunk)
             percent = int(size * 100 / total_length)
+            time_left = int((total_length - size) * (time() - starttime) / size)
             if progress.iscanceled():
                 progress.close()
                 req.close()
                 return False
-            progress.update(percent)
+            progress.update(
+                percent,
+                message='{line1}\n{line2}'.format(
+                    line1=message,
+                    line2=localize(30058, mins=time_left // 60, secs=time_left % 60))  # Time remaining
+            )
 
     if checksum and not calc_checksum.hexdigest() == checksum:
         log(4, 'Download failed, checksums do not match!')

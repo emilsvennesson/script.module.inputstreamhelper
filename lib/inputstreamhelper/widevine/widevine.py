@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from .. import config
-from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, open_file, translate_path, yesno_dialog
+from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdirs, ok_dialog, open_file, translate_path, yesno_dialog
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, run_cmd, store, system_os
 
 
@@ -52,7 +52,7 @@ def backup_path():
     """Return the path to the cdm backups"""
     path = os.path.join(addon_profile(), 'backup')
     if not exists(path):
-        mkdir(path)
+        mkdirs(path)
     return path
 
 
@@ -107,7 +107,7 @@ def ia_cdm_path():
 
     cdm_path = translate_path(addon.getSetting('DECRYPTERPATH'))
     if not exists(cdm_path):
-        mkdir(cdm_path)
+        mkdirs(cdm_path)
 
     return cdm_path
 

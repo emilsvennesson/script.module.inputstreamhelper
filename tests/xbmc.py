@@ -6,7 +6,6 @@
 # pylint: disable=invalid-name,no-self-use,unused-argument
 
 from __future__ import absolute_import, division, print_function
-
 import os
 import json
 import time

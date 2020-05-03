@@ -8,6 +8,7 @@ import os
 from .. import config
 from ..kodiutils import browsesingle, copy, exists, localize, log, mkdir, ok_dialog, open_file, progress_dialog, yesno_dialog
 from ..utils import cmd_exists, diskspace, http_download, http_get, run_cmd, sizeof_fmt, store, system_os, temp_path, unzip, update_temp_path
+from ..unicodes import compat_path, to_unicode
 
 
 def mnt_path():
@@ -78,7 +79,7 @@ def losetup(bin_path):
 
 def mnt_loop_dev():
     """Mount loop device to mnt_path()"""
-    cmd = ['mount', '-t', 'ext2', '-o', 'ro', store('loop_dev'), mnt_path()]
+    cmd = ['mount', '-t', 'ext2', '-o', 'ro', store('loop_dev'), compat_path(mnt_path())]
     output = run_cmd(cmd, sudo=True)
     if output['success']:
         return True
@@ -204,7 +205,7 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
             bin_filename = url.split('/')[-1].replace('.zip', '')
-            bin_path = os.path.join(temp_path(), bin_filename)
+            bin_path = compat_path(os.path.join(temp_path(), bin_filename))
 
             progress.update(
                 0,
@@ -250,10 +251,10 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
 
 def extract_widevine_from_img(backup_path):
     """Extract the Widevine CDM binary from the mounted Chrome OS image"""
-    for root, _, files in os.walk(mnt_path()):
-        if 'libwidevinecdm.so' not in files:
+    for root, _, files in os.walk(compat_path(mnt_path())):
+        if compat_path('libwidevinecdm.so') not in files:
             continue
-        cdm_path = os.path.join(root, 'libwidevinecdm.so')
+        cdm_path = os.path.join(to_unicode(root), 'libwidevinecdm.so')
         log(0, 'Found libwidevinecdm.so in {path}', path=cdm_path)
         if not exists(backup_path):
             mkdir(backup_path)
@@ -266,8 +267,8 @@ def extract_widevine_from_img(backup_path):
 
 def unmount():
     """Unmount mountpoint if mounted"""
-    while os.path.ismount(mnt_path()):
+    while os.path.ismount(compat_path(mnt_path())):
         log(0, 'Unmount {mountpoint}', mountpoint=mnt_path())
-        umount_output = run_cmd(['umount', mnt_path()], sudo=True)
+        umount_output = run_cmd(['umount', compat_path(mnt_path())], sudo=True)
         if not umount_output['success']:
             break

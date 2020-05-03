@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from .. import config
-from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, translate_path, yesno_dialog
+from ..kodiutils import addon_profile, exists, get_setting_int, localize, log, mkdir, ok_dialog, open_file, translate_path, yesno_dialog
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, run_cmd, store, system_os
 
 
@@ -66,8 +66,10 @@ def widevine_config_path():
 def load_widevine_config():
     """Load the widevine or recovery config in JSON format"""
     from json import loads
-    with open(widevine_config_path(), 'r') as config_file:
-        return loads(config_file.read())
+    if exists(widevine_config_path()):
+        with open_file(widevine_config_path(), 'r') as config_file:
+            return loads(config_file.read())
+    return None
 
 
 def widevinecdm_path():

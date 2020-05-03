@@ -3,6 +3,7 @@
 """Implements Kodi Helper functions"""
 
 from __future__ import absolute_import, division, unicode_literals
+from contextlib import contextmanager
 import xbmc
 import xbmcaddon
 from xbmcgui import DialogProgress
@@ -313,6 +314,15 @@ def kodi_to_ascii(string):
     string = string.replace('[COLOR yellow]', '')
     string = string.replace('[/COLOR]', '')
     return string
+
+
+@contextmanager
+def open_file(path, flags='r'):
+    """Open a file (using xbmcvfs)"""
+    from xbmcvfs import File
+    fdesc = File(path, flags)
+    yield fdesc
+    fdesc.close()
 
 
 def copy(src, dest):

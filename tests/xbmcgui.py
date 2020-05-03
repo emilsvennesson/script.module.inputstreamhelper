@@ -5,7 +5,7 @@
 
 # pylint: disable=invalid-name,super-on-old-class,too-few-public-methods,too-many-arguments,unused-argument,useless-super-delegation
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 import sys
 from xbmcextra import kodi_to_ansi
 

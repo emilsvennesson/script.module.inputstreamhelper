@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from .. import config
-from ..kodiutils import browsesingle, copy, exists, localize, log, mkdir, ok_dialog, progress_dialog, yesno_dialog
+from ..kodiutils import browsesingle, copy, exists, localize, log, mkdir, ok_dialog, open_file, progress_dialog, yesno_dialog
 from ..utils import cmd_exists, diskspace, http_download, http_get, run_cmd, sizeof_fmt, store, system_os, temp_path, unzip, update_temp_path
 
 
@@ -239,7 +239,7 @@ def install_widevine_arm(backup_path):  # pylint: disable=too-many-statements
                 progress.update(96, message=localize(30048))  # Extracting Widevine CDM
                 extract_widevine_from_img(os.path.join(backup_path, arm_device['version']))
                 json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
-                with open(json_file, 'w') as config_file:
+                with open_file(json_file, 'w') as config_file:
                     config_file.write(json.dumps(devices, indent=4))
 
                 return (progress, arm_device['version'])

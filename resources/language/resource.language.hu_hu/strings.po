@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: script.module.inputstreamhelper\n"
 "Report-Msgid-Bugs-To: https://github.com/emilsvennesson/script.module.inputstreamhelper\n"
 "POT-Creation-Date: 2013-11-18 16:15+0000\n"
-"PO-Revision-Date: 2020-02-17 16:30+0000\n"
+"PO-Revision-Date: 2020-05-04 14:30+0000\n"
 "Last-Translator: frodo19\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -239,7 +239,7 @@ msgstr "Válassz mentés fájlt a visszaállításhoz"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "Hátralevő idő: {mins:d}:{secs:02d}"
 
 
 ### INFORMATION DIALOG

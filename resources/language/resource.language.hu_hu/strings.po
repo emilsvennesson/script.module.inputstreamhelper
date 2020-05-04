@@ -239,7 +239,7 @@ msgstr "Válassz mentés fájlt a visszaállításhoz"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr "Hátrelevő idő: {perc:d}:{mp:02d}"
+msgstr "Hátralevő idő: {mins:d}:{secs:02d}"
 
 
 ### INFORMATION DIALOG

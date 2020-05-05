@@ -164,7 +164,8 @@ def install_widevine_arm(backup_path):
             return False
 
         url = arm_device['url']
-        downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1', dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
+        downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1',
+                                   dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
@@ -180,11 +181,9 @@ def install_widevine_arm(backup_path):
                                 message='{line1}\n{line2}\n{line3}'.format(
                                     line1=localize(30016),
                                     line2=localize(30830, url=config.ISSUE_URL),
-                                    line3=localize(30059))
-                               ):
+                                    line3=localize(30059))):
                     return install_wv_arm_legacy(backup_path)
                 return False
-
 
             json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
             with open_file(json_file, 'w') as config_file:

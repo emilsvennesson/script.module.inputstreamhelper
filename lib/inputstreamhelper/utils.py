@@ -121,10 +121,14 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             )
 
     if checksum and not calc_checksum.hexdigest() == checksum:
+        progress.close()
+        req.close()
         log(4, 'Download failed, checksums do not match!')
         return False
 
     if dl_size and not stat_file(download_path).st_size() == dl_size:
+        progress.close()
+        req.close()
         log(4, 'Download failed, filesize does not match!')
         return False
 

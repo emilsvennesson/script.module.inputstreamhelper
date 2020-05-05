@@ -426,7 +426,10 @@ class Helper:
             text += ' - ' + localize(30821) + '\n'
         else:
             from datetime import datetime
-            wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M") if get_setting_float('last_update', 0.0) else 'Never'
+            if get_setting_float('last_update', 0.0):
+                wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M")
+            else:
+                wv_updated = 'Never'
             text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
             text += ' - ' + localize(30823, path=ia_cdm_path()) + '\n'
 

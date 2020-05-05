@@ -2,7 +2,7 @@
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements a class with methods related to the Chrome OS image"""
 
-from __future__ import absolute_import, division
+from __future__ import absolute_import, division, unicode_literals
 import os
 from struct import calcsize, unpack
 from zipfile import ZipFile
@@ -10,6 +10,7 @@ from io import UnsupportedOperation
 
 from ..kodiutils import exists, localize, log, mkdirs
 from .. import config
+from ..unicodes import compat_path
 
 
 class ChromeOSImage:
@@ -19,7 +20,6 @@ class ChromeOSImage:
     Information related to ext2 is sourced from here: https://www.nongnu.org/ext2-doc/ext2.html
     """
 
-
     def __init__(self, imgpath):
         """Prepares the image"""
         self.imgpath = imgpath
@@ -28,7 +28,6 @@ class ChromeOSImage:
         self.sb_dict = self.superblock()
         self.blk_groups = self.block_groups()
         self.progress = None
-
 
     def gpt_header(self):
         """Returns the needed parts of the GPT header, can be easily expanded if necessary"""
@@ -44,7 +43,6 @@ class ChromeOSImage:
 
         return (start_lba_part_entries, num_part_entries, size_part_entry)
 
-
     def chromeos_offset(self):
         """Calculate the Chrome OS losetup start offset"""
         part_format = '<16s16sQQQ72s'
@@ -56,8 +54,8 @@ class ChromeOSImage:
             log(4, 'Partition table entries are not 128 bytes long')
             return 0
 
-        for index in range(1, entries_num+1):  # pylint: disable=unused-variable
-            #Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
+        for index in range(1, entries_num + 1):  # pylint: disable=unused-variable
+            # Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
             _, _, first_lba, _, _, part_name = unpack(part_format, self.read_stream(entry_size))
             part_name = part_name.decode('utf-16').strip('\x00')
             if part_name == 'ROOT-A':
@@ -70,12 +68,11 @@ class ChromeOSImage:
 
         return offset
 
-
     def extract_file(self, filename, extract_path, progress):
         """Extracts the file from the image"""
         self.progress = progress
         bin_filename = filename.encode('ascii')
-        chunksize = 4*1024**2
+        chunksize = 4 * 1024**2
         percent = 5
         count = 0
         self.progress.update(percent, localize(30060))
@@ -99,18 +96,17 @@ class ChromeOSImage:
 
         self.progress.update(30, localize(30048))
 
-        i_index_pos = chunk.index(bin_filename)-8
-        dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos+len(filename)+8])
+        i_index_pos = chunk.index(bin_filename) - 8
+        dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
 
-        blk_group_num = (dir_dict['inode']-1) // self.sb_dict['s_inodes_per_group']
+        blk_group_num = (dir_dict['inode'] - 1) // self.sb_dict['s_inodes_per_group']
         blk_group = self.blk_groups[blk_group_num]
-        i_index_in_group = (dir_dict['inode']-1) % self.sb_dict['s_inodes_per_group']
+        i_index_in_group = (dir_dict['inode'] - 1) % self.sb_dict['s_inodes_per_group']
 
-        inode_pos = self.part_offset + self.blocksize*blk_group['bg_inode_table'] + self.sb_dict['s_inode_size']*i_index_in_group
+        inode_pos = self.part_offset + self.blocksize * blk_group['bg_inode_table'] + self.sb_dict['s_inode_size'] * i_index_in_group
         inode_dict, _ = self.inode_table(inode_pos)
 
         return self.write_file(inode_dict, os.path.join(extract_path, filename))
-
 
     def superblock(self):
         """Get relevant info from the superblock, assert it's an ext2 fs"""
@@ -119,8 +115,7 @@ class ChromeOSImage:
                  's_mnt_count', 's_max_mnt_count', 's_magic', 's_state', 's_errors', 's_minor_rev_level', 's_lastcheck', 's_checkinterval',
                  's_creator_os', 's_rev_level', 's_def_resuid', 's_def_resgid', 's_first_ino', 's_inode_size', 's_block_group_nr',
                  's_feature_compat', 's_feature_incompat', 's_feature_ro_compat', 's_uuid', 's_volume_name', 's_last_mounted',
-                 's_algorithm_usage_bitmap', 's_prealloc_block', 's_prealloc_dir_blocks'
-                )
+                 's_algorithm_usage_bitmap', 's_prealloc_block', 's_prealloc_dir_blocks')
         fmt = '<13I6H4I2HI2H3I16s16s64sI2B818x'
         fmt_len = calcsize(fmt)
 
@@ -131,17 +126,16 @@ class ChromeOSImage:
         sb_dict['s_magic'] = hex(sb_dict['s_magic'])
         assert sb_dict['s_magic'] == '0xef53'  # identifies this as ext2 fs
 
-        block_groups_count1 = sb_dict['s_blocks_count']/sb_dict['s_blocks_per_group']
-        block_groups_count1 = int(block_groups_count1) if float(int(block_groups_count1)) == block_groups_count1 else int(block_groups_count1)+1
-        block_groups_count2 = sb_dict['s_inodes_count']/sb_dict['s_inodes_per_group']
-        block_groups_count2 = int(block_groups_count2) if float(int(block_groups_count2)) == block_groups_count2 else int(block_groups_count2)+1
+        block_groups_count1 = sb_dict['s_blocks_count'] / sb_dict['s_blocks_per_group']
+        block_groups_count1 = int(block_groups_count1) if float(int(block_groups_count1)) == block_groups_count1 else int(block_groups_count1) + 1
+        block_groups_count2 = sb_dict['s_inodes_count'] / sb_dict['s_inodes_per_group']
+        block_groups_count2 = int(block_groups_count2) if float(int(block_groups_count2)) == block_groups_count2 else int(block_groups_count2) + 1
         assert block_groups_count1 == block_groups_count2
         sb_dict['block_groups_count'] = block_groups_count1
 
         self.blocksize = 1024 << sb_dict['s_log_block_size']
 
         return sb_dict
-
 
     def block_group(self):
         """Get info about a block group"""
@@ -156,7 +150,6 @@ class ChromeOSImage:
 
         return blk_dict
 
-
     def block_groups(self):
         """Get info about all block groups"""
         if self.blocksize == 1024:
@@ -170,7 +163,6 @@ class ChromeOSImage:
             blk_groups.append(blk_group)
 
         return blk_groups
-
 
     def inode_table(self, inode_pos):
         """Reads and returns an inode table and inode size"""
@@ -188,40 +180,37 @@ class ChromeOSImage:
         inode_dict = dict(zip(names, inode))
         inode_dict['i_mode'] = hex(inode_dict['i_mode'])
 
-        blocks = inode_dict['i_size']/self.blocksize
-        inode_dict['blocks'] = int(blocks) if float(int(blocks)) == blocks else int(blocks)+1
+        blocks = inode_dict['i_size'] / self.blocksize
+        inode_dict['blocks'] = int(blocks) if float(int(blocks)) == blocks else int(blocks) + 1
 
-        self.read_stream(inode_size-fmt_len)
+        self.read_stream(inode_size - fmt_len)
         return inode_dict, inode_size
-
 
     @staticmethod
     def dir_entry(chunk):
         """Returns the directory entry found in chunk"""
         dir_names = ('inode', 'rec_len', 'name_len', 'file_type', 'name')
-        dir_fmt = '<IHBB' + str(len(chunk)-8) + 's'
+        dir_fmt = '<IHBB' + str(len(chunk) - 8) + 's'
 
         dir_dict = dict(zip(dir_names, unpack(dir_fmt, chunk)))
 
         return dir_dict
 
-
     def iblock_ids(self, blk_id, ids_to_read):
         """Reads the block indices/IDs from an indirect block"""
-        seek_pos = self.part_offset + self.blocksize*blk_id
+        seek_pos = self.part_offset + self.blocksize * blk_id
         self.seek_stream(seek_pos)
-        fmt = '<' + str(int(self.blocksize/4)) + 'I'
+        fmt = '<' + str(int(self.blocksize / 4)) + 'I'
         ids = list(unpack(fmt, self.read_stream(self.blocksize)))
         ids_to_read -= len(ids)
 
         return ids, ids_to_read
 
-
     def iiblock_ids(self, blk_id, ids_to_read):
         """Reads the block indices/IDs from a doubly-indirect block"""
-        seek_pos = self.part_offset + self.blocksize*blk_id
+        seek_pos = self.part_offset + self.blocksize * blk_id
         self.seek_stream(seek_pos)
-        fmt = '<' + str(int(self.blocksize/4)) + 'I'
+        fmt = '<' + str(int(self.blocksize / 4)) + 'I'
         iids = unpack(fmt, self.read_stream(self.blocksize))
 
         ids = []
@@ -233,7 +222,6 @@ class ChromeOSImage:
 
         return ids, ids_to_read
 
-
     def seek_stream(self, seek_pos):
         """Move position of bstream to seek_pos"""
         try:
@@ -242,7 +230,7 @@ class ChromeOSImage:
             return
 
         except UnsupportedOperation:
-            chunksize = 4*1024**2
+            chunksize = 4 * 1024**2
 
             if seek_pos >= self.bstream[1]:
                 while seek_pos - self.bstream[1] > chunksize:
@@ -260,13 +248,11 @@ class ChromeOSImage:
 
             return
 
-
     def read_stream(self, num_of_bytes):
         """Read and return a chunk of the bytestream"""
         self.bstream[1] += num_of_bytes
 
         return self.bstream[0].read(num_of_bytes)
-
 
     def get_block_ids(self, inode_dict):
         """Get all block indices/IDs of an inode"""
@@ -283,19 +269,17 @@ class ChromeOSImage:
 
         return block_ids[:inode_dict['blocks']]
 
-
     def read_file(self, block_ids):
         """Read blocks specified by IDs into a dict"""
         block_dict = {}
         for block_id in block_ids:
             percent = int(35 + 60 * block_ids.index(block_id) / len(block_ids))
             self.progress.update(percent, localize(30061))
-            seek_pos = self.part_offset + self.blocksize*block_id
+            seek_pos = self.part_offset + self.blocksize * block_id
             self.seek_stream(seek_pos)
             block_dict[block_id] = self.read_stream(self.blocksize)
 
         return block_dict
-
 
     @staticmethod
     def write_file_chunk(opened_file, chunk, bytes_to_write):
@@ -306,7 +290,6 @@ class ChromeOSImage:
 
         opened_file.write(chunk)
         return bytes_to_write - len(chunk)
-
 
     def write_file(self, inode_dict, filepath):
         """Writes file specified by its inode to filepath"""
@@ -320,8 +303,7 @@ class ChromeOSImage:
         if not exists(os.path.dirname(filepath)):
             mkdirs(os.path.dirname(filepath))
 
-
-        with open(filepath, 'wb') as opened_file:
+        with open(compat_path(filepath), 'wb') as opened_file:
             for block_id in block_ids:
                 bytes_to_write = self.write_file_chunk(opened_file, block_dict[block_id], bytes_to_write)
                 if bytes_to_write == 0:
@@ -329,12 +311,11 @@ class ChromeOSImage:
 
         return False
 
-
     def get_bstream(self):
         """Get a bytestream of the image"""
         if self.imgpath.endswith('.zip'):
-            bstream = ZipFile(self.imgpath, 'r').open(os.path.basename(self.imgpath).strip('.zip'), 'r')
+            bstream = ZipFile(compat_path(self.imgpath), 'r').open(os.path.basename(self.imgpath).strip('.zip'), 'r')
         else:
-            bstream = open(self.imgpath, 'rb')
+            bstream = open(compat_path(self.imgpath), 'rb')
 
         self.bstream = [bstream, 0]

@@ -80,7 +80,8 @@ def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFold
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
-    return to_unicode(Dialog().browseSingle(type=type, heading=heading, shares=shares, mask=mask, useThumbs=useThumbs, treatAsFolder=treatAsFolder, defaultt=defaultt))
+    return to_unicode(Dialog().browseSingle(type=type, heading=heading, shares=shares, mask=mask, useThumbs=useThumbs,
+                                            treatAsFolder=treatAsFolder, defaultt=defaultt))
 
 
 def notification(heading='', message='', icon='info', time=4000):

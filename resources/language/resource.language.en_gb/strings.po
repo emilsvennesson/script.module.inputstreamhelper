@@ -246,11 +246,15 @@ msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?
 msgstr ""
 
 msgctxt "#30060"
-msgid "Searching the Chrome OS image for the Widevine CDM"
+msgid "Identifying wanted partition..."
 msgstr ""
 
 msgctxt "#30061"
-msgid "Reading the file..."
+msgid "Scanning the filesystem for the Widevine CDM..."
+msgstr ""
+
+msgctxt "#30062"
+msgid "Widevine CDM found, analyzing..."
 msgstr ""
 
 

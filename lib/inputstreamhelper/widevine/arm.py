@@ -177,6 +177,7 @@ def install_widevine_arm(backup_path):
 
             if not extracted:
                 log(3, 'Directly extracting widevine from the zip failed, using legacy method.')
+                progress.close()
                 if yesno_dialog(heading=localize(30004),
                                 message='{line1}\n{line2}\n{line3}'.format(
                                     line1=localize(30016),

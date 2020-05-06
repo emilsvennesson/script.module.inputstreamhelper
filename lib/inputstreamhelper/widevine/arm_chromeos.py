@@ -23,17 +23,18 @@ class ChromeOSImage:
     def __init__(self, imgpath):
         """Prepares the image"""
         self.imgpath = imgpath
-        self.get_bstream()
-        self.part_offset = self.chromeos_offset()
-        self.sb_dict = self.superblock()
-        self.blk_groups = self.block_groups()
+        self.bstream = self.get_bstream(imgpath)
+        self.part_offset = None
+        self.sb_dict = None
+        self.blocksize = None
+        self.blk_groups = None
         self.progress = None
 
     def gpt_header(self):
         """Returns the needed parts of the GPT header, can be easily expanded if necessary"""
         header_fmt = '<8s4sII4x4Q16sQ3I'
         header_size = calcsize(header_fmt)
-        lba_size = config.CHROMEOS_BLOCK_SIZE
+        lba_size = config.CHROMEOS_BLOCK_SIZE  # assuming LBA size
         self.seek_stream(lba_size)
 
         # GPT Header entries: signature, revision, header_size, header_crc32, (reserved 4x skipped,) current_lba, backup_lba,
@@ -46,8 +47,8 @@ class ChromeOSImage:
     def chromeos_offset(self):
         """Calculate the Chrome OS losetup start offset"""
         part_format = '<16s16sQQQ72s'
-        entries_start, entries_num, entry_size = self.gpt_header()
-        lba_size = config.CHROMEOS_BLOCK_SIZE
+        entries_start, entries_num, entry_size = self.gpt_header()  # assuming partition table is GPT
+        lba_size = config.CHROMEOS_BLOCK_SIZE  # assuming LBA size
         self.seek_stream(entries_start * lba_size)
 
         if not calcsize(part_format) == entry_size:
@@ -58,7 +59,7 @@ class ChromeOSImage:
             # Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
             _, _, first_lba, _, _, part_name = unpack(part_format, self.read_stream(entry_size))
             part_name = part_name.decode('utf-16').strip('\x00')
-            if part_name == 'ROOT-A':
+            if part_name == 'ROOT-A':  # assuming partition name is ROOT-A
                 offset = first_lba * lba_size
                 break
 
@@ -71,11 +72,16 @@ class ChromeOSImage:
     def extract_file(self, filename, extract_path, progress):
         """Extracts the file from the image"""
         self.progress = progress
+
+        self.progress.update(2, localize(30060))
+        self.part_offset = self.chromeos_offset()
+        self.sb_dict = self.superblock()
+        self.blk_groups = self.block_groups()
+
         bin_filename = filename.encode('ascii')
         chunksize = 4 * 1024**2
-        percent = 5
-        count = 0
-        self.progress.update(percent, localize(30060))
+        percent8 = 40
+        self.progress.update(int(percent8 / 8), localize(30061))
         chunk1 = self.read_stream(chunksize)
         while True:
             chunk2 = self.read_stream(chunksize)
@@ -87,14 +93,11 @@ class ChromeOSImage:
             if bin_filename in chunk:
                 break
             chunk1 = chunk2
-            if percent < 30 and count == 8:
-                count = 0
-                percent += 1
-                self.progress.update(percent)
-            else:
-                count += 1
+            if percent8 < 240:
+                percent8 += 1
+                self.progress.update(int(percent8 / 8))
 
-        self.progress.update(30, localize(30048))
+        self.progress.update(32, localize(30062))
 
         i_index_pos = chunk.index(bin_filename) - 8
         dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
@@ -124,7 +127,7 @@ class ChromeOSImage:
         sb_dict = dict(zip(names, unpack(fmt, pack)))
 
         sb_dict['s_magic'] = hex(sb_dict['s_magic'])
-        assert sb_dict['s_magic'] == '0xef53'  # identifies this as ext2 fs
+        assert sb_dict['s_magic'] == '0xef53'  # assuming/checking this is an ext2 fs
 
         block_groups_count1 = sb_dict['s_blocks_count'] / sb_dict['s_blocks_per_group']
         block_groups_count1 = int(block_groups_count1) if float(int(block_groups_count1)) == block_groups_count1 else int(block_groups_count1) + 1
@@ -240,7 +243,7 @@ class ChromeOSImage:
 
             self.bstream[0].close()
             self.bstream[1] = 0
-            self.get_bstream()
+            self.bstream = self.get_bstream(self.imgpath)
 
             while seek_pos - self.bstream[1] > chunksize:
                 self.read_stream(chunksize)
@@ -274,7 +277,7 @@ class ChromeOSImage:
         block_dict = {}
         for block_id in block_ids:
             percent = int(35 + 60 * block_ids.index(block_id) / len(block_ids))
-            self.progress.update(percent, localize(30061))
+            self.progress.update(percent, localize(30048))
             seek_pos = self.part_offset + self.blocksize * block_id
             self.seek_stream(seek_pos)
             block_dict[block_id] = self.read_stream(self.blocksize)
@@ -311,11 +314,12 @@ class ChromeOSImage:
 
         return False
 
-    def get_bstream(self):
+    @staticmethod
+    def get_bstream(imgpath):
         """Get a bytestream of the image"""
-        if self.imgpath.endswith('.zip'):
-            bstream = ZipFile(compat_path(self.imgpath), 'r').open(os.path.basename(self.imgpath).strip('.zip'), 'r')
+        if imgpath.endswith('.zip'):
+            bstream = ZipFile(compat_path(imgpath), 'r').open(os.path.basename(imgpath).strip('.zip'), 'r')
         else:
-            bstream = open(compat_path(self.imgpath), 'rb')
+            bstream = open(compat_path(imgpath), 'rb')
 
-        self.bstream = [bstream, 0]
+        return [bstream, 0]

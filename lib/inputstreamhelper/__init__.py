@@ -274,13 +274,21 @@ class Helper:
                 return
 
         wv_config = load_widevine_config()
-        latest_version = latest_widevine_version()
-        if 'x86' in arch():
+        if not wv_config:
+            log(3, 'Widevine config missing. Could not determine current version, forcing update.')
+            current_version = '0'
+        elif 'x86' in arch():
             component = 'Widevine CDM'
             current_version = wv_config['version']
         else:
             component = 'Chrome OS'
             current_version = select_best_chromeos_image(wv_config)['version']
+
+        latest_version = latest_widevine_version()
+        if not latest_version:
+            log(3, 'Updating widevine failed. Could not determine latest version.')
+            return
+
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 

@@ -37,7 +37,7 @@ def widevine_eula():
         cdm_arch = 'x64'
 
     url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
-    downloaded = http_download(url, message=localize(30025))  # Acquiring EULA
+    downloaded = http_download(url, message=localize(30025), background=True)  # Acquiring EULA
     if not downloaded:
         return False
 

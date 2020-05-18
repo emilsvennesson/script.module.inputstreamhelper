@@ -7,7 +7,7 @@ import os
 from time import time
 
 from . import config
-from .kodiutils import copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
+from .kodiutils import bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
 from .unicodes import compat_path, from_unicode, to_unicode
 
 
@@ -30,7 +30,7 @@ def update_temp_path(new_temp_path):
         move(old_temp_path, temp_path())
 
 
-def _http_request(url):
+def _http_request(url, timeout=10):
     """Perform an HTTP request and return request"""
 
     try:  # Python 3
@@ -43,7 +43,7 @@ def _http_request(url):
     filename = url.split('/')[-1]
 
     try:
-        req = urlopen(url, timeout=5)
+        req = urlopen(url, timeout=timeout)
         log(0, 'Response code: {code}', code=req.getcode())
         if 400 <= req.getcode() < 600:
             raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
@@ -65,7 +65,7 @@ def http_get(url):
     return content.decode()
 
 
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None):
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:
         from hashlib import sha1, md5
@@ -87,13 +87,11 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
     download_path = os.path.join(temp_path(), filename)
     total_length = float(req.info().get('content-length'))
-    progress = progress_dialog()
-    progress.create(
-        localize(30014),  # Download in progress
-        message='{line1}\n{line2}'.format(
-            line1=message,
-            line2=localize(30058, mins=0, secs=0))  # Time remaining
-    )
+    if background:
+        progress = bg_progress_dialog()
+    else:
+        progress = progress_dialog()
+    progress.create(localize(30014), message=message)  # Download in progress
 
     starttime = time()
     chunk_size = 32 * 1024
@@ -108,17 +106,19 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
                 calc_checksum.update(chunk)
             size += len(chunk)
             percent = int(size * 100 / total_length)
-            time_left = int((total_length - size) * (time() - starttime) / size)
-            if progress.iscanceled():
+            if not background and progress.iscanceled():
                 progress.close()
                 req.close()
                 return False
-            progress.update(
-                percent,
-                message='{line1}\n{line2}'.format(
+            if time() - starttime > 5:
+                time_left = int((total_length - size) * (time() - starttime) / size)
+                prog_message = '{line1}\n{line2}'.format(
                     line1=message,
                     line2=localize(30058, mins=time_left // 60, secs=time_left % 60))  # Time remaining
-            )
+            else:
+                prog_message = message
+
+            progress.update(percent, prog_message)
 
     if checksum and not calc_checksum.hexdigest() == checksum:
         progress.close()

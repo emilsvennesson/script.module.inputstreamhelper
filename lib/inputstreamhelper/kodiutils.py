@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 from contextlib import contextmanager
 import xbmc
 import xbmcaddon
-from xbmcgui import DialogProgress
+from xbmcgui import DialogProgress, DialogProgressBG
 from .unicodes import from_unicode, to_unicode
 
 # NOTE: We need to explicitly add the add-on id here!
@@ -371,3 +371,8 @@ def stat_file(path):
     """Return information about a file (using xbmcvfs)"""
     from xbmcvfs import Stat
     return Stat(from_unicode(path))
+
+
+def bg_progress_dialog():
+    """Show Kodi's Background Progress dialog"""
+    return DialogProgressBG()

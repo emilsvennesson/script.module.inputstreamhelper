@@ -257,6 +257,18 @@ msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
 msgstr ""
 
+msgctxt "#30063"
+msgid "Could not make the request. Your internet may be down."
+msgstr ""
+
+msgctxt "#30064"
+msgid "Could not finish the download."
+msgstr ""
+
+msgctxt "#30065"
+msgid "Shall we try again?"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

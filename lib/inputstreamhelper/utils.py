@@ -86,7 +86,11 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
         message = localize(30015, filename=filename)  # Downloading file
 
     download_path = os.path.join(temp_path(), filename)
-    total_length = float(req.info().get('content-length'))
+    total_length = int(req.info().get('content-length'))
+    if dl_size and dl_size != total_length:
+        log(2, 'The given file size does not match the request!')
+        dl_size = total_length  # Otherwise size check at end would fail even if dl succeeded
+
     if background:
         progress = bg_progress_dialog()
     else:
@@ -120,16 +124,17 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
             progress.update(percent, prog_message)
 
-    if checksum and not calc_checksum.hexdigest() == checksum:
+    if checksum and calc_checksum.hexdigest() != checksum:
         progress.close()
         req.close()
         log(4, 'Download failed, checksums do not match!')
         return False
 
-    if dl_size and not stat_file(download_path).st_size() == dl_size:
+    if dl_size and stat_file(download_path).st_size() != dl_size:
         progress.close()
         req.close()
-        log(4, 'Download failed, filesize does not match!')
+        free_space = sizeof_fmt(diskspace())
+        log(4, 'Download failed, filesize does not match! Filesystem full? Remaining diskspace in temp: {}.'.format(free_space))
         return False
 
     progress.close()

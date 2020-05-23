@@ -5,9 +5,17 @@
 from __future__ import absolute_import, division, unicode_literals
 import os
 from time import time
+from socket import timeout
+from ssl import SSLError
+
+try:  # Python 3
+    from urllib.error import HTTPError, URLError
+    from urllib.request import Request, urlopen
+except ImportError:  # Python 2
+    from urllib2 import HTTPError, Request, URLError, urlopen
 
 from . import config
-from .kodiutils import bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs, ok_dialog, progress_dialog, set_setting, stat_file, translate_path
+from .kodiutils import bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs, progress_dialog, set_setting, stat_file, translate_path, yesno_dialog
 from .unicodes import compat_path, from_unicode, to_unicode
 
 
@@ -30,26 +38,25 @@ def update_temp_path(new_temp_path):
         move(old_temp_path, temp_path())
 
 
-def _http_request(url, timeout=10):
+def _http_request(url, headers=None, time_out=10):
     """Perform an HTTP request and return request"""
-
-    try:  # Python 3
-        from urllib.error import HTTPError
-        from urllib.request import urlopen
-    except ImportError:  # Python 2
-        from urllib2 import HTTPError, urlopen
-
     log(0, 'Request URL: {url}', url=url)
-    filename = url.split('/')[-1]
 
     try:
-        req = urlopen(url, timeout=timeout)
+        if headers:
+            request = Request(url, headers=headers)
+        else:
+            request = Request(url)
+        req = urlopen(request, timeout=time_out)
         log(0, 'Response code: {code}', code=req.getcode())
         if 400 <= req.getcode() < 600:
             raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
-    except HTTPError:
-        ok_dialog(localize(30004), localize(30013, filename=filename))  # Failed to retrieve file
+    except (HTTPError, URLError) as err:
+        log(2, 'Download failed with error {}'.format(err))
+        if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
+            return _http_request(url, headers, time_out)
         return None
+
     return req
 
 
@@ -86,7 +93,11 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
         message = localize(30015, filename=filename)  # Downloading file
 
     download_path = os.path.join(temp_path(), filename)
-    total_length = float(req.info().get('content-length'))
+    total_length = int(req.info().get('content-length'))
+    if dl_size and dl_size != total_length:
+        log(2, 'The given file size does not match the request!')
+        dl_size = total_length  # Otherwise size check at end would fail even if dl succeeded
+
     if background:
         progress = bg_progress_dialog()
     else:
@@ -97,21 +108,32 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     chunk_size = 32 * 1024
     with open(compat_path(download_path), 'wb') as image:
         size = 0
-        while True:
-            chunk = req.read(chunk_size)
-            if not chunk:
-                break
+        while size < total_length:
+            try:
+                chunk = req.read(chunk_size)
+            except (timeout, SSLError):
+                req.close()
+                if not yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30064), line2=localize(30065))):  # Could not finish dl. Try again?
+                    progress.close()
+                    return False
+
+                headers = {'Range': 'bytes={}-{}'.format(size, total_length)}
+                req = _http_request(url, headers=headers)
+                if req is None:
+                    return None
+                continue
+
             image.write(chunk)
             if checksum:
                 calc_checksum.update(chunk)
             size += len(chunk)
-            percent = int(size * 100 / total_length)
+            percent = int(round(size * 100 / total_length))
             if not background and progress.iscanceled():
                 progress.close()
                 req.close()
                 return False
             if time() - starttime > 5:
-                time_left = int((total_length - size) * (time() - starttime) / size)
+                time_left = int(round((total_length - size) * (time() - starttime) / size))
                 prog_message = '{line1}\n{line2}'.format(
                     line1=message,
                     line2=localize(30058, mins=time_left // 60, secs=time_left % 60))  # Time remaining
@@ -120,16 +142,17 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
             progress.update(percent, prog_message)
 
-    if checksum and not calc_checksum.hexdigest() == checksum:
+    if checksum and calc_checksum.hexdigest() != checksum:
         progress.close()
         req.close()
         log(4, 'Download failed, checksums do not match!')
         return False
 
-    if dl_size and not stat_file(download_path).st_size() == dl_size:
+    if dl_size and stat_file(download_path).st_size() != dl_size:
         progress.close()
         req.close()
-        log(4, 'Download failed, filesize does not match!')
+        free_space = sizeof_fmt(diskspace())
+        log(4, 'Download failed, filesize does not match! Filesystem full? Remaining diskspace in temp: {}.'.format(free_space))
         return False
 
     progress.close()

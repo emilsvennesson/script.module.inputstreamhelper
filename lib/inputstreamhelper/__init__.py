@@ -229,6 +229,7 @@ class Helper:
             from datetime import datetime
             from time import mktime
             set_setting('last_update', mktime(datetime.utcnow().timetuple()))
+            set_setting('last_check', mktime(datetime.utcnow().timetuple()))
             return True
 
         ok_dialog(localize(30004), localize(30005))  # An error occurred
@@ -266,11 +267,11 @@ class Helper:
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
         from datetime import datetime, timedelta
 
-        last_update = get_setting_float('last_update', 0.0)
-        if last_update and not self._first_run():
-            last_update_dt = datetime.fromtimestamp(get_setting_float('last_update', 0.0))
-            if last_update_dt + timedelta(days=get_setting_int('update_frequency', 14)) >= datetime.utcnow():
-                log(2, 'Widevine update check was made on {date}', date=last_update_dt.isoformat())
+        last_check = get_setting_float('last_check', 0.0)
+        if last_check and not self._first_run():
+            last_check_dt = datetime.fromtimestamp(get_setting_float('last_check', 0.0))
+            if last_check_dt + timedelta(days=get_setting_int('update_frequency', 14)) >= datetime.utcnow():
+                log(2, 'Widevine update check was made on {date}', date=last_check_dt.isoformat())
                 return
 
         wv_config = load_widevine_config()
@@ -301,7 +302,7 @@ class Helper:
                 log(3, 'User declined to update {component}.', component=component)
         else:
             from time import mktime
-            set_setting('last_update', mktime(datetime.utcnow().timetuple()))
+            set_setting('last_check', mktime(datetime.utcnow().timetuple()))
             log(0, 'User is on the latest available {component} version.', component=component)
 
     def _check_widevine(self):

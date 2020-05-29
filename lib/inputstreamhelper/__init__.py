@@ -226,9 +226,8 @@ class Helper:
             return result
 
         if self.install_and_finish(*result):
-            from datetime import datetime
-            from time import mktime
-            set_setting('last_update', mktime(datetime.utcnow().timetuple()))
+            from time import time
+            set_setting('last_check', time())
             return True
 
         ok_dialog(localize(30004), localize(30005))  # An error occurred
@@ -242,6 +241,7 @@ class Helper:
             log(0, 'Removed Widevine CDM at {path}', path=widevinecdm)
             delete(widevinecdm)
             notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
+            set_setting('last_modified', '0.0')
             return True
         notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
         return False
@@ -264,13 +264,12 @@ class Helper:
 
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
-        from datetime import datetime, timedelta
+        from time import localtime, strftime, time
 
-        last_update = get_setting_float('last_update', 0.0)
-        if last_update and not self._first_run():
-            last_update_dt = datetime.fromtimestamp(get_setting_float('last_update', 0.0))
-            if last_update_dt + timedelta(days=get_setting_int('update_frequency', 14)) >= datetime.utcnow():
-                log(2, 'Widevine update check was made on {date}', date=last_update_dt.isoformat())
+        last_check = get_setting_float('last_check', 0.0)
+        if last_check and not self._first_run():
+            if last_check + 3600 * 24 * get_setting_int('update_frequency', 14) >= time():
+                log(2, 'Widevine update check was made on {date}', date=strftime('%Y-%m-%d %H:%M', localtime(last_check)))
                 return
 
         wv_config = load_widevine_config()
@@ -300,8 +299,7 @@ class Helper:
             else:
                 log(3, 'User declined to update {component}.', component=component)
         else:
-            from time import mktime
-            set_setting('last_update', mktime(datetime.utcnow().timetuple()))
+            set_setting('last_check', time())
             log(0, 'User is on the latest available {component} version.', component=component)
 
     def _check_widevine(self):
@@ -433,9 +431,9 @@ class Helper:
         if system_os() == 'Android':
             text += ' - ' + localize(30821) + '\n'
         else:
-            from datetime import datetime
-            if get_setting_float('last_update', 0.0):
-                wv_updated = datetime.fromtimestamp(get_setting_float('last_update', 0.0)).strftime("%Y-%m-%d %H:%M")
+            from time import localtime, strftime
+            if get_setting_float('last_modified', 0.0):
+                wv_updated = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_modified', 0.0)))
             else:
                 wv_updated = 'Never'
             text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'

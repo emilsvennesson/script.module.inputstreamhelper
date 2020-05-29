@@ -227,7 +227,6 @@ class Helper:
 
         if self.install_and_finish(*result):
             from time import time
-            set_setting('last_update', time())
             set_setting('last_check', time())
             return True
 
@@ -242,6 +241,7 @@ class Helper:
             log(0, 'Removed Widevine CDM at {path}', path=widevinecdm)
             delete(widevinecdm)
             notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
+            set_setting('last_modified', '0.0')
             return True
         notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
         return False
@@ -432,8 +432,8 @@ class Helper:
             text += ' - ' + localize(30821) + '\n'
         else:
             from time import localtime, strftime
-            if get_setting_float('last_update', 0.0):
-                wv_updated = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_update', 0.0)))
+            if get_setting_float('last_modified', 0.0):
+                wv_updated = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_modified', 0.0)))
             else:
                 wv_updated = 'Never'
             text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'

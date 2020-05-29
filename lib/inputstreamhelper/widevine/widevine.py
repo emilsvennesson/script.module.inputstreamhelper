@@ -4,9 +4,10 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
+from time import time
 
 from .. import config
-from ..kodiutils import addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs, ok_dialog, open_file, translate_path, yesno_dialog
+from ..kodiutils import addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs, ok_dialog, open_file, set_setting, translate_path, yesno_dialog
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, remove_tree, run_cmd, store, system_os
 from ..unicodes import compat_path, to_unicode
 
@@ -21,6 +22,7 @@ def install_cdm_from_backup(version):
         hardlink(backup_fpath, install_fpath)
 
     log(0, 'Installed CDM version {version} from backup', version=version)
+    set_setting('last_modified', time())
     remove_old_backups(backup_path())
 
 

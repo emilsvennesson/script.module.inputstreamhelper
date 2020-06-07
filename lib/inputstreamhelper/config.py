@@ -118,3 +118,5 @@ CHROMEOS_BLOCK_SIZE = 512
 HLS_MINIMUM_IA_VERSION = '2.0.10'
 
 ISSUE_URL = 'https://github.com/emilsvennesson/script.module.inputstreamhelper/issues'
+
+SHORT_ISSUE_URL = 'https://git.io/JfKJb'

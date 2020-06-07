@@ -414,39 +414,40 @@ class Helper:
 
     def info_dialog(self):
         """ Show an Info box with useful info e.g. for bug reports"""
-        text = localize(30800) + '\n'  # Kodi information
-        text += ' - ' + localize(30801, version=kodi_version()) + '\n'
-        text += ' - ' + localize(30802, platform=system_os(), arch=arch()) + '\n'
+        text = localize(30800, version=kodi_version(), system=system_os(), arch=arch()) + '\n'  # Kodi information
         text += '\n'
 
-        text += localize(30810) + '\n'  # InputStream information
         disabled_str = ' ({disabled})'.format(disabled=localize(30054))
         ishelper_state = disabled_str if get_setting_bool('disabled', False) else ''
         istream_state = disabled_str if not self._inputstream_enabled() else ''
-        text += ' - ' + localize(30811, version=addon_version(), state=ishelper_state) + '\n'
-        text += ' - ' + localize(30812, version=self._inputstream_version(), state=istream_state) + '\n'
+        text += localize(30810, version=addon_version(), state=ishelper_state) + '\n'
+        text += localize(30811, version=self._inputstream_version(), state=istream_state) + '\n'
         text += '\n'
 
-        text += localize(30820) + '\n'  # Widevine information
         if system_os() == 'Android':
-            text += ' - ' + localize(30821) + '\n'
+            text += localize(30820) + '\n'
         else:
             from time import localtime, strftime
             if get_setting_float('last_modified', 0.0):
                 wv_updated = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_modified', 0.0)))
             else:
                 wv_updated = 'Never'
-            text += ' - ' + localize(30822, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
-            text += ' - ' + localize(30823, path=ia_cdm_path()) + '\n'
-
+            text += localize(30821, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
             if arch() in ('arm', 'arm64'):  # Chrome OS version
                 wv_cfg = load_widevine_config()
                 if wv_cfg:
-                    text += ' - ' + localize(30824, version=select_best_chromeos_image(wv_cfg)['version']) + '\n'
+                    installed_img = select_best_chromeos_image(wv_cfg)
+                    text += localize(30822, name=installed_img['hwidmatch'].split()[0].lstrip('^'), version=installed_img['version']) + '\n'
+            if get_setting_float('last_check', 0.0):
+                wv_check = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_check', 0.0)))
+            else:
+                wv_check = 'Never'
+            text += localize(30823, date=wv_check) + '\n'
+            text += localize(30824, path=ia_cdm_path()) + '\n'
 
         text += '\n'
 
-        text += localize(30830, url=config.ISSUE_URL)  # Report issues
+        text += localize(30830, url=config.SHORT_ISSUE_URL)  # Report issues
 
         log(2, '\n{info}'.format(info=kodi_to_ascii(text)))
         textviewer(localize(30901), text)

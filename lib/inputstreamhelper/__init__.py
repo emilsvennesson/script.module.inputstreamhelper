@@ -281,7 +281,7 @@ class Helper:
             current_version = wv_config['version']
         else:
             component = 'Chrome OS'
-            current_version = select_best_chromeos_image(wv_config)['version']
+            current_version = wv_config['version']
 
         latest_version = latest_widevine_version()
         if not latest_version:
@@ -436,8 +436,7 @@ class Helper:
             if arch() in ('arm', 'arm64'):  # Chrome OS version
                 wv_cfg = load_widevine_config()
                 if wv_cfg:
-                    installed_img = select_best_chromeos_image(wv_cfg)
-                    text += localize(30822, name=installed_img['hwidmatch'].split()[0].lstrip('^'), version=installed_img['version']) + '\n'
+                    text += localize(30822, name=wv_cfg['hwidmatch'].split()[0].lstrip('^'), version=wv_cfg['version']) + '\n'
             if get_setting_float('last_check', 0.0):
                 wv_check = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_check', 0.0)))
             else:
@@ -462,10 +461,7 @@ class Helper:
             notification(localize(30004), localize(30041))
             return
 
-        if 'x86' in arch():
-            installed_version = load_widevine_config()['version']
-        else:
-            installed_version = select_best_chromeos_image(load_widevine_config())['version']
+        installed_version = load_widevine_config()['version']
         del versions[versions.index(installed_version)]
 
         if 'x86' in arch():

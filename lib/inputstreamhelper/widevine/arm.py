@@ -170,9 +170,12 @@ def install_widevine_arm(backup_path):
                     return install_wv_arm_legacy(backup_path)
                 return False
 
-            json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
-            with open_file(json_file, 'w') as config_file:
-                config_file.write(json.dumps(devices, indent=4))
+            recovery_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
+            config_file = os.path.join(backup_path, arm_device['version'], 'config.json')
+            with open_file(recovery_file, 'w') as reco_file:
+                reco_file.write(json.dumps(devices, indent=4))
+            with open_file(config_file, 'w') as conf_file:
+                conf_file.write(json.dumps(arm_device))
 
             return (progress, arm_device['version'])
 

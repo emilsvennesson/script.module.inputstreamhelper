@@ -63,7 +63,7 @@ def widevine_config_path():
     """Return the full path to the widevine or recovery config file"""
     if 'x86' in arch():
         return os.path.join(ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
-    return os.path.join(ia_cdm_path(), os.path.basename(config.CHROMEOS_RECOVERY_URL))
+    return os.path.join(ia_cdm_path(), 'config.json')
 
 
 def load_widevine_config():
@@ -177,11 +177,7 @@ def remove_old_backups(bpath):
     if len(versions) < 2:
         return
 
-    if 'x86' in arch():
-        installed_version = load_widevine_config()['version']
-    else:
-        from .arm import select_best_chromeos_image
-        installed_version = select_best_chromeos_image(load_widevine_config())['version']
+    installed_version = load_widevine_config()['version']
 
     while len(versions) > max_backups + 1:
         remove_version = str(versions[1] if versions[0] == LooseVersion(installed_version) else versions[0])

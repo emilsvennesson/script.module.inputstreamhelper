@@ -77,7 +77,7 @@ WIDEVINE_MANIFEST_FILE = 'manifest.json'
 
 WIDEVINE_CONFIG_NAME = 'manifest.json'
 
-CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.conf'
+CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.json'
 
 # Last updated: 2019-08-20 (version 12239.67.0)
 CHROMEOS_RECOVERY_ARM_HWIDS = [

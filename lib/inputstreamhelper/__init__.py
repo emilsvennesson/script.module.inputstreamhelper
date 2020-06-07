@@ -308,7 +308,7 @@ class Helper:
             return True
 
         if not exists(widevine_config_path()):
-            log(4, 'Widevine or Chrome OS recovery.conf is missing. Reinstall is required.')
+            log(4, 'Widevine or Chrome OS recovery.json is missing. Reinstall is required.')
             ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 

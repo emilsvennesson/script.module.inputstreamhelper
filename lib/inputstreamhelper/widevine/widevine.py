@@ -63,7 +63,7 @@ def widevine_config_path():
     """Return the full path to the widevine or recovery config file"""
     if 'x86' in arch():
         return os.path.join(ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
-    return os.path.join(ia_cdm_path(), os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
+    return os.path.join(ia_cdm_path(), os.path.basename(config.CHROMEOS_RECOVERY_URL))
 
 
 def load_widevine_config():
@@ -161,7 +161,7 @@ def latest_widevine_version(eula=False):
     devices = chromeos_config()
     arm_device = select_best_chromeos_image(devices)
     if arm_device is None:
-        log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
+        log(4, 'We could not find an ARM device in the Chrome OS recovery.json')
         ok_dialog(localize(30004), localize(30005))
         return ''
     return arm_device['version']

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: script.module.inputstreamhelper\n"
 "Report-Msgid-Bugs-To: https://github.com/emilsvennesson/script.module.inputstreamhelper\n"
 "POT-Creation-Date: 2013-11-18 16:15+0000\n"
-"PO-Revision-Date: 2020-05-04 14:30+0000\n"
+"PO-Revision-Date: 2020-06-08 9:30+0000\n"
 "Last-Translator: frodo19\n"
 "Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
@@ -241,6 +241,33 @@ msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
 msgstr "Hátralevő idő: {mins:d}:{secs:02d}"
 
+msgctxt "#30059"
+msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
+msgstr "Megpróbáljuk a Widevine CDM kinyerését a régi módszerrel?"
+
+msgctxt "#30060"
+msgid "Identifying wanted partition..."
+msgstr "A kívánt partíció azonosítása ..."
+
+msgctxt "#30061"
+msgid "Scanning the filesystem for the Widevine CDM..."
+msgstr "A fájlrendszer szkennelése a Widevine CDM számára ..."
+
+msgctxt "#30062"
+msgid "Widevine CDM found, analyzing..."
+msgstr "A Widevine CDM megtalálva, elemzés ..."
+
+msgctxt "#30063"
+msgid "Could not make the request. Your internet may be down."
+msgstr "Nem sikerült teljesíteni a kérést. Lehet, hogy az internet nem működik."
+
+msgctxt "#30064"
+msgid "Could not finish the download."
+msgstr "A letöltés megszakadt"
+
+msgctxt "#30065"
+msgid "Shall we try again?"
+msgstr "Megpróbáljuk újra?"
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

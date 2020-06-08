@@ -248,11 +248,11 @@ msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] syst
 msgstr ""
 
 msgctxt "#30810"
-msgid "InputStream Helper is at version [B]{version}[/B] {state}"
+msgid "[B]InputStream Helper[/B] is at version [B]{version}[/B] {state}"
 msgstr ""
 
 msgctxt "#30811"
-msgid "InputStream Adaptive is at version [B]{version}[/B] {state}"
+msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
 msgstr ""
 
 msgctxt "#30820"
@@ -260,19 +260,19 @@ msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"
 msgstr ""
 
 msgctxt "#30821"
-msgid "[B]Widevine CDM[/B] version [B]{version}[/B] was installed on [B]{date}[/B]"
+msgid "[B]Widevine CDM[/B] is at version [B]{version}[/B] and was installed on [B]{date}[/B]"
 msgstr ""
 
 msgctxt "#30822"
-msgid "[B]Widevine CDM[/B] was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
+msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
 msgstr ""
 
 msgctxt "#30823"
-msgid "[B]Widevine CDM[/B] was last checked for updates on [B]{date}[/B]"
+msgid "It was last checked for updates on [B]{date}[/B]"
 msgstr ""
 
 msgctxt "#30824"
-msgid "[B]Widevine CDM[/B] is installed at [B]{path}[/B]"
+msgid "It is installed at [B]{path}[/B]"
 msgstr ""
 
 msgctxt "#30830"

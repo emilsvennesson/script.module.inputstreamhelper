@@ -239,35 +239,35 @@ msgstr "Kies een back-up om te herstellen"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "Resterende tijd: {mins:d}:{secs:02d}"
 
 msgctxt "#30059"
 msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
-msgstr ""
+msgstr "Moeten we ondertussen Widevine CDM proberen uit te pakken met de legacy-methode?"
 
 msgctxt "#30060"
 msgid "Identifying wanted partition..."
-msgstr ""
+msgstr "Bezig met de gewenste partitie te identificeren..."
 
 msgctxt "#30061"
 msgid "Scanning the filesystem for the Widevine CDM..."
-msgstr ""
+msgstr "Bezig met het bestandssysteem te scannen op Widevine CDM..."
 
 msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
-msgstr ""
+msgstr "Widevine CDM gevonden, bezig met analyseren..."
 
 msgctxt "#30063"
 msgid "Could not make the request. Your internet may be down."
-msgstr ""
+msgstr "Het verzoek kan niet verstuurd worden. Uw internetverbinding is mogelijk niet beschikbaar."
 
 msgctxt "#30064"
 msgid "Could not finish the download."
-msgstr ""
+msgstr "Het downloaden kan niet voltooid worden."
 
 msgctxt "#30065"
 msgid "Shall we try again?"
-msgstr ""
+msgstr "Zullen we het opnieuw proberen?"
 
 
 ### INFORMATION DIALOG
@@ -305,7 +305,7 @@ msgstr "Het is geïnstalleerd in [B]{path}[/B]"
 
 msgctxt "#30830"
 msgid "Please report issues to: [COLOR yellow]{url}[/COLOR]"
-msgstr "Problemen graag melden op: [COLOR yellow]{url}[/COLOR]"
+msgstr "Gelieve problemen te melden op: [COLOR yellow]{url}[/COLOR]"
 
 
 ### SETTINGS

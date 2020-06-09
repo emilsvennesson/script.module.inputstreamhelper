@@ -241,6 +241,34 @@ msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
 msgstr ""
 
+msgctxt "#30059"
+msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
+msgstr ""
+
+msgctxt "#30060"
+msgid "Identifying wanted partition..."
+msgstr ""
+
+msgctxt "#30061"
+msgid "Scanning the filesystem for the Widevine CDM..."
+msgstr ""
+
+msgctxt "#30062"
+msgid "Widevine CDM found, analyzing..."
+msgstr ""
+
+msgctxt "#30063"
+msgid "Could not make the request. Your internet may be down."
+msgstr ""
+
+msgctxt "#30064"
+msgid "Could not finish the download."
+msgstr ""
+
+msgctxt "#30065"
+msgid "Shall we try again?"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

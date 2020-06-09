@@ -269,6 +269,7 @@ msgctxt "#30065"
 msgid "Shall we try again?"
 msgstr "Megpróbáljuk újra?"
 
+
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] system with [B]{arch}[/B] architecture."

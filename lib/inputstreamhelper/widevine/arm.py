@@ -73,7 +73,7 @@ def mnt_loop_dev():
 
 def select_best_chromeos_image(devices):
     """Finds the newest and smallest of the ChromeOS images given"""
-    log(0, 'Find best ARM image to use from the Chrome OS recovery.conf')
+    log(0, 'Find best ARM image to use from the Chrome OS recovery.json')
 
     best = None
     for device in devices:
@@ -118,24 +118,8 @@ def select_best_chromeos_image(devices):
 
 
 def chromeos_config():
-    """Parse the Chrome OS recovery configuration and put it in a dictionary"""
-    url = config.CHROMEOS_RECOVERY_URL
-    conf = [line for line in http_get(url).split('\n\n') if 'hwidmatch=' in line]
-
-    devices = []
-    for device in conf:
-        device_dict = dict()
-        for device_info in device.splitlines():
-            if not device_info:
-                continue
-            try:
-                key, value = device_info.split('=')
-                device_dict[key] = value
-            except ValueError:
-                continue
-        devices.append(device_dict)
-
-    return devices
+    """Reads the Chrome OS recovery configuration"""
+    return json.loads(http_get(config.CHROMEOS_RECOVERY_URL))
 
 
 def install_widevine_arm(backup_path):
@@ -143,7 +127,7 @@ def install_widevine_arm(backup_path):
     devices = chromeos_config()
     arm_device = select_best_chromeos_image(devices)
     if arm_device is None:
-        log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
+        log(4, 'We could not find an ARM device in the Chrome OS recovery.json')
         ok_dialog(localize(30004), localize(30005))
         return False
     # Estimated required disk space: takes into account an extra 20 MiB buffer
@@ -186,9 +170,12 @@ def install_widevine_arm(backup_path):
                     return install_wv_arm_legacy(backup_path)
                 return False
 
-            json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
-            with open_file(json_file, 'w') as config_file:
-                config_file.write(json.dumps(devices, indent=4))
+            recovery_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
+            config_file = os.path.join(backup_path, arm_device['version'], 'config.json')
+            with open_file(recovery_file, 'w') as reco_file:
+                reco_file.write(json.dumps(devices, indent=4))
+            with open_file(config_file, 'w') as conf_file:
+                conf_file.write(json.dumps(arm_device))
 
             return (progress, arm_device['version'])
 
@@ -201,7 +188,7 @@ def install_wv_arm_legacy(backup_path):
     devices = chromeos_config()
     arm_device = select_best_chromeos_image(devices)
     if arm_device is None:
-        log(4, 'We could not find an ARM device in the Chrome OS recovery.conf')
+        log(4, 'We could not find an ARM device in the Chrome OS recovery.json')
         ok_dialog(localize(30004), localize(30005))
         return False
     # Estimated required disk space: takes into account an extra 20 MiB buffer
@@ -279,7 +266,7 @@ def install_wv_arm_legacy(backup_path):
         if check_loop() and set_loop_dev() and losetup(bin_path) and mnt_loop_dev():
             progress.update(96, message=localize(30048))  # Extracting Widevine CDM
             extract_widevine_from_img(os.path.join(backup_path, arm_device['version']))
-            json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL) + '.json')
+            json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
             with open_file(json_file, 'w') as config_file:
                 config_file.write(json.dumps(devices, indent=4))
 

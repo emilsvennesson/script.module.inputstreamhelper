@@ -91,16 +91,16 @@ class ChromeOSImage:
 
             chunk = chunk1 + chunk2
             if bin_filename in chunk:
-                break
+                i_index_pos = chunk.index(bin_filename) - 8
+                dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
+                if dir_dict['inode'] < self.sb_dict['s_inodes_count'] and dir_dict['name_len'] == len(filename):
+                    break
             chunk1 = chunk2
             if percent8 < 240:
                 percent8 += 1
                 self.progress.update(int(percent8 / 8))
 
         self.progress.update(32, localize(30062))
-
-        i_index_pos = chunk.index(bin_filename) - 8
-        dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
 
         blk_group_num = (dir_dict['inode'] - 1) // self.sb_dict['s_inodes_per_group']
         blk_group = self.blk_groups[blk_group_num]

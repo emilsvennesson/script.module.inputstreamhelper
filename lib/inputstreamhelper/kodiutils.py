@@ -16,6 +16,14 @@ ADDON = xbmcaddon.Addon('script.module.inputstreamhelper')
 class progress_dialog(DialogProgress, object):  # pylint: disable=invalid-name,useless-object-inheritance
     """Show Kodi's Progress dialog"""
 
+    def __init__(self):
+        """Initialize a new progress dialog"""
+        # Wait for previous Progress dialog to close
+        # Progress dialog Window ID is 10101: https://kodi.wiki/view/Window_IDs
+        while get_current_window_id() == 10101:
+            xbmc.sleep(100)
+        super(progress_dialog, self).__init__()
+
     def create(self, heading, message=''):  # pylint: disable=arguments-differ
         """Create and show a progress dialog"""
         if kodi_version_major() < 19:
@@ -211,6 +219,14 @@ def get_global_setting(key):
     """Get a Kodi setting"""
     result = jsonrpc(method='Settings.GetSettingValue', params=dict(setting=key))
     return result.get('result', {}).get('value')
+
+
+def get_current_window_id():
+    """Get current window id"""
+    result = jsonrpc(method='GUI.GetProperties', params=dict(properties=['currentwindow']))
+    if result.get('error'):
+        return None
+    return result.get('result', {}).get('currentwindow').get('id')
 
 
 def has_socks():

@@ -59,7 +59,7 @@ msgstr "Windows Store-versionen av Kodi stöds inte av [B]Widevine CDM[/B].[CR][
 
 msgctxt "#30013"
 msgid "Failed to retrieve [B]{filename}[/B]."
-msgstr "Det gick inte att hämta [B]{filename}[/B]."
+msgstr "Det gick inte att ladda ned [B]{filename}[/B]."
 
 msgctxt "#30014"
 msgid "Download in progress..."
@@ -239,69 +239,69 @@ msgstr "Välj säkerhetskopia att återställa"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "Återstående tid: {mins:d}:{secs:02d}"
 
 msgctxt "#30059"
 msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
-msgstr ""
+msgstr "Ska vi prova att extrahera Widevine CDM med den gamla metoden?"
 
 msgctxt "#30060"
 msgid "Identifying wanted partition..."
-msgstr ""
+msgstr "Identifiera önskad partition..."
 
 msgctxt "#30061"
 msgid "Scanning the filesystem for the Widevine CDM..."
-msgstr ""
+msgstr "Söker igenom filsystemet efter Widevine CDM..."
 
 msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
-msgstr ""
+msgstr "Hittade Widevine CDM, analyserar..."
 
 msgctxt "#30063"
 msgid "Could not make the request. Your internet may be down."
-msgstr ""
+msgstr "Det gick inte att skicka begäran. Ditt internet kan ligga nere."
 
 msgctxt "#30064"
 msgid "Could not finish the download."
-msgstr ""
+msgstr "Det gick inte att slutföra nedladdningen"
 
 msgctxt "#30065"
 msgid "Shall we try again?"
-msgstr ""
+msgstr "Ska vi prova igen?"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] system with [B]{arch}[/B] architecture."
-msgstr ""
+msgstr "[B]Kodi[/B] version [B]{version}[/B] körs på ett [B]{system}[/B]-system med [B]{arch}[/B]-arkitektur."
 
 msgctxt "#30810"
 msgid "[B]InputStream Helper[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Helper[/B] är på version [B]{version}[/B] {state}"
 
 msgctxt "#30811"
 msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Adaptive[/B] är på version [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B] finns [B]inbyggt i Android[/B]"
 
 msgctxt "#30821"
 msgid "[B]Widevine CDM[/B] is at version [B]{version}[/B] and was installed on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B] är på version [B]{version}[/B] och installerades den [B]{date}[/B]"
 
 msgctxt "#30822"
 msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
-msgstr ""
+msgstr "Det extraherades från en Chrome OS-avbild [B]{name}[/B] med version [B]{version}[/B]"
 
 msgctxt "#30823"
 msgid "It was last checked for updates on [B]{date}[/B]"
-msgstr ""
+msgstr "Senaste uppdateringkontrollen gjordes [B]{date}[/B]"
 
 msgctxt "#30824"
 msgid "It is installed at [B]{path}[/B]"
-msgstr ""
+msgstr "Det är installerat på [B]{path}[/B]"
 
 msgctxt "#30830"
 msgid "Please report issues to: [COLOR yellow]{url}[/COLOR]"

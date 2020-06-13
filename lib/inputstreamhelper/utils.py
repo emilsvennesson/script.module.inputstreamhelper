@@ -15,7 +15,8 @@ except ImportError:  # Python 2
     from urllib2 import HTTPError, Request, URLError, urlopen
 
 from . import config
-from .kodiutils import bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs, progress_dialog, set_setting, stat_file, translate_path, yesno_dialog
+from .kodiutils import (bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs,
+                        progress_dialog, set_setting, stat_file, translate_path, yesno_dialog)
 from .unicodes import compat_path, from_unicode, to_unicode
 
 
@@ -113,7 +114,8 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
                 chunk = req.read(chunk_size)
             except (timeout, SSLError):
                 req.close()
-                if not yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30064), line2=localize(30065))):  # Could not finish dl. Try again?
+                if not yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30064),
+                                                                               line2=localize(30065))):  # Could not finish dl. Try again?
                     progress.close()
                     return False
 

@@ -3,7 +3,7 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """This file implements the Kodi xbmcaddon module, either using stubs or alternative functionality"""
 
-# pylint: disable=invalid-name
+# flake8: noqa: FI14; pylint: disable=invalid-name
 
 from __future__ import absolute_import, division, print_function
 from xbmcextra import ADDON_ID, ADDON_INFO, addon_settings

@@ -239,69 +239,69 @@ msgstr "Выберите резервную копию для восстанов
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "Оставшееся время: {mins:d}:{secs:02d}"
 
 msgctxt "#30059"
 msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
-msgstr ""
+msgstr "Тем временем, стоит нам попробовать извлечь Widevine CDM используя устаревшие методы?"
 
 msgctxt "#30060"
 msgid "Identifying wanted partition..."
-msgstr ""
+msgstr "Определение нужного раздела..."
 
 msgctxt "#30061"
 msgid "Scanning the filesystem for the Widevine CDM..."
-msgstr ""
+msgstr "Сканирование файловой системы на наличие Widevine CDM..."
 
 msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
-msgstr ""
+msgstr "Обнаружен Widevine CDM, анализирую..."
 
 msgctxt "#30063"
 msgid "Could not make the request. Your internet may be down."
-msgstr ""
+msgstr "Не удалось выполнить запрос. Возможно у Вас проблемы с интернетом."
 
 msgctxt "#30064"
 msgid "Could not finish the download."
-msgstr ""
+msgstr "Не удалось завершить загрузку."
 
 msgctxt "#30065"
 msgid "Shall we try again?"
-msgstr ""
+msgstr "Попробовать еще раз?"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] system with [B]{arch}[/B] architecture."
-msgstr ""
+msgstr "Версия [B]Kodi[/B] [B]{version}[/B] запущена на системе [B]{system}[/B] с архитектурой [B]{arch}[/B]."
 
 msgctxt "#30810"
 msgid "[B]InputStream Helper[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Helper[/B] версии [B]{version}[/B] {state}"
 
 msgctxt "#30811"
 msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Adaptive[/B] версии [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B] [B]встроен в Android[/B]"
 
 msgctxt "#30821"
 msgid "[B]Widevine CDM[/B] is at version [B]{version}[/B] and was installed on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B] версии [B]{version}[/B] и установлен [B]{date}[/B]"
 
 msgctxt "#30822"
 msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
-msgstr ""
+msgstr "Был извлечен из образа Chrome OS [B]{name}[/B] версии [B]{version}[/B]"
 
 msgctxt "#30823"
 msgid "It was last checked for updates on [B]{date}[/B]"
-msgstr ""
+msgstr "Последняя проверка обновления [B]{date}[/B]"
 
 msgctxt "#30824"
 msgid "It is installed at [B]{path}[/B]"
-msgstr ""
+msgstr "Установлен в [B]{path}[/B]"
 
 msgctxt "#30830"
 msgid "Please report issues to: [COLOR yellow]{url}[/COLOR]"
@@ -335,11 +335,11 @@ msgstr "Временный каталог загрузки"
 
 msgctxt "#30909"
 msgid "(Re)install Widevine CDM library..."
-msgstr "(Пере)установить модуль Widevine CDM..."
+msgstr "(Пере)установить библиотеку Widevine CDM..."
 
 msgctxt "#30911"
 msgid "Remove Widevine CDM library..."
-msgstr "Удалить модуль Widevine CDM..."
+msgstr "Удалить библиотеку Widevine CDM..."
 
 msgctxt "#30913"
 msgid "Number of backups"
@@ -347,4 +347,4 @@ msgstr "Количество резервных копий"
 
 msgctxt "#30915"
 msgid "Restore Widevine CDM library..."
-msgstr "Восстановить модуль Widevine CDM..."
+msgstr "Восстановить библиотеку Widevine CDM..."

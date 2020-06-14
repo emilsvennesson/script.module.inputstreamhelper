@@ -61,9 +61,12 @@ def backup_path():
 
 def widevine_config_path():
     """Return the full path to the widevine or recovery config file"""
+    iacdm = ia_cdm_path()
+    if iacdm is None:
+        return None
     if 'x86' in arch():
-        return os.path.join(ia_cdm_path(), config.WIDEVINE_CONFIG_NAME)
-    return os.path.join(ia_cdm_path(), 'config.json')
+        return os.path.join(iacdm, config.WIDEVINE_CONFIG_NAME)
+    return os.path.join(iacdm, 'config.json')
 
 
 def load_widevine_config():

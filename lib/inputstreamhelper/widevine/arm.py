@@ -265,7 +265,7 @@ def install_wv_arm_legacy(backup_path):
 
         if check_loop() and set_loop_dev() and losetup(bin_path) and mnt_loop_dev():
             progress.update(96, message=localize(30048))  # Extracting Widevine CDM
-            extract_widevine_from_img(os.path.join(backup_path, arm_device['version']))
+            extract_widevine_from_img(os.path.join(backup_path, arm_device['version'], ''))
             json_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
             with open_file(json_file, 'w') as config_file:
                 config_file.write(json.dumps(devices, indent=4))

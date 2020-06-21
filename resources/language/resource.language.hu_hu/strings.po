@@ -293,7 +293,7 @@ msgstr "[B]Widevine CDM[/B] verzió [B]{version}[/B] telepítve [B]{date}[/B]"
 
 msgctxt "#30822"
 msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
-msgstr "Legutóbb kicsomagolva a Chrome OS image-ból [B]{name}[/B] verzió [B]{version}[/B]"k
+msgstr "Legutóbb kicsomagolva a Chrome OS image-ból [B]{name}[/B] verzió [B]{version}[/B]"
 
 msgctxt "#30823"
 msgid "It was last checked for updates on [B]{date}[/B]"

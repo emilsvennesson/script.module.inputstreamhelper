@@ -303,8 +303,9 @@ class ChromeOSImage:
         block_ids_sorted.sort()
         block_dict = self.read_file(block_ids_sorted)
 
-        if not exists(os.path.dirname(filepath)):
-            mkdirs(os.path.dirname(filepath))
+        write_dir = os.path.join(os.path.dirname(filepath), '')
+        if not exists(write_dir):
+            mkdirs(write_dir)
 
         with open(compat_path(filepath), 'wb') as opened_file:
             for block_id in block_ids:

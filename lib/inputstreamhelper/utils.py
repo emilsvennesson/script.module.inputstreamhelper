@@ -21,8 +21,8 @@ from .unicodes import compat_path, from_unicode, to_unicode
 
 
 def temp_path():
-    """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp"""
-    tmp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
+    """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/"""
+    tmp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp', ''))
     if not exists(tmp_path):
         mkdirs(tmp_path)
 

@@ -14,10 +14,10 @@ from ..unicodes import compat_path, to_unicode
 from .arm_chromeos import ChromeOSImage
 
 
-def mnt_path():
-    """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt"""
-    mount_path = os.path.join(temp_path(), 'mnt')
-    if not exists(mount_path):
+def mnt_path(make=True):
+    """Return mount path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/mnt/"""
+    mount_path = os.path.join(temp_path(), 'mnt', '')
+    if make and not exists(mount_path):
         mkdir(mount_path)
 
     return mount_path
@@ -294,7 +294,7 @@ def extract_widevine_from_img(backup_path):
 
 def unmount():
     """Unmount mountpoint if mounted"""
-    while os.path.ismount(compat_path(mnt_path())):
+    while os.path.ismount(compat_path(mnt_path(make=False))):
         log(0, 'Unmount {mountpoint}', mountpoint=mnt_path())
         umount_output = run_cmd(['umount', compat_path(mnt_path())], sudo=True)
         if not umount_output['success']:

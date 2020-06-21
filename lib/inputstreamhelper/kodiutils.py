@@ -358,6 +358,7 @@ def delete(path):
 
 def exists(path):
     """Whether the path exists (using xbmcvfs)"""
+    # File or folder (folder must end with slash or backslash)
     from xbmcvfs import exists as vfsexists
     return vfsexists(from_unicode(path))
 

@@ -53,7 +53,7 @@ def widevine_eula():
 
 def backup_path():
     """Return the path to the cdm backups"""
-    path = os.path.join(addon_profile(), 'backup')
+    path = os.path.join(addon_profile(), 'backup', '')
     if not exists(path):
         mkdirs(path)
     return path
@@ -111,7 +111,7 @@ def ia_cdm_path():
     except RuntimeError:
         return None
 
-    cdm_path = translate_path(to_unicode(addon.getSetting('DECRYPTERPATH')))
+    cdm_path = translate_path(os.path.join(to_unicode(addon.getSetting('DECRYPTERPATH')), ''))
     if not exists(cdm_path):
         mkdirs(cdm_path)
 

@@ -185,7 +185,7 @@ class Helper:
         if downloaded:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
-            unzip(store('download_path'), os.path.join(bpath, cdm_version))
+            unzip(store('download_path'), os.path.join(bpath, cdm_version, ''))
 
             return (progress, cdm_version)
 

@@ -95,7 +95,7 @@ msgstr "[B]Widevine CDM[/B]을 뽑아 내기 위해서 [B]'{command}'[/B] 커맨
 
 msgctxt "#30022"
 msgid "Downloading the Chrome OS recovery image..."
-msgstr "크롬OS복구 이미지를 다운로드 중..."
+msgstr "크롬OS복구 이미지를 내려받는 중..."
 
 msgctxt "#30023"
 msgid "Download completed!"
@@ -239,69 +239,69 @@ msgstr "복구할 백업을 고르시지요"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "남은 시간: {mins:d}:{secs:02d}"
 
 msgctxt "#30059"
 msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
-msgstr ""
+msgstr "그러면, Widevine CDM을 예전방식으로 풀어낼까요?"
 
 msgctxt "#30060"
 msgid "Identifying wanted partition..."
-msgstr ""
+msgstr "파티션 확인 중..."
 
 msgctxt "#30061"
 msgid "Scanning the filesystem for the Widevine CDM..."
-msgstr ""
+msgstr "Widevin CDM을 위한 파일시스템을 확인 중..."
 
 msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
-msgstr ""
+msgstr "Widevine CDM 발견해서 분석 중..."
 
 msgctxt "#30063"
 msgid "Could not make the request. Your internet may be down."
-msgstr ""
+msgstr "연결실패. 인터넷이 죽었을 수도 있습니다."
 
 msgctxt "#30064"
 msgid "Could not finish the download."
-msgstr ""
+msgstr "내려받기를 끝내지 못 했습니다."
 
 msgctxt "#30065"
 msgid "Shall we try again?"
-msgstr ""
+msgstr "다시 할까요?"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] system with [B]{arch}[/B] architecture."
-msgstr ""
+msgstr "[B]Kodi[/B] 버전 [B]{version}[/B]이 아키텍쳐 [B]{arch}[/B]의 시스템 [B]{system}[/B]에서 실행중입니다."
 
 msgctxt "#30810"
 msgid "[B]InputStream Helper[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Helper[/B] 버전 [B]{version}[/B] {state}"
 
 msgctxt "#30811"
 msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Adaptive[/B] 버전 [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"
-msgstr ""
+msgstr "[B]Android에 이미 포함[/B]되어 있습니다."
 
 msgctxt "#30821"
 msgid "[B]Widevine CDM[/B] is at version [B]{version}[/B] and was installed on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B]의 버전은 [B]{version}[/B]이며, [B]{date}[/B]에 설치하였습니다."
 
 msgctxt "#30822"
 msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
-msgstr ""
+msgstr "버전 [B]{version}[/B]의 Chrom OS 이미지 [B]{name}[/B]로부터 뽑아냈습니다."
 
 msgctxt "#30823"
 msgid "It was last checked for updates on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]{date}[/B]에 마지막으로 업데이트를 확인하였습니다."
 
 msgctxt "#30824"
 msgid "It is installed at [B]{path}[/B]"
-msgstr ""
+msgstr "[B]{path}[/B]에 설치하였습니다."
 
 msgctxt "#30830"
 msgid "Please report issues to: [COLOR yellow]{url}[/COLOR]"

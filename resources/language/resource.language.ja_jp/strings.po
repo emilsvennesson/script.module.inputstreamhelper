@@ -239,69 +239,69 @@ msgstr "バックアップを選んでください"
 
 msgctxt "#30058"
 msgid "Time remaining: {mins:d}:{secs:02d}"
-msgstr ""
+msgstr "残り時間: {mins:d}:{secs:02d}"
 
 msgctxt "#30059"
 msgid "Meanwhile, should we try extracting Widevine CDM using the legacy method?"
-msgstr ""
+msgstr "そしたら、Widevine CDMを既存の方法で抽出しましょうか。"
 
 msgctxt "#30060"
 msgid "Identifying wanted partition..."
-msgstr ""
+msgstr "パーティション確認中。。。"
 
 msgctxt "#30061"
 msgid "Scanning the filesystem for the Widevine CDM..."
-msgstr ""
+msgstr "Widevine CDMのためのファイルシステムをスキャン中。。。"
 
 msgctxt "#30062"
 msgid "Widevine CDM found, analyzing..."
-msgstr ""
+msgstr "Widevine CDMを見つけました、分析中。。。"
 
 msgctxt "#30063"
 msgid "Could not make the request. Your internet may be down."
-msgstr ""
+msgstr "リクエスト失敗。インタネット繋がってないかも"
 
 msgctxt "#30064"
 msgid "Could not finish the download."
-msgstr ""
+msgstr "ダウンロードを終えませんでした。"
 
 msgctxt "#30065"
 msgid "Shall we try again?"
-msgstr ""
+msgstr "もう一度やって見ましょうか。"
 
 
 ### INFORMATION DIALOG
 msgctxt "#30800"
 msgid "[B]Kodi[/B] version [B]{version}[/B] is running on a [B]{system}[/B] system with [B]{arch}[/B] architecture."
-msgstr ""
+msgstr "[B]Kodi[/B]バージョン[B]{version}[/B]がアーキテクチャ[B]{arch}[/B]のシステム[B]{system}[/B]の上で実行中です。"
 
 msgctxt "#30810"
 msgid "[B]InputStream Helper[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Helper[/B]のバージョン [B]{version}[/B] {state}"
 
 msgctxt "#30811"
 msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
-msgstr ""
+msgstr "[B]InputStream Adaptive[/B]のバージョン [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"
-msgstr ""
+msgstr "[B]Android[/B]に入っています。"
 
 msgctxt "#30821"
 msgid "[B]Widevine CDM[/B] is at version [B]{version}[/B] and was installed on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]Widevine CDM[/B]のバージョンは[B]{version}[/B]であり、[B]{date}[/B]にインストールしました。"
 
 msgctxt "#30822"
 msgid "It was extracted from Chrome OS image [B]{name}[/B] with version [B]{version}[/B]"
-msgstr ""
+msgstr "Chrom OSのイメージ[B]{name}[/B]のバージョン[B]{version}[/B]から抽出しました。"
 
 msgctxt "#30823"
 msgid "It was last checked for updates on [B]{date}[/B]"
-msgstr ""
+msgstr "[B]{date}[/B]に最新アップデートをチェックしました。"
 
 msgctxt "#30824"
 msgid "It is installed at [B]{path}[/B]"
-msgstr ""
+msgstr "[B]{path}[/B]にインストールしました。"
 
 msgctxt "#30830"
 msgid "Please report issues to: [COLOR yellow]{url}[/COLOR]"

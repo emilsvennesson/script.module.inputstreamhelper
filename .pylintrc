@@ -6,6 +6,7 @@ disable=
     import-outside-toplevel,  # Done on purpose to reduce overhead at startup
     line-too-long,  # Flake8 is used for testing line-length
     old-style-class,
+    super-with-arguments,
     too-many-arguments,
     too-many-branches,
     too-many-lines,

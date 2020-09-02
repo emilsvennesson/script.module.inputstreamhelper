@@ -48,14 +48,14 @@ jobs:
     - name: Upload code coverage to CodeCov
       uses: codecov/codecov-action@v1
       continue-on-error: true
-    # FIXME: Requires changes from SonarSource/sonarcloud-github-action#9
     - name: Analyze with SonarCloud
-      uses: dagwieers/sonarcloud-github-action@more-options
+      uses: SonarSource/sonarcloud-github-action@v1.4
       with:
-        organization: emilsvennesson
-        projectKey: emilsvennesson_script.module.inputstreamhelper
-        sources: lib/
-        tests: tests/
+        args: >
+          -Dsonar.organization=emilsvennesson
+          -Dsonar.projectKey=emilsvennesson_script.module.inputstreamhelper
+          -Dsonar.sources=lib/
+          -Dsonar.tests=tests/
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

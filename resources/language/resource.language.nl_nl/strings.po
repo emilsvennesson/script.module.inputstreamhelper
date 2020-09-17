@@ -281,7 +281,7 @@ msgstr "[B]InputStream Helper[/B] is versie [B]{version}[/B] {state}"
 
 msgctxt "#30811"
 msgid "[B]InputStream Adaptive[/B] is at version [B]{version}[/B] {state}"
-msgstr "[B]InputStream Adaptive[/B] is versie [B]{versoin}[/B] {state}"
+msgstr "[B]InputStream Adaptive[/B] is versie [B]{version}[/B] {state}"
 
 msgctxt "#30820"
 msgid "[B]Widevine CDM[/B] is [B]built into Android[/B]"

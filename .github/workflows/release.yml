@@ -62,3 +62,16 @@ jobs:
           asset_name: ${{ steps.get-matrix-filename.outputs.matrix-filename }}
           asset_path: ../${{ steps.get-matrix-filename.outputs.matrix-filename }}
           asset_content_type: application/zip
+      - name: Generate distribution zip and submit to official kodi repository
+        id: kodi-addon-submitter
+        uses: xbmc/action-kodi-addon-submitter@v1.2
+        with:
+          kodi-repository: repo-scripts
+          kodi-version: krypton
+          addon-id: script.module.inputstreamhelper
+          kodi-matrix: true
+        env:
+          GH_USERNAME: ${{secrets.GH_USERNAME}}
+          GH_TOKEN: ${{secrets.GH_TOKEN}}
+          EMAIL: ${{secrets.EMAIL}}
+

@@ -5,6 +5,7 @@
 from __future__ import absolute_import, division, unicode_literals
 from contextlib import contextmanager
 import xbmc
+import xbmcvfs
 import xbmcaddon
 from xbmcgui import DialogProgress, DialogProgressBG
 from .unicodes import from_unicode, to_unicode
@@ -60,7 +61,7 @@ def kodi_version_major():
 
 def translate_path(path):
     """Translate special xbmc paths"""
-    return to_unicode(xbmc.translatePath(from_unicode(path)))
+    return to_unicode(xbmcvfs.translatePath(from_unicode(path)))
 
 
 def get_addon_info(key):

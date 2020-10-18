@@ -7,6 +7,13 @@ from contextlib import contextmanager
 import xbmc
 import xbmcaddon
 from xbmcgui import DialogProgress, DialogProgressBG
+
+try:  # Kodi v19 or newer
+    from xbmcvfs import translatePath
+except ImportError:  # Kodi v18 and older
+    # pylint: disable=ungrouped-imports
+    from xbmc import translatePath
+
 from .unicodes import from_unicode, to_unicode
 
 # NOTE: We need to explicitly add the add-on id here!
@@ -60,7 +67,7 @@ def kodi_version_major():
 
 def translate_path(path):
     """Translate special xbmc paths"""
-    return to_unicode(xbmc.translatePath(from_unicode(path)))
+    return to_unicode(translatePath(from_unicode(path)))
 
 
 def get_addon_info(key):

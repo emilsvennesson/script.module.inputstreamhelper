@@ -29,6 +29,12 @@ def cleanup_decorator(func):
     """Decorator which runs cleanup before and after a function"""
 
     def clean_before_after(self, *args, **kwargs):  # pylint: disable=missing-docstring
+        """
+        Clean up after after after after after after.
+
+        Args:
+            self: (todo): write your description
+        """
         # pylint only complains about a missing docstring on py2.7?
         self.cleanup()
         result = func(self, *args, **kwargs)
@@ -98,6 +104,12 @@ class Helper:
 
     @staticmethod
     def _get_lib_version(path):
+        """
+        Get the lib version.
+
+        Args:
+            path: (str): write your description
+        """
         if not path or not exists(path):
             return '(Not found)'
         import re

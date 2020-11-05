@@ -21,6 +21,12 @@ xbmcvfs = __import__('xbmcvfs')
 class LinuxProxyTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        Set the xbmcached settings.
+
+        Args:
+            self: (todo): write your description
+        """
         xbmc.settings['network.usehttpproxy'] = True
         xbmc.settings['network.httpproxytype'] = 0
         xbmc.settings['network.httpproxyserver'] = '127.0.0.1'
@@ -28,9 +34,21 @@ class LinuxProxyTests(unittest.TestCase):
         delete_cached()
 
     def tearDown(self):
+        """
+        Tear down the tear.
+
+        Args:
+            self: (todo): write your description
+        """
         xbmc.settings['network.usehttpproxy'] = False
 
     def test_check_inputstream_mpd(self):
+        """
+        Check if inputstream is installed.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
@@ -39,6 +57,12 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_hls_again(self):
+        """
+        Check if the test test is enabled.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'AMD64'
         platform.architecture = lambda: ['64bit', '']
@@ -47,6 +71,12 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
+        """
+        Check if the test is installed.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('rtmp')
@@ -54,6 +84,12 @@ class LinuxProxyTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_disabled(self):
+        """
+        Check if the test is disabled.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Linux'
         platform.machine = lambda: 'x86_64'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')

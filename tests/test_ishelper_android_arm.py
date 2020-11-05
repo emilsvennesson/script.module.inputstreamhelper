@@ -19,9 +19,21 @@ xbmcvfs = __import__('xbmcvfs')
 class AndroidARMTests(unittest.TestCase):
 
     def setUp(self):
+        """
+        Set the cached list of this task instances.
+
+        Args:
+            self: (todo): write your description
+        """
         delete_cached()
 
     def test_check_inputstream_mpd(self):
+        """
+        Check if inputstream is installed.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'arm'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
@@ -30,6 +42,12 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_hls_again(self):
+        """
+        Check if the test test is enabled.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'armv7'
         is_helper = inputstreamhelper.Helper('hls', drm='com.widevine.alpha')
@@ -37,6 +55,12 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_rtmp(self):
+        """
+        Check if the test is installed.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'armv8'
         is_helper = inputstreamhelper.Helper('rtmp')
@@ -44,6 +68,12 @@ class AndroidARMTests(unittest.TestCase):
         self.assertTrue(is_installed, True)
 
     def test_check_inputstream_disabled(self):
+        """
+        Check if the test is disabled.
+
+        Args:
+            self: (todo): write your description
+        """
         inputstreamhelper.system_os = lambda: 'Android'
         platform.machine = lambda: 'arm'
         is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')

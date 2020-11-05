@@ -19,22 +19,47 @@ class TestApi(unittest.TestCase):
 
     @staticmethod
     def test_settings():
+        """
+        Return the default settings.
+
+        Args:
+        """
         default.run(['default.py'])
 
     @staticmethod
     def test_widevine_install():
+        """
+        Installs default test test suite.
+
+        Args:
+        """
         default.run(['default.py', 'widevine_install'])
 
     @staticmethod
     def test_widevine_remove():
+        """
+        Remove default test test.
+
+        Args:
+        """
         default.run(['default.py', 'widevine_remove'])
 
     @staticmethod
     def test_about():
+        """
+        Set default test test.
+
+        Args:
+        """
         default.run(['default.py', 'info'])
 
     @staticmethod
     def test_check_inputstream():
+        """
+        Check if input file exists.
+
+        Args:
+        """
         if os.path.exists('tests/cdm/widevine_config.json'):
             os.remove('tests/cdm/widevine_config.json')
         default.run(['default.py', 'check_inputstream', 'mpd', 'com.widevine.alpha'])

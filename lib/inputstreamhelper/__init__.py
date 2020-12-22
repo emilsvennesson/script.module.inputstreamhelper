@@ -11,7 +11,7 @@ from .kodiutils import (addon_version, delete, exists, get_proxies, get_setting,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, http_download, remove_tree, run_cmd, store, system_os, temp_path, unzip
 from .widevine.arm import install_widevine_arm, unmount
-from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_widevine_version,
+from .widevine.widevine import (backup_path, has_widevinecdm, get_lib_version, ia_cdm_path, install_cdm_from_backup, latest_widevine_version,
                                 load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
 from .unicodes import compat_path
 
@@ -95,18 +95,6 @@ class Helper:
 
         from .unicodes import to_unicode
         return to_unicode(addon.getAddonInfo('version'))
-
-    @staticmethod
-    def _get_lib_version(path):
-        if not path or not exists(path):
-            return '(Not found)'
-        import re
-        with open(compat_path(path), 'rb') as library:
-            match = re.search(br'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', library.read())
-        if not match:
-            return '(Undetected)'
-        from .unicodes import to_unicode
-        return to_unicode(match.group(0))
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
@@ -195,7 +183,9 @@ class Helper:
         """Installs the cdm from backup and runs checks"""
 
         progress.update(97, message=localize(30049))  # Installing Widevine CDM
-        install_cdm_from_backup(version)
+        if not install_cdm_from_backup(version):
+            progress.close()
+            return False
 
         progress.update(98, message=localize(30050))  # Finishing
         if has_widevinecdm():
@@ -432,7 +422,7 @@ class Helper:
                 wv_updated = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_modified', 0.0)))
             else:
                 wv_updated = 'Never'
-            text += localize(30821, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
+            text += localize(30821, version=get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
             if arch() in ('arm', 'arm64'):  # Chrome OS version
                 wv_cfg = load_widevine_config()
                 if wv_cfg:
@@ -451,7 +441,8 @@ class Helper:
         log(2, '\n{info}'.format(info=kodi_to_ascii(text)))
         textviewer(localize(30901), text)
 
-    def rollback_libwv(self):
+    @staticmethod
+    def rollback_libwv():
         """Rollback lib to a version specified by the user"""
         bpath = backup_path()
         versions = listdir(bpath)
@@ -470,7 +461,7 @@ class Helper:
             show_versions = []
 
             for version in versions:
-                lib_version = self._get_lib_version(os.path.join(bpath, version, config.WIDEVINE_CDM_FILENAME[system_os()]))
+                lib_version = get_lib_version(os.path.join(bpath, version, config.WIDEVINE_CDM_FILENAME[system_os()]))
                 show_versions.append('{}    ({})'.format(lib_version, version))
 
         if not show_versions:
@@ -480,7 +471,7 @@ class Helper:
         version = select_dialog(localize(30057), show_versions)
         if version != -1:
             log(0, 'Rollback to version {version}', version=versions[version])
-            install_cdm_from_backup(versions[version])
-            notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
+            if install_cdm_from_backup(versions[version]):
+                notification(localize(30037), localize(30051))  # Success! Widevine successfully installed.
 
         return

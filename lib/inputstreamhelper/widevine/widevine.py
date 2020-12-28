@@ -127,16 +127,18 @@ def ia_cdm_path():
 
 def get_lib_version(path):
     """
-    Determines version of the Widevine library.
+    Determines version of the Widevine library using the python ctypes module.
     Returns empty string if not possible, which might indicate a problematic file/arch mismatch, so this can be used as a check.
     """
     from ctypes import CDLL, c_char_p
+    from _ctypes import dlclose
 
     lib_version = ''
     try:
         lib = CDLL(compat_path(path))
         lib.GetCdmVersion.restype = c_char_p
         lib_version = to_unicode(lib.GetCdmVersion())
+        dlclose(lib._handle)  # pylint: disable=protected-access
     except (OSError, AttributeError) as exc:
         log(4, 'Failed to determine lib version: ' + str(exc))
 

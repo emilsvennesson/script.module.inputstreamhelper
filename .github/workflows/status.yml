@@ -1,0 +1,29 @@
+# This workflow checks Chrome OS recovery images availability status
+
+name: Status
+on:
+  pull_request:
+  push:
+  schedule:
+  - cron:  '0 5 * * 3'
+jobs:
+  tests:
+    name: Checks
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONPATH: ${{ github.workspace }}/resources/lib:${{ github.workspace }}/tests
+    strategy:
+      fail-fast: false
+    steps:
+    - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Check Chrome OS recovery images availability
+      run: python -m tests.checkchromeos
+      if: always()

@@ -91,10 +91,10 @@ CHROMEOS_RECOVERY_ARM_HWIDS = [
     'FIEVEL',
     'HANA',
     'JUNIPER-HVPU',
+    'KAPPA',
     'KEVIN',
     'KODAMA',
     'KRANE-ZDKS',
-    'MICKEY',
     'SCARLET',
     'TIGER',
 ]

@@ -9,7 +9,9 @@ from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS
 def get_devices():
     """Get Chrome OS devices as json object"""
     url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
-    html = requests.get(url).text.split('<table id="goog-ws-list-table"')[1].split('</table>')[0]
+    response = requests.get(url)
+    response.raise_for_status()
+    html = response.text.split('<table id="goog-ws-list-table"')[1].split('</table>')[0]
     html = '<table id="goog-ws-list-table"' + html + '</table>'
     table = ET.XML(html.encode('utf-8'))
     keys = [k.text for k in table[0][0]]
@@ -37,7 +39,9 @@ def get_arm_devices():
 def get_serves():
     """Get Chrome OS serving updates as json object"""
     url = 'https://cros-updates-serving.appspot.com/csv'
-    csv = requests.get(url).text
+    response = requests.get(url)
+    response.raise_for_status()
+    csv = response.text
     keys = list(csv.split('\n')[0].split(','))
     serves = []
     for row in csv.split('\n')[1:]:
@@ -50,7 +54,9 @@ def get_serves():
 def get_recoveries():
     """Get Chrome OS recovery items as json object"""
     url = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.json'
-    recoveries = requests.get(url).json()
+    response = requests.get(url)
+    response.raise_for_status()
+    recoveries = response.json()
     return recoveries
 
 def get_compatibles():

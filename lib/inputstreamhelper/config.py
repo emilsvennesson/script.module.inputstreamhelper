@@ -82,7 +82,7 @@ CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recov
 # To keep the Chrome OS ARM hardware ID list up to date, the following resources can be used:
 # https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices
 # https://cros-updates-serving.appspot.com/
-# Last updated: 2020-10-05
+# Last updated: 2021-01-19
 CHROMEOS_RECOVERY_ARM_HWIDS = [
     'BOB',
     'DRUWL',
@@ -97,6 +97,7 @@ CHROMEOS_RECOVERY_ARM_HWIDS = [
     'KRANE-ZDKS',
     'SCARLET',
     'TIGER',
+    'WILLOW-ZZCR',
 ]
 
 CHROMEOS_BLOCK_SIZE = 512

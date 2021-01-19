@@ -60,6 +60,7 @@ def run(addon_url):
     else:
         xbmcplugin.setContent(int(sys.argv[1]), 'videos')
         list_item = xbmcgui.ListItem(label='InputStream Helper Demo')
+        list_item.setInfo('video', {})
         list_item.setProperty('IsPlayable', 'true')
         url = addon_url + '/play'
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, list_item)

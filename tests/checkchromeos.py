@@ -102,7 +102,7 @@ def check_hwids():
     hwids = []
     messages = []
     for compatible in compatibles:
-        hwid = compatible.get('hwidmatch').strip('^.*').split(' ')[0]
+        hwid = compatible.get('hwidmatch').strip('^.*-').split(' ')[0]
         if hwid not in hwids:
             hwids.append(hwid)
 
@@ -116,7 +116,7 @@ def check_hwids():
         raise Exception(messages)
 
     smallest = get_smallest()
-    hwid = smallest.get('hwidmatch').strip('^.*').split(' ')[0]
+    hwid = smallest.get('hwidmatch').strip('^.*-').split(' ')[0]
     print('Chrome OS hardware id\'s are up to date, current smallest recovery image is %s' % hwid)
 
 def run():

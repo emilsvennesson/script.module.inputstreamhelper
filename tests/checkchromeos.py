@@ -108,7 +108,7 @@ def check_hwids():
 
     for item in CHROMEOS_RECOVERY_ARM_HWIDS:
         if item not in hwids:
-            messages.append('%s is end of life, please remove it from inputstreamhelper config' % item)
+            messages.append('%s is not available, please remove it from inputstreamhelper config' % item)
     for item in hwids:
         if item not in CHROMEOS_RECOVERY_ARM_HWIDS:
             messages.append('%s is missing, please add it to inputstreamhelper config' % item)

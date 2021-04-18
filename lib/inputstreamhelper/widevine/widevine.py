@@ -14,16 +14,23 @@ from ..unicodes import compat_path, to_unicode
 
 def install_cdm_from_backup(version):
     """Copies files from specified backup version to cdm dir"""
-    filenames = listdir(os.path.join(backup_path(), version))
+    backup_dir = os.path.join(backup_path(), version)
+
+    if not get_lib_version(os.path.join(backup_dir, config.WIDEVINE_CDM_FILENAME[system_os()])):
+        log(4, 'lib version check failed! Aborting installation.')
+        ok_dialog(localize(30004), localize(30005))  # Error during install, please report
+        return False
+    filenames = listdir(backup_dir)
 
     for filename in filenames:
-        backup_fpath = os.path.join(backup_path(), version, filename)
+        backup_fpath = os.path.join(backup_dir, filename)
         install_fpath = os.path.join(ia_cdm_path(), filename)
         hardlink(backup_fpath, install_fpath)
 
     log(0, 'Installed CDM version {version} from backup', version=version)
     set_setting('last_modified', time())
     remove_old_backups(backup_path())
+    return True
 
 
 def widevine_eula():
@@ -116,6 +123,26 @@ def ia_cdm_path():
         mkdirs(cdm_path)
 
     return cdm_path
+
+
+def get_lib_version(path):
+    """
+    Determines version of the Widevine library using the python ctypes module.
+    Returns empty string if not possible, which might indicate a problematic file/arch mismatch, so this can be used as a check.
+    """
+    from ctypes import CDLL, c_char_p
+    from _ctypes import dlclose
+
+    lib_version = ''
+    try:
+        lib = CDLL(compat_path(path))
+        lib.GetCdmVersion.restype = c_char_p
+        lib_version = to_unicode(lib.GetCdmVersion())
+        dlclose(lib._handle)  # pylint: disable=protected-access
+    except (OSError, AttributeError) as exc:
+        log(4, 'Failed to determine lib version: ' + str(exc))
+
+    return lib_version
 
 
 def missing_widevine_libs():

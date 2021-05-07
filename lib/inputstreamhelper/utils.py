@@ -73,6 +73,17 @@ def http_get(url):
     return content.decode()
 
 
+def http_head(url):
+    """Perform an HTTP HEAD request and return status code"""
+    req = Request(url)
+    req.get_method = lambda: 'HEAD'
+    try:
+        resp = urlopen(req)
+        return resp.getcode()
+    except HTTPError as exc:
+        return exc.getcode()
+
+
 def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:

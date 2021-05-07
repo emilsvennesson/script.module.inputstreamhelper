@@ -28,11 +28,11 @@ def install_cdm_from_backup(version):
 
 def widevine_eula():
     """Displays the Widevine EULA and prompts user to accept it."""
-    if 'x86' in arch():
+    if cdm_from_repo():
         cdm_version = latest_available_widevine_from_repo().get('version')
         cdm_os = config.WIDEVINE_OS_MAP[system_os()]
-        cdm_arch = config.WIDEVINE_ARCH_MAP_X86[arch()]
-    else:  # grab the license from the x86 files
+        cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
+    else:  # Grab the license from the x86 files
         log(0, 'Acquiring Widevine EULA from x86 files.')
         cdm_version = latest_widevine_version(eula=True)
         cdm_os = 'mac'
@@ -51,6 +51,13 @@ def widevine_eula():
     return yesno_dialog(localize(30026), eula, nolabel=localize(30028), yeslabel=localize(30027))  # Widevine CDM EULA
 
 
+def cdm_from_repo():
+    """Whether the Widevine CDM is available from Google's library CDM repository"""
+    # Based on https://source.chromium.org/chromium/chromium/src/+/master:third_party/widevine/cdm/widevine.gni
+    if 'x86' in arch() or arch() == 'arm64' and system_os() == 'Darwin':
+        return True
+    return False
+
 def backup_path():
     """Return the path to the cdm backups"""
     path = os.path.join(addon_profile(), 'backup', '')
@@ -64,7 +71,7 @@ def widevine_config_path():
     iacdm = ia_cdm_path()
     if iacdm is None:
         return None
-    if 'x86' in arch():
+    if cdm_from_repo():
         return os.path.join(iacdm, config.WIDEVINE_CONFIG_NAME)
     return os.path.join(iacdm, 'config.json')
 
@@ -155,7 +162,7 @@ def missing_widevine_libs():
 
 def latest_widevine_version(eula=False):
     """Returns the latest available version of Widevine CDM/Chrome OS."""
-    if eula or 'x86' in arch():
+    if eula or cdm_from_repo():
         url = config.WIDEVINE_VERSIONS_URL
         versions = http_get(url)
         return versions.split()[-1]
@@ -174,7 +181,7 @@ def latest_available_widevine_from_repo():
     """Returns the latest available Widevine CDM version and url from Google's library CDM repository"""
     cdm_versions = http_get(config.WIDEVINE_VERSIONS_URL).strip('\n').split('\n')
     cdm_os = config.WIDEVINE_OS_MAP[system_os()]
-    cdm_arch = config.WIDEVINE_ARCH_MAP_X86[arch()]
+    cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
     available_cdms = []
     for cdm_version in cdm_versions:
         cdm_url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)

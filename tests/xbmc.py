@@ -24,7 +24,8 @@ LOGNONE = 7
 
 INFO_LABELS = {
     'Container.FolderPath': 'plugin://' + ADDON_ID + '/',
-    'System.BuildVersion': '18.2',
+    'System.BuildVersion': '18.9',
+    'System.OSVersionInfo': 'Linux (kernel: Linux 5.4.0-73-generic)',
 }
 
 REGIONS = {

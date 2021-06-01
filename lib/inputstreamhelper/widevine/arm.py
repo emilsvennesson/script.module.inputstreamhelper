@@ -138,7 +138,7 @@ def install_widevine_arm(backup_path):
     # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
 
     # Experimental: Check if TCMalloc library exists and gets preloaded
-    libtcmalloc = 'libtcmalloc_minimal.so'
+    libtcmalloc = 'libtcmalloc'
     process_maps = open('/proc/self/maps', 'r').read()
     is_tcmalloc_preloaded = bool(libtcmalloc in process_maps)
 

@@ -137,7 +137,7 @@ def install_widevine_arm(backup_path):
     # Google will remove support for older Widevine CDM's on May 31, 2021
     # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
 
-    # Experimental: Check if TCMalloc library exists and gets preloaded
+    # Experimental: Check if TCMalloc library is preloaded or linked
     libtcmalloc = 'libtcmalloc'
     process_maps = open('/proc/self/maps', 'r').read()
     is_tcmalloc_preloaded = bool(libtcmalloc in process_maps)

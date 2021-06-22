@@ -223,8 +223,6 @@ class Helper:
             return result
 
         if self.install_and_finish(*result):
-            from time import time
-            set_setting('last_check', time())
             return True
 
         ok_dialog(localize(30004), localize(30005))  # An error occurred
@@ -260,15 +258,17 @@ class Helper:
         return False
 
     def _update_widevine(self):
-        """Prompts user to upgrade Widevine CDM when a newer version is available."""
+        """Prompts user to update Widevine CDM when a newer version is available."""
         from time import localtime, strftime, time
 
+        # Don't update if already checked recently
         last_check = get_setting_float('last_check', 0.0)
         if last_check and not self._first_run():
             if last_check + 3600 * 24 * get_setting_int('update_frequency', 14) >= time():
                 log(2, 'Widevine update check was made on {date}', date=strftime('%Y-%m-%d %H:%M', localtime(last_check)))
                 return
 
+        # Determine versions using config files
         wv_config = load_widevine_config()
         if not wv_config:
             log(3, 'Widevine config missing. Could not determine current version, forcing update.')
@@ -288,6 +288,8 @@ class Helper:
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
+        # Set last_check timestamp and check versions
+        set_setting('last_check', time())
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log(2, 'There is an update available for {component}', component=component)
@@ -296,7 +298,6 @@ class Helper:
             else:
                 log(3, 'User declined to update {component}.', component=component)
         else:
-            set_setting('last_check', time())
             log(0, 'User is on the latest available {component} version.', component=component)
 
     def _check_widevine(self):

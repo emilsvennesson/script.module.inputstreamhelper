@@ -142,10 +142,10 @@ def supports_widevine_arm64tls():
     process_maps = open('/proc/self/maps', 'r').read()
     is_tcmalloc_preloaded = bool(libtcmalloc in process_maps)
 
-    # Experimental: detect TLS 64-byte alignment support, searching for 'arm64tls' string in libc version
-    import platform
-    _, libc_version = platform.libc_ver()
-    has_tls64bytes_support = bool('arm64tls' in libc_version)
+    # Experimental: detect TLS 64-byte alignment support, searching for 'arm64tls' string in ldd version
+    cmd = ['ldd', '--version']
+    ldd_version = run_cmd(cmd).get('output').split('\n')[0].split(' ')[-1]
+    has_tls64bytes_support = bool('arm64tls' in ldd_version)
 
     return is_tcmalloc_preloaded or has_tls64bytes_support
 

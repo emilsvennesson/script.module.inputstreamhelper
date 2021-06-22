@@ -291,13 +291,12 @@ class Helper:
         from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
         if LooseVersion(latest_version) > LooseVersion(current_version):
             log(2, 'There is an update available for {component}', component=component)
-            # Set update check timestamp
-            set_setting('last_check', time())
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
                 self.install_widevine()
             else:
                 log(3, 'User declined to update {component}.', component=component)
         else:
+            set_setting('last_check', time())
             log(0, 'User is on the latest available {component} version.', component=component)
 
     def _check_widevine(self):

@@ -131,8 +131,8 @@ def hardcoded_chromeos_image():
     return None
 
 
-def install_widevine_arm(backup_path):
-    """Installs Widevine CDM on ARM-based architectures."""
+def supports_widevine_arm64tls():
+    """Whether the system supports newer Widevine CDM's that use TLS with 64-byte alignment"""
     # With the release of Widevine CDM 4.10.2252.0, Google uses a newer dynamic library that uses TLS with 64-byte alignment and needs a patched glibc to work
     # Google will remove support for older ARM Widevine CDM's at some point
     # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
@@ -147,8 +147,13 @@ def install_widevine_arm(backup_path):
     _, libc_version = platform.libc_ver()
     has_tls64bytes_support = bool('arm64tls' in libc_version)
 
+    return is_tcmalloc_preloaded or has_tls64bytes_support
+
+
+def install_widevine_arm(backup_path):
+    """Installs Widevine CDM on ARM-based architectures."""
     arm_device = None
-    if not is_tcmalloc_preloaded and not has_tls64bytes_support:
+    if not supports_widevine_arm64tls():
         # Propose user to install older version
         if yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your os probably doesn't support the newest Widevine CDM. Try older one?
             # Install hardcoded ChromeOS image

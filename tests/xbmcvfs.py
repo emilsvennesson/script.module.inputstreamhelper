@@ -12,7 +12,7 @@ from shutil import copyfile
 
 def File(path, flags='r'):
     """A reimplementation of the xbmcvfs File() function"""
-    return open(path, flags)  # pylint: disable=consider-using-with
+    return open(path, flags)  # pylint: disable=consider-using-with, unspecified-encoding
 
 
 def Stat(path):

@@ -17,7 +17,7 @@ def get_devices():
     keys = [k.text for k in table[0][0]]
     devices = []
     for row in table[1]:
-        device = dict()
+        device = {}
         for num, value in enumerate(row):
             device[keys[num]] = None
             if value.text:
@@ -45,7 +45,7 @@ def get_serves():
     keys = list(csv.split('\n')[0].split(','))
     serves = []
     for row in csv.split('\n')[1:]:
-        serve = dict()
+        serve = {}
         for num, value in enumerate(row.split(',')):
             serve[keys[num]] = value
         serves.append(serve)

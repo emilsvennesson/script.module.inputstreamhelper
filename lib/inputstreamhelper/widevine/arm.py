@@ -102,19 +102,16 @@ def supports_widevine_arm64tls():
 
 def install_widevine_arm(backup_path):
     """Installs Widevine CDM on ARM-based architectures."""
-    arm_device = None
     if not supports_widevine_arm64tls():
-        # Propose user to install older version
-        if yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your os probably doesn't support the newest Widevine CDM. Try older one?
-            # Install hardcoded ChromeOS image
-            ok_dialog(localize(30066), localize(30068))  # Please note that Google will remove support for older Widevine CDM's at some point
-            arm_device = hardcoded_chromeos_image()
-            devices = arm_device
+        # Show warning
+        if not yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your operating system probably doesn't support the newest Widevine CDM. Do you wish to continue?
+            # Abort installation when user pressed 'No'
+            log(4, 'User aborted Widevine installation after incompatible operating system warning')
+            return False
 
     # Select newest and smallest ChromeOS image
-    if arm_device is None:
-        devices = chromeos_config()
-        arm_device = select_best_chromeos_image(devices)
+    devices = chromeos_config()
+    arm_device = select_best_chromeos_image(devices)
 
     if arm_device is None:
         log(4, 'We could not find an ARM device in the Chrome OS recovery.json')

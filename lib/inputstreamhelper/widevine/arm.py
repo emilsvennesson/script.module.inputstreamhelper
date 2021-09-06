@@ -80,7 +80,7 @@ def supports_widevine_arm64tls():
 
     # LibreELEC 9.2.7: Check if TCMalloc library is preloaded or linked
     libtcmalloc = 'libtcmalloc'
-    with open('/proc/self/maps', 'r') as maps:
+    with open('/proc/self/maps', 'r') as maps:  # pylint: disable=unspecified-encoding
         process_maps = maps.read()
     is_tcmalloc_preloaded = bool(libtcmalloc in process_maps)
 
@@ -158,7 +158,7 @@ def install_widevine_arm(backup_path):
 
             recovery_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
             config_file = os.path.join(backup_path, arm_device['version'], 'config.json')
-            with open_file(recovery_file, 'w') as reco_file:
+            with open_file(recovery_file, 'w') as reco_file:  # pylint: disable=unspecified-encoding
                 reco_file.write(json.dumps(devices, indent=4))
             with open_file(config_file, 'w') as conf_file:
                 conf_file.write(json.dumps(arm_device))

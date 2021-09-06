@@ -75,7 +75,7 @@ def hardcoded_chromeos_image():
 def supports_widevine_arm64tls():
     """Whether the system supports newer Widevine CDM's that use TLS with 64-byte alignment"""
     # With the release of Widevine CDM 4.10.2252.0, Google uses a newer dynamic library that uses TLS with 64-byte alignment and needs a patched glibc to work
-    # Google will remove support for older ARM Widevine CDM's at some point
+    # Google removed support for older ARM Widevine CDM's on Sep 1, 2021
     # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
 
     # LibreELEC 9.2.7: Check if TCMalloc library is preloaded or linked
@@ -102,12 +102,12 @@ def supports_widevine_arm64tls():
 
 def install_widevine_arm(backup_path):
     """Installs Widevine CDM on ARM-based architectures."""
-    if not supports_widevine_arm64tls():
-        # Show warning
-        if not yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your operating system probably doesn't support the newest Widevine CDM. Do you wish to continue?
-            # Abort installation when user pressed 'No'
-            log(4, 'User aborted Widevine installation after incompatible operating system warning')
-            return False
+    # Show warning
+    if (not supports_widevine_arm64tls() and
+            not yesno_dialog(localize(30066), localize(30067, os=kodi_os()))):  # Your operating system probably doesn't support the newest Widevine CDM. Do you wish to continue?
+        # Abort installation when user pressed 'No'
+        log(4, 'User aborted Widevine installation after incompatible operating system warning')
+        return False
 
     # Select newest and smallest ChromeOS image
     devices = chromeos_config()

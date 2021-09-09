@@ -262,7 +262,7 @@ msgid "Warning"
 msgstr ""
 
 msgctxt "#30067"
-msgid "{os} probably doesn't support the newest Widevine CDM and Google removed support for older Widevine CDM's on Sep 1, 2021. Do you wish to continue?"
+msgid "{os} perhaps doesn't support the newest Widevine CDM and older versions were revoked. Please manually mark your system as compatible in settings to install the new Widevine CDM. Go to settings?"
 msgstr ""
 
 

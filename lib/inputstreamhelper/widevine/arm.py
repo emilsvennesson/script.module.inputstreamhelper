@@ -7,7 +7,7 @@ import os
 import json
 
 from .. import config
-from ..kodiutils import browsesingle, kodi_os, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
+from ..kodiutils import ADDON, browsesingle, get_setting_bool, kodi_os, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
 from ..utils import diskspace, http_download, http_get, http_head, run_cmd, sizeof_fmt, store, system_os, update_temp_path
 from .arm_chromeos import ChromeOSImage
 
@@ -75,7 +75,7 @@ def hardcoded_chromeos_image():
 def supports_widevine_arm64tls():
     """Whether the system supports newer Widevine CDM's that use TLS with 64-byte alignment"""
     # With the release of Widevine CDM 4.10.2252.0, Google uses a newer dynamic library that uses TLS with 64-byte alignment and needs a patched glibc to work
-    # Google will remove support for older ARM Widevine CDM's at some point
+    # Google removed support for older ARM Widevine CDM's on 2021-09-01
     # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
 
     # LibreELEC 9.2.7: Check if TCMalloc library is preloaded or linked
@@ -97,17 +97,19 @@ def supports_widevine_arm64tls():
         except KeyError:
             has_tls64bytes_support = False
 
-    return is_tcmalloc_preloaded or has_tls64bytes_support
+    return is_tcmalloc_preloaded or has_tls64bytes_support or get_setting_bool('compatible_with_4.10.2252.0')
 
 
 def install_widevine_arm(backup_path):
     """Installs Widevine CDM on ARM-based architectures."""
     if not supports_widevine_arm64tls():
         # Show warning
-        if not yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your operating system probably doesn't support the newest Widevine CDM. Do you wish to continue?
+        if not yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your operating system probably doesn't support the newest Widevine CDM. Go to settings?
             # Abort installation when user pressed 'No'
             log(4, 'User aborted Widevine installation after incompatible operating system warning')
             return False
+
+        ADDON.openSettings()
 
     # Select newest and smallest ChromeOS image
     devices = chromeos_config()

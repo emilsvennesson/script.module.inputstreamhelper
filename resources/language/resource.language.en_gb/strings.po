@@ -257,14 +257,6 @@ msgctxt "#30065"
 msgid "Shall we try again?"
 msgstr ""
 
-msgctxt "#30066"
-msgid "Warning"
-msgstr ""
-
-msgctxt "#30067"
-msgid "{os} probably doesn't support the newest Widevine CDM and Google removed support for older Widevine CDM's on Sep 1, 2021. Do you wish to continue?"
-msgstr ""
-
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

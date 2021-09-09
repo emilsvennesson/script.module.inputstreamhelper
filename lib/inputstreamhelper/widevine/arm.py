@@ -7,8 +7,8 @@ import os
 import json
 
 from .. import config
-from ..kodiutils import browsesingle, kodi_os, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, http_head, run_cmd, sizeof_fmt, store, system_os, update_temp_path
+from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
+from ..utils import diskspace, http_download, http_get, sizeof_fmt, store, system_os, update_temp_path
 from .arm_chromeos import ChromeOSImage
 
 
@@ -63,52 +63,8 @@ def chromeos_config():
     return json.loads(http_get(config.CHROMEOS_RECOVERY_URL))
 
 
-def hardcoded_chromeos_image():
-    """Gets a hardcoded ChromeOS image"""
-    arm_device = config.HARDCODED_CHROMEOS_IMAGE
-    http_status = http_head(arm_device['url'])
-    if http_status == 200:
-        return arm_device
-    return None
-
-
-def supports_widevine_arm64tls():
-    """Whether the system supports newer Widevine CDM's that use TLS with 64-byte alignment"""
-    # With the release of Widevine CDM 4.10.2252.0, Google uses a newer dynamic library that uses TLS with 64-byte alignment and needs a patched glibc to work
-    # Google will remove support for older ARM Widevine CDM's at some point
-    # More info at https://github.com/xbmc/inputstream.adaptive/issues/678 and https://www.widevine.com/news
-
-    # LibreELEC 9.2.7: Check if TCMalloc library is preloaded or linked
-    libtcmalloc = 'libtcmalloc'
-    with open('/proc/self/maps', 'r') as maps:  # pylint: disable=unspecified-encoding
-        process_maps = maps.read()
-    is_tcmalloc_preloaded = bool(libtcmalloc in process_maps)
-
-    # Experimental: detect TLS 64-byte alignment support, searching for 'arm64tls' string in ldd version
-    cmd = ['ldd', '--version']
-    ldd_version = run_cmd(cmd).get('output').split('\n')[0].split(' ')[-1]
-    has_tls64bytes_support = bool('arm64tls' in ldd_version)
-
-    # Experimental: detect TLS 64-byte alignment support, checking environment variable
-    if not has_tls64bytes_support:
-        try:
-            libc_patchlevel = int(os.environ['LIBC_WIDEVINE_PATCHLEVEL'])
-            has_tls64bytes_support = libc_patchlevel >= 1
-        except KeyError:
-            has_tls64bytes_support = False
-
-    return is_tcmalloc_preloaded or has_tls64bytes_support
-
-
 def install_widevine_arm(backup_path):
     """Installs Widevine CDM on ARM-based architectures."""
-    if not supports_widevine_arm64tls():
-        # Show warning
-        if not yesno_dialog(localize(30066), localize(30067, os=kodi_os())):  # Your operating system probably doesn't support the newest Widevine CDM. Do you wish to continue?
-            # Abort installation when user pressed 'No'
-            log(4, 'User aborted Widevine installation after incompatible operating system warning')
-            return False
-
     # Select newest and smallest ChromeOS image
     devices = chromeos_config()
     arm_device = select_best_chromeos_image(devices)

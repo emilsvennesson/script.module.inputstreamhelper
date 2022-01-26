@@ -11,19 +11,22 @@ def get_devices():
     url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
     response = requests.get(url)
     response.raise_for_status()
-    html = response.text.split('<table id="goog-ws-list-table"')[1].split('</table>')[0]
-    html = '<table id="goog-ws-list-table"' + html + '</table>'
+    html = response.text.split('<table>')[3].split('</table>')[0]
+    html = '<table>' + html + '</table>'
+    html = html.replace('&', '&#38;')
+    html = html.replace('<white label>', 'white label')
     table = ET.XML(html.encode('utf-8'))
-    keys = [k.text for k in table[0][0]]
+    keys = [k.text.strip() for k in table[0]]
     devices = []
-    for row in table[1]:
+    for row in table[1:]:
         device = {}
         for num, value in enumerate(row):
             device[keys[num]] = None
             if value.text:
                 device[keys[num]] = value.text.strip()
-            elif list(value)[0].text:
-                device[keys[num]] = list(value)[0].text.strip()
+            elif value.find('a') is not None:
+                if value.find('a').text is not None:
+                    device[keys[num]] = value.find('a').text.strip()
         devices.append(device)
     return devices
 

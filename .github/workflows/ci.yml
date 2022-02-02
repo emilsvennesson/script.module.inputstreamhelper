@@ -1,26 +1,42 @@
 name: CI
 on:
-- pull_request
-- push
+  # Run action when pushed to master, or for commits in a pull request.
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   tests:
     name: Add-on testing
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     env:
       PYTHONIOENCODING: utf-8
       PYTHONPATH: ${{ github.workspace }}/lib:${{ github.workspace }}/tests
     strategy:
       fail-fast: false
       matrix:
-#        max-parallel: 2
-        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8 ]
+        os: [ ubuntu-latest ]
+        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8, 3.9 ]
+        include:
+          # Kodi Leia on Windows uses a bundled Python 2.7.
+          - os: windows-latest
+            python-version: 2.7
+
+          # Kodi Matrix on Windows uses a bundled Python 3.8, but we test 3.9 also to be sure.
+          - os: windows-latest
+            python-version: 3.8
+          - os: windows-latest
+            python-version: 3.9
     steps:
-    - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
-      uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         sudo apt-get install gettext

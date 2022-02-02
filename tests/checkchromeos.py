@@ -6,6 +6,7 @@ from xml.etree import ElementTree as ET
 import requests
 from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS
 
+
 def get_devices():
     """Get Chrome OS devices as json object"""
     url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
@@ -30,6 +31,7 @@ def get_devices():
         devices.append(device)
     return devices
 
+
 def get_arm_devices():
     """Get Chrome OS ARM devices as json object"""
     devices = get_devices()
@@ -38,6 +40,7 @@ def get_arm_devices():
         if device.get('User ABI') == 'arm':
             arm_devices.append(device)
     return arm_devices
+
 
 def get_serves():
     """Get Chrome OS serving updates as json object"""
@@ -54,6 +57,7 @@ def get_serves():
         serves.append(serve)
     return serves
 
+
 def get_recoveries():
     """Get Chrome OS recovery items as json object"""
     url = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.json'
@@ -61,6 +65,7 @@ def get_recoveries():
     response.raise_for_status()
     recoveries = response.json()
     return recoveries
+
 
 def get_compatibles():
     """Get compatible Chrome OS recovery items"""
@@ -86,6 +91,7 @@ def get_compatibles():
                         compatibles.append(recovery)
     return compatibles
 
+
 def get_smallest():
     """Get the Chrome OS recovery item with the smallest filesize"""
     compatibles = get_compatibles()
@@ -93,8 +99,8 @@ def get_smallest():
     for item in compatibles:
         if smallest is None:
             smallest = item
-        if (int(item.get('filesize')) + int(item.get('zipfilesize')) <
-                int(smallest.get('filesize')) + int(smallest.get('zipfilesize'))):
+        if (int(item.get('filesize')) + int(item.get('zipfilesize'))
+                < int(smallest.get('filesize')) + int(smallest.get('zipfilesize'))):
             smallest = item
     return smallest
 
@@ -111,7 +117,7 @@ def check_hwids():
 
     for item in CHROMEOS_RECOVERY_ARM_HWIDS:
         if item not in hwids:
-            messages.append('%s is not available, please remove it from inputstreamhelper config' % item)
+            messages.append('%s is end-of-life, consider removing it from inputstreamhelper config' % item)
     for item in hwids:
         if item not in CHROMEOS_RECOVERY_ARM_HWIDS:
             messages.append('%s is missing, please add it to inputstreamhelper config' % item)
@@ -122,9 +128,11 @@ def check_hwids():
     hwid = smallest.get('hwidmatch').strip('^.*-').split(' ')[0]
     print('Chrome OS hardware id\'s are up to date, current smallest recovery image is %s' % hwid)
 
+
 def run():
     """Main function"""
     check_hwids()
+
 
 if __name__ == '__main__':
     run()

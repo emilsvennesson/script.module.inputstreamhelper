@@ -1,6 +1,7 @@
 [MESSAGES CONTROL]
 disable=
     bad-option-value,
+    consider-using-f-string,
     duplicate-code,  # Integration tests tend to test similar things
     fixme,  # Allow FIXMEs in code is a useful practice
     import-outside-toplevel,  # Done on purpose to reduce overhead at startup

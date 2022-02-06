@@ -38,15 +38,15 @@ def select_best_chromeos_image(devices):
             continue
 
         # Select the newest version
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(device['version']) > LooseVersion(best['version']):
+        from packaging.version import parse
+        if parse(device['version']) > parse(best['version']):
             log(0, '{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
                 device=device,
                 best=best)
             best = device
 
         # Select the smallest image (disk space requirement)
-        elif LooseVersion(device['version']) == LooseVersion(best['version']):
+        elif parse(device['version']) == parse(best['version']):
             if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
                 log(0, '{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',
                     device=device,

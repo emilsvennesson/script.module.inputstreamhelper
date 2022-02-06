@@ -186,10 +186,10 @@ def latest_available_widevine_from_repo():
 
 def remove_old_backups(bpath):
     """Removes old Widevine backups, if number of allowed backups is exceeded"""
-    from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
+    from packaging.version import parse
 
     max_backups = get_setting_int('backups', 4)
-    versions = sorted([LooseVersion(version) for version in listdir(bpath)])
+    versions = sorted([parse(version) for version in listdir(bpath)])
 
     if len(versions) < 2:
         return
@@ -197,9 +197,9 @@ def remove_old_backups(bpath):
     installed_version = load_widevine_config()['version']
 
     while len(versions) > max_backups + 1:
-        remove_version = str(versions[1] if versions[0] == LooseVersion(installed_version) else versions[0])
+        remove_version = str(versions[1] if versions[0] == parse(installed_version) else versions[0])
         log(0, 'Removing oldest backup which is not installed: {version}', version=remove_version)
         remove_tree(os.path.join(bpath, remove_version))
-        versions = sorted([LooseVersion(version) for version in listdir(bpath)])
+        versions = sorted([parse(version) for version in listdir(bpath)])
 
     return

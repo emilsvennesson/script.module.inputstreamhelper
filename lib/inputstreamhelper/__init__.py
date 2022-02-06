@@ -155,8 +155,8 @@ class Helper:
             ok_dialog(localize(30004), localize(30011, os=system_os()))  # Operating system not supported by Widevine
             return False
 
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > LooseVersion(kodi_version()):
+        from packaging.version import parse
+        if parse(config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]) > parse(kodi_version()):
             log(4, 'Unsupported Kodi version for Widevine: {version}', version=kodi_version())
             ok_dialog(localize(30004), localize(30010, version=config.WIDEVINE_MINIMUM_KODI_VERSION[system_os()]))  # Kodi too old
             return False
@@ -251,8 +251,8 @@ class Helper:
         settings_version = get_setting('version', '0.3.4')  # settings_version didn't exist in version 0.3.4 and older
 
         # Compare versions
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(addon_version()) > LooseVersion(settings_version):
+        from packaging.version import parse
+        if parse(addon_version()) > parse(settings_version):
             # New version found, save addon_version to settings
             set_setting('version', addon_version())
             log(2, 'InputStreamHelper version {version} is running for the first time', version=addon_version())
@@ -293,8 +293,8 @@ class Helper:
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(latest_version) > LooseVersion(current_version):
+        from packaging.version import parse
+        if parse(latest_version) > parse(current_version):
             log(2, 'There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
                 self.install_widevine()
@@ -340,8 +340,8 @@ class Helper:
 
     def _supports_hls(self):
         """Return if HLS support is available in inputstream.adaptive."""
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(self._inputstream_version()) >= LooseVersion(config.HLS_MINIMUM_IA_VERSION):
+        from packaging.version import parse
+        if parse(self._inputstream_version()) >= parse(config.HLS_MINIMUM_IA_VERSION):
             return True
 
         log(3, 'HLS is unsupported on {addon} version {version}', addon=self.inputstream_addon, version=self._inputstream_version())

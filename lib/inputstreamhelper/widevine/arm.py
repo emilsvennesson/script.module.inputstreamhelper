@@ -8,7 +8,7 @@ import json
 
 from .. import config
 from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, sizeof_fmt, store, system_os, update_temp_path
+from ..utils import diskspace, http_download, http_get, sizeof_fmt, store, system_os, update_temp_path, version_tuple
 from .arm_chromeos import ChromeOSImage
 
 
@@ -38,15 +38,14 @@ def select_best_chromeos_image(devices):
             continue
 
         # Select the newest version
-        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module,useless-suppression
-        if LooseVersion(device['version']) > LooseVersion(best['version']):
+        if version_tuple(device['version']) > version_tuple(best['version']):
             log(0, '{device[hwid]} ({device[version]}) is newer than {best[hwid]} ({best[version]})',
                 device=device,
                 best=best)
             best = device
 
         # Select the smallest image (disk space requirement)
-        elif LooseVersion(device['version']) == LooseVersion(best['version']):
+        elif version_tuple(device['version']) == version_tuple(best['version']):
             if int(device['filesize']) + int(device['zipfilesize']) < int(best['filesize']) + int(best['zipfilesize']):
                 log(0, '{device[hwid]} ({device_size}) is smaller than {best[hwid]} ({best_size})',
                     device=device,

@@ -329,3 +329,21 @@ def remove_tree(path):
     """Remove an entire directory tree"""
     from shutil import rmtree
     rmtree(compat_path(path))
+
+
+def version_tuple(vstring):
+    """Convert a version string to a tuple"""
+    import re
+    # Parses a version string to a tuple e.g. '1.2' -> (1, 2)
+    # Simplified from distutils.version.LooseVersion which was deprecated in
+    # Python 3.10.
+    components = []
+    regex = re.compile(r'(\d+ | [a-z]+ | \.)', re.VERBOSE)
+    for item in regex.split(vstring):
+        if item and item != '.':
+            try:
+                item = int(item)
+            except ValueError:
+                pass
+            components.append(item)
+    return components

@@ -51,7 +51,7 @@ def _http_request(url, headers=None, time_out=10):
         req = urlopen(request, timeout=time_out)
         log(0, 'Response code: {code}', code=req.getcode())
         if 400 <= req.getcode() < 600:
-            raise HTTPError('HTTP %s Error for url: %s' % (req.getcode(), url), response=req)
+            raise HTTPError('HTTP {} Error for url: {}'.format(req.getcode(), url), response=req)
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?

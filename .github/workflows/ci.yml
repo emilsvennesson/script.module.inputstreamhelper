@@ -1,24 +1,32 @@
 name: CI
 on:
-- pull_request
-- push
+  # Run action when pushed to master, or for commits in a pull request.
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   tests:
     name: Add-on testing
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     env:
       PYTHONIOENCODING: utf-8
       PYTHONPATH: ${{ github.workspace }}/lib:${{ github.workspace }}/tests
     strategy:
       fail-fast: false
+      # Set max-parallel to avoid ConnectionRefusedError from Google servers
+      max-parallel: 2
       matrix:
-#        max-parallel: 2
-        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8 ]
+        os: [ ubuntu-latest ]
+        python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8, 3.9 ]
     steps:
     - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
       uses: actions/checkout@v2
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies

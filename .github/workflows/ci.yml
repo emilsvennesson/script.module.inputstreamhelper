@@ -16,8 +16,6 @@ jobs:
       PYTHONPATH: ${{ github.workspace }}/lib:${{ github.workspace }}/tests
     strategy:
       fail-fast: false
-      # Set max-parallel to avoid ConnectionRefusedError from Google servers
-      max-parallel: 2
       matrix:
         os: [ ubuntu-latest ]
         python-version: [ 2.7, 3.5, 3.6, 3.7, 3.8, 3.9 ]
@@ -46,9 +44,8 @@ jobs:
       continue-on-error: true
     # Python 2.7 and Python 3.5 are no longer supported by proxy.py
     - name: Start proxy server, when supported
-      run: python -m proxy --hostname 127.0.0.1 --log-level DEBUG &
-      if: matrix.python-version == '3.6' || matrix.python-version == '3.7' || matrix.python-version == '3.8'
-      #if: contains(["3.6", "3.7", "3.8"], matrix.python-version)
+      run: python -m proxy --threaded --hostname 127.0.0.1 --log-level DEBUG &
+      if: matrix.python-version != '2.7' && matrix.python-version != '3.5'
     - name: Run unit tests
       run: coverage run -m unittest discover
     - name: Run addon using cli

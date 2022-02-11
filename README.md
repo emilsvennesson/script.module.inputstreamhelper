@@ -29,7 +29,7 @@ import xbmcplugin
 
 PROTOCOL = 'mpd'
 DRM = 'com.widevine.alpha'
-STREAM_URL = 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd'
+STREAM_URL = 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd'
 MIME_TYPE = 'application/dash+xml'
 LICENSE_URL = 'https://widevine-proxy.appspot.com/proxy'
 KODI_VERSION_MAJOR = int(xbmc.getInfoLabel('System.BuildVersion').split('.')[0])

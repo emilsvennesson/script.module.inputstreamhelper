@@ -329,3 +329,13 @@ def remove_tree(path):
     """Remove an entire directory tree"""
     from shutil import rmtree
     rmtree(compat_path(path))
+
+
+def parse_version(version):
+    """Parse a version string and return a comparable version object"""
+    try:
+        from packaging.version import parse
+        return parse(version)
+    except ImportError:
+        from distutils.version import LooseVersion
+        return LooseVersion(version)

@@ -81,12 +81,13 @@ CHROMEOS_RECOVERY_URL = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recov
 
 # To keep the Chrome OS ARM hardware ID list up to date, the following resources can be used:
 # https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices
-# https://cros-updates-serving.appspot.com/
-# Last updated: 2022-01-20
+# https://chromiumdash.appspot.com/serving-builds?deviceCategory=Chrome%20OS
+# Last updated: 2022-02-24
 CHROMEOS_RECOVERY_ARM_HWIDS = [
     'BOB',
     'BURNET',
     'COACHZ',
+    'COZMO',
     'DAMU',
     'DRUWL',
     'DUMO',
@@ -94,7 +95,6 @@ CHROMEOS_RECOVERY_ARM_HWIDS = [
     'ESCHE',
     'FENNEL',
     'FENNEL14',
-    'FIEVEL',
     'HANA',
     'HAYATO-YLRO',
     'HOMESTAR-MBLE',
@@ -114,7 +114,6 @@ CHROMEOS_RECOVERY_ARM_HWIDS = [
     'POMPOM-MZVS',
     'SCARLET',
     'SPHERION',
-    'TIGER',
     'WILLOW-TFIY',
 ]
 

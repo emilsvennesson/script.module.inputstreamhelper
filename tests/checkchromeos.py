@@ -44,17 +44,10 @@ def get_arm_devices():
 
 def get_serves():
     """Get Chrome OS serving updates as json object"""
-    url = 'https://cros-updates-serving.appspot.com/csv'
+    url = 'https://chromiumdash.appspot.com/cros/fetch_serving_builds?deviceCategory=Chrome%20OS'
     response = requests.get(url)
     response.raise_for_status()
-    csv = response.text
-    keys = list(csv.split('\n')[0].split(','))
-    serves = []
-    for row in csv.split('\n')[1:]:
-        serve = {}
-        for num, value in enumerate(row.split(',')):
-            serve[keys[num]] = value
-        serves.append(serve)
+    serves = response.json().get('builds')
     return serves
 
 
@@ -80,15 +73,15 @@ def get_compatibles():
             board = full_board.split('_')[1]
         else:
             board = full_board
-        for serve in serves:
-            if board == serve.get('board') and serve.get('eol') == 'False' and board not in boards:
-                boards.append(board)
-                for recovery in recoveries:
-                    r_board = recovery.get('file').split('_')[2]
-                    if '-' in r_board:
-                        r_board = r_board.replace('-', '_')
-                    if full_board == r_board:
-                        compatibles.append(recovery)
+        served_board = serves.get(board)
+        if served_board and not served_board.get('isAue') and board not in boards:
+            boards.append(board)
+            for recovery in recoveries:
+                r_board = recovery.get('file').split('_')[2]
+                if '-' in r_board:
+                    r_board = r_board.replace('-', '_')
+                if full_board == r_board:
+                    compatibles.append(recovery)
     return compatibles
 
 

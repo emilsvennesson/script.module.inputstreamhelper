@@ -65,22 +65,14 @@ def get_compatibles():
     arm_devices = get_arm_devices()
     serves = get_serves()
     recoveries = get_recoveries()
-    boards = []
     compatibles = []
     for device in arm_devices:
-        full_board = device.get('Board name(s)').lower()
-        if '_' in full_board:
-            board = full_board.split('_')[1]
-        else:
-            board = full_board
+        board = device.get('Board name(s)').lower().replace('_', '-')
         served_board = serves.get(board)
-        if served_board and not served_board.get('isAue') and board not in boards:
-            boards.append(board)
+        if served_board and not served_board.get('isAue'):
             for recovery in recoveries:
                 r_board = recovery.get('file').split('_')[2]
-                if '-' in r_board:
-                    r_board = r_board.replace('-', '_')
-                if full_board == r_board:
+                if board == r_board:
                     compatibles.append(recovery)
     return compatibles
 

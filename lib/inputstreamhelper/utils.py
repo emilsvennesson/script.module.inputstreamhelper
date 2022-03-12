@@ -70,7 +70,7 @@ def http_get(url):
     content = req.read()
     # NOTE: Do not log reponse (as could be large)
     # log(0, 'Response: {response}', response=content)
-    return content.decode()
+    return content.decode("utf-8")
 
 
 def http_head(url):

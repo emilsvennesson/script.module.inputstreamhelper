@@ -6,11 +6,11 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from . import config
-from .kodiutils import (addon_version, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
+from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
                         kodi_to_ascii, kodi_version, listdir, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip
-from .widevine.arm import install_widevine_arm
+from .widevine.arm import dl_extract_widevine, extract_widevine, install_widevine_arm
 from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_available_widevine_from_repo,
                                 latest_widevine_version, load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
 from .unicodes import compat_path
@@ -228,6 +228,33 @@ class Helper:
 
         ok_dialog(localize(30004), localize(30005))  # An error occurred
         return False
+
+    @cleanup_decorator
+    def install_widevine_from(self):
+        """Install Widevine from a given URL or file."""
+        if yesno_dialog(None, localize(30066)): # download resource with widevine from url? no means specify local
+            result = dl_extract_widevine(get_setting("image_url"), backup_path())
+            if not result:
+                return result
+
+            if self.install_and_finish(*result):
+                return True
+
+        else:
+            image_path = browsesingle(1, localize(30067), "files")
+            if not image_path:
+                return False
+
+            image_version = os.path.basename(image_path).split("_")[1]
+            progress = extract_widevine(backup_path(), image_path, image_version)
+            if not progress:
+                return False
+
+            if self.install_and_finish(progress, image_version):
+                return True
+
+        return False
+
 
     @staticmethod
     def remove_widevine():

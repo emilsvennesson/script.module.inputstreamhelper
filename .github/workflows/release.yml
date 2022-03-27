@@ -65,7 +65,7 @@ jobs:
           asset_content_type: application/zip
       - name: Generate distribution zip and submit to official kodi repository
         id: kodi-addon-submitter
-        uses: xbmc/action-kodi-addon-submitter@v1.2
+        uses: mediaminister/action-kodi-addon-submitter@master
         with:
           kodi-repository: repo-scripts
           kodi-version: krypton

@@ -13,7 +13,7 @@ from .. import config
 from ..unicodes import compat_path
 
 
-class ChromeOSImage:
+class ChromeOSImage:  # pylint: disable=too-many-public-methods
     """
     The main class handling a Chrome OS image
 
@@ -69,6 +69,59 @@ class ChromeOSImage:
 
         return offset
 
+    def find_file(self, filename, path_to_file=("opt", "google", "chrome", "WidevineCdm", "_platform_specific", "cros_arm")):
+        """
+        Finds a file at a given path, or search upwards if not found.
+        Returns a directory entry.
+
+        Assumes the path is roughly correct, else it might take long.
+        """
+        root_inode_pos = self.calc_inode_pos(2)
+        root_inode_dict, _ = self.inode_table(root_inode_pos)
+        root_dir_entries = self.dir_entries(self.read_file(self.get_block_ids(root_inode_dict)))
+
+        dentries = root_dir_entries
+        try:
+            for dir_name in path_to_file:
+                inode_dict, _ = self.inode_table(self.calc_inode_pos(dentries[dir_name]["inode"]))
+                dentries = self.dir_entries(self.read_file(self.get_block_ids(inode_dict)))
+
+            return self.find_file_in_dir(filename, dentries)
+        except KeyError:
+            return self.find_file(filename, path_to_file[:-1])
+
+    def find_file_in_dir(self, filename, dentries):
+        """
+        Finds a file in a directory or recursively in its subdirectories.
+        Returns a directory entry.
+
+        Can take long for deep searches.
+        Returns the first result.
+        """
+        try:
+            return dentries[filename]
+        except KeyError:
+            for dentry in dentries:
+                if dentry in (".", "..") or not dentries[dentry]["file_type"] == 2:  # make sure it's not recursive and check if a directory
+                    continue
+
+                inode_dict, _ = self.inode_table(self.calc_inode_pos(dentries[dentry]["inode"]))
+                subdentries = self.dir_entries(self.read_file(self.get_block_ids(inode_dict)))
+
+                file_entry = self.find_file_in_dir(filename, subdentries)
+                if file_entry:
+                    return file_entry
+
+            return None
+
+    def calc_inode_pos(self, inode_num):
+        """Calculate the byte position of an inode from its index"""
+        blk_group_num = (inode_num - 1) // self.sb_dict['s_inodes_per_group']
+        blk_group = self.blk_groups[blk_group_num]
+        i_index_in_group = (inode_num - 1) % self.sb_dict['s_inodes_per_group']
+
+        return self.part_offset + self.blocksize * blk_group['bg_inode_table'] + self.sb_dict['s_inode_size'] * i_index_in_group
+
     def extract_file(self, filename, extract_path, progress):
         """Extracts the file from the image"""
         self.progress = progress
@@ -78,35 +131,11 @@ class ChromeOSImage:
         self.sb_dict = self.superblock()
         self.blk_groups = self.block_groups()
 
-        bin_filename = filename.encode('ascii')
-        chunksize = 4 * 1024**2
-        percent8 = 40
-        self.progress.update(int(percent8 / 8), localize(30061))
-        chunk1 = self.read_stream(chunksize)
-        while True:
-            chunk2 = self.read_stream(chunksize)
-            if not chunk2:
-                log(4, 'File {filename} not found in the ChromeOS image', filename=filename)
-                return False
-
-            chunk = chunk1 + chunk2
-            if bin_filename in chunk:
-                i_index_pos = chunk.index(bin_filename) - 8
-                dir_dict = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
-                if dir_dict['inode'] < self.sb_dict['s_inodes_count'] and dir_dict['name_len'] == len(filename):
-                    break
-            chunk1 = chunk2
-            if percent8 < 240:
-                percent8 += 1
-                self.progress.update(int(percent8 / 8))
+        self.progress.update(5, localize(30061))
+        dir_dict = self.find_file(filename)
 
         self.progress.update(32, localize(30062))
-
-        blk_group_num = (dir_dict['inode'] - 1) // self.sb_dict['s_inodes_per_group']
-        blk_group = self.blk_groups[blk_group_num]
-        i_index_in_group = (dir_dict['inode'] - 1) % self.sb_dict['s_inodes_per_group']
-
-        inode_pos = self.part_offset + self.blocksize * blk_group['bg_inode_table'] + self.sb_dict['s_inode_size'] * i_index_in_group
+        inode_pos = self.calc_inode_pos(dir_dict["inode"])
         inode_dict, _ = self.inode_table(inode_pos)
 
         return self.write_file(inode_dict, os.path.join(extract_path, filename))
@@ -141,7 +170,7 @@ class ChromeOSImage:
         return sb_dict
 
     def block_group(self):
-        """Get info about a block group"""
+        """Get info about a block group. Expects stream to be at the right position already."""
         names = ('bg_block_bitmap', 'bg_inode_bitmap', 'bg_inode_table', 'bg_free_blocks_count', 'bg_free_inodes_count', 'bg_used_dirs_count', 'bg_pad')
         fmt = '<3I4H12x'
         fmt_len = calcsize(fmt)
@@ -191,13 +220,28 @@ class ChromeOSImage:
 
     @staticmethod
     def dir_entry(chunk):
-        """Returns the directory entry found in chunk"""
+        """Returns the directory entry found in chunk as dict."""
         dir_names = ('inode', 'rec_len', 'name_len', 'file_type', 'name')
         dir_fmt = '<IHBB' + str(len(chunk) - 8) + 's'
 
         dir_dict = dict(list(zip(dir_names, unpack(dir_fmt, chunk))))
+        dir_dict["name"] = dir_dict["name"][:dir_dict["name_len"]]
 
         return dir_dict
+
+    def dir_entries(self, dir_file):
+        """Returns all directory entries of a directory file as dict of dicts with name as key"""
+        dirs = {}
+        while dir_file:
+            dir_entry = self.dir_entry(dir_file)
+            dir_file = dir_file[dir_entry["rec_len"]:]  # Maybe in the future check for IndexError, just to be safe
+            if dir_entry['inode'] == 0:
+                continue
+
+            name = dir_entry["name"].decode()
+            dirs[name] = dir_entry
+
+        return dirs
 
     def iblock_ids(self, blk_id, ids_to_read):
         """Reads the block indices/IDs from an indirect block"""
@@ -272,8 +316,8 @@ class ChromeOSImage:
 
         return block_ids[:inode_dict['blocks']]
 
-    def read_file(self, block_ids):
-        """Read blocks specified by IDs into a dict"""
+    def read_file_dict(self, block_ids):
+        """Reads blocks specified by IDs into a dict with IDs as key"""
         block_dict = {}
         for block_id in block_ids:
             percent = int(35 + 60 * block_ids.index(block_id) / len(block_ids))
@@ -283,6 +327,17 @@ class ChromeOSImage:
             block_dict[block_id] = self.read_stream(self.blocksize)
 
         return block_dict
+
+    def read_file(self, block_ids):
+        """Reads a file (can be directory or anything ext2 considers a file) as one binary string"""
+        block_ids_sorted = sorted(block_ids)
+        block_dict = self.read_file_dict(block_ids_sorted)
+
+        file_str = b''
+        for block_id in block_ids:
+            file_str += block_dict[block_id]
+
+        return file_str
 
     @staticmethod
     def write_file_chunk(opened_file, chunk, bytes_to_write):
@@ -301,7 +356,7 @@ class ChromeOSImage:
 
         block_ids_sorted = block_ids[:]
         block_ids_sorted.sort()
-        block_dict = self.read_file(block_ids_sorted)
+        block_dict = self.read_file_dict(block_ids_sorted)  # Maybe replace with read_file in the future, but may use more memory.
 
         write_dir = os.path.join(os.path.dirname(filepath), '')
         if not exists(write_dir):

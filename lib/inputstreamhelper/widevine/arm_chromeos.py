@@ -13,24 +13,26 @@ from .. import config
 from ..unicodes import compat_path
 
 
-class ChromeOSImage:  # pylint: disable=too-many-public-methods
+class ChromeOSImage:
     """
     The main class handling a Chrome OS image
 
     Information related to ext2 is sourced from here: https://www.nongnu.org/ext2-doc/ext2.html
     """
 
-    def __init__(self, imgpath):
+    def __init__(self, imgpath, progress=None):
         """Prepares the image"""
+        self.progress = progress
+        if self.progress:
+            self.progress.update(2, localize(30060))
         self.imgpath = imgpath
-        self.bstream = self.get_bstream(imgpath)
-        self.part_offset = None
-        self.sb_dict = None
+        self.bstream = self._get_bstream(imgpath)
+        self.part_offset = self.chromeos_offset()
         self.blocksize = None
-        self.blk_groups = None
-        self.progress = None
+        self.sb_dict = self._superblock()
+        self.blk_groups = self._block_groups()
 
-    def gpt_header(self):
+    def _gpt_header(self):
         """Returns the needed parts of the GPT header, can be easily expanded if necessary"""
         header_fmt = '<8s4sII4x4Q16sQ3I'
         header_size = calcsize(header_fmt)
@@ -47,7 +49,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
     def chromeos_offset(self):
         """Calculate the Chrome OS losetup start offset"""
         part_format = '<16s16sQQQ72s'
-        entries_start, entries_num, entry_size = self.gpt_header()  # assuming partition table is GPT
+        entries_start, entries_num, entry_size = self._gpt_header()  # assuming partition table is GPT
         lba_size = config.CHROMEOS_BLOCK_SIZE  # assuming LBA size
         self.seek_stream(entries_start * lba_size)
 
@@ -55,7 +57,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
             log(4, 'Partition table entries are not 128 bytes long')
             return 0
 
-        for index in range(1, entries_num + 1):  # pylint: disable=unused-variable
+        for _ in range(1, entries_num + 1):
             # Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
             _, _, first_lba, _, _, part_name = unpack(part_format, self.read_stream(entry_size))
             part_name = part_name.decode('utf-16').strip('\x00')
@@ -76,21 +78,21 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         Assumes the path is roughly correct, else it might take long.
         """
-        root_inode_pos = self.calc_inode_pos(2)
-        root_inode_dict, _ = self.inode_table(root_inode_pos)
-        root_dir_entries = self.dir_entries(self.read_file(self.get_block_ids(root_inode_dict)))
+        root_inode_pos = self._calc_inode_pos(2)
+        root_inode_dict, _ = self._inode_table(root_inode_pos)
+        root_dir_entries = self.dir_entries(self.read_file(self._get_block_ids(root_inode_dict)))
 
         dentries = root_dir_entries
         try:
             for dir_name in path_to_file:
-                inode_dict, _ = self.inode_table(self.calc_inode_pos(dentries[dir_name]["inode"]))
-                dentries = self.dir_entries(self.read_file(self.get_block_ids(inode_dict)))
+                inode_dict, _ = self._inode_table(self._calc_inode_pos(dentries[dir_name]["inode"]))
+                dentries = self.dir_entries(self.read_file(self._get_block_ids(inode_dict)))
 
-            return self.find_file_in_dir(filename, dentries)
+            return self._find_file_in_dir(filename, dentries)
         except KeyError:
             return self.find_file(filename, path_to_file[:-1])
 
-    def find_file_in_dir(self, filename, dentries):
+    def _find_file_in_dir(self, filename, dentries):
         """
         Finds a file in a directory or recursively in its subdirectories.
         Returns a directory entry.
@@ -102,19 +104,19 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
             return dentries[filename]
         except KeyError:
             for dentry in dentries:
-                if dentry in (".", "..") or not dentries[dentry]["file_type"] == 2:  # make sure it's not recursive and check if a directory
+                if dentry in (".", "..") or not dentries[dentry]["file_type"] == 2:  # makes sure it's not recursive and checks if a directory
                     continue
 
-                inode_dict, _ = self.inode_table(self.calc_inode_pos(dentries[dentry]["inode"]))
-                subdentries = self.dir_entries(self.read_file(self.get_block_ids(inode_dict)))
+                inode_dict, _ = self._inode_table(self._calc_inode_pos(dentries[dentry]["inode"]))
+                subdentries = self.dir_entries(self.read_file(self._get_block_ids(inode_dict)))
 
-                file_entry = self.find_file_in_dir(filename, subdentries)
+                file_entry = self._find_file_in_dir(filename, subdentries)
                 if file_entry:
                     return file_entry
 
             return None
 
-    def calc_inode_pos(self, inode_num):
+    def _calc_inode_pos(self, inode_num):
         """Calculate the byte position of an inode from its index"""
         blk_group_num = (inode_num - 1) // self.sb_dict['s_inodes_per_group']
         blk_group = self.blk_groups[blk_group_num]
@@ -122,25 +124,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return self.part_offset + self.blocksize * blk_group['bg_inode_table'] + self.sb_dict['s_inode_size'] * i_index_in_group
 
-    def extract_file(self, filename, extract_path, progress):
-        """Extracts the file from the image"""
-        self.progress = progress
-
-        self.progress.update(2, localize(30060))
-        self.part_offset = self.chromeos_offset()
-        self.sb_dict = self.superblock()
-        self.blk_groups = self.block_groups()
-
-        self.progress.update(5, localize(30061))
-        dir_dict = self.find_file(filename)
-
-        self.progress.update(32, localize(30062))
-        inode_pos = self.calc_inode_pos(dir_dict["inode"])
-        inode_dict, _ = self.inode_table(inode_pos)
-
-        return self.write_file(inode_dict, os.path.join(extract_path, filename))
-
-    def superblock(self):
+    def _superblock(self):
         """Get relevant info from the superblock, assert it's an ext2 fs"""
         names = ('s_inodes_count', 's_blocks_count', 's_r_blocks_count', 's_free_blocks_count', 's_free_inodes_count', 's_first_data_block',
                  's_log_block_size', 's_log_frag_size', 's_blocks_per_group', 's_frags_per_group', 's_inodes_per_group', 's_mtime', 's_wtime',
@@ -169,7 +153,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return sb_dict
 
-    def block_group(self):
+    def _block_group(self):
         """Get info about a block group. Expects stream to be at the right position already."""
         names = ('bg_block_bitmap', 'bg_inode_bitmap', 'bg_inode_table', 'bg_free_blocks_count', 'bg_free_inodes_count', 'bg_used_dirs_count', 'bg_pad')
         fmt = '<3I4H12x'
@@ -182,7 +166,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return blk_dict
 
-    def block_groups(self):
+    def _block_groups(self):
         """Get info about all block groups"""
         if self.blocksize == 1024:
             self.seek_stream(self.part_offset + 2 * self.blocksize)
@@ -190,14 +174,14 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
             self.seek_stream(self.part_offset + self.blocksize)
 
         blk_groups = []
-        for i in range(self.sb_dict['block_groups_count']):  # pylint: disable=unused-variable
-            blk_group = self.block_group()
+        for _ in range(self.sb_dict['block_groups_count']):
+            blk_group = self._block_group()
             blk_groups.append(blk_group)
 
         return blk_groups
 
-    def inode_table(self, inode_pos):
-        """Reads and returns an inode table and inode size"""
+    def _inode_table(self, inode_pos):
+        """Reads and returns an inode table entry and its size"""
         names = ('i_mode', 'i_uid', 'i_size', 'i_atime', 'i_ctime', 'i_mtime', 'i_dtime', 'i_gid', 'i_links_count', 'i_blocks', 'i_flags',
                  'i_osd1', 'i_block0', 'i_block1', 'i_block2', 'i_block3', 'i_block4', 'i_block5', 'i_block6', 'i_block7', 'i_block8',
                  'i_block9', 'i_block10', 'i_block11', 'i_blocki', 'i_blockii', 'i_blockiii', 'i_generation', 'i_file_acl', 'i_dir_acl', 'i_faddr')
@@ -243,7 +227,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return dirs
 
-    def iblock_ids(self, blk_id, ids_to_read):
+    def _iblock_ids(self, blk_id, ids_to_read):
         """Reads the block indices/IDs from an indirect block"""
         seek_pos = self.part_offset + self.blocksize * blk_id
         self.seek_stream(seek_pos)
@@ -253,7 +237,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return ids, ids_to_read
 
-    def iiblock_ids(self, blk_id, ids_to_read):
+    def _iiblock_ids(self, blk_id, ids_to_read):
         """Reads the block indices/IDs from a doubly-indirect block"""
         seek_pos = self.part_offset + self.blocksize * blk_id
         self.seek_stream(seek_pos)
@@ -264,7 +248,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
         for iid in iids:
             if ids_to_read <= 0:
                 break
-            ind_block_ids, ids_to_read = self.iblock_ids(iid, ids_to_read)
+            ind_block_ids, ids_to_read = self._iblock_ids(iid, ids_to_read)
             ids += ind_block_ids
 
         return ids, ids_to_read
@@ -287,7 +271,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
             self.bstream[0].close()
             self.bstream[1] = 0
-            self.bstream = self.get_bstream(self.imgpath)
+            self.bstream = self._get_bstream(self.imgpath)
 
             while seek_pos - self.bstream[1] > chunksize:
                 self.read_stream(chunksize)
@@ -301,27 +285,28 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         return self.bstream[0].read(num_of_bytes)
 
-    def get_block_ids(self, inode_dict):
+    def _get_block_ids(self, inode_dict):
         """Get all block indices/IDs of an inode"""
         ids_to_read = inode_dict['blocks']
         block_ids = [inode_dict['i_block' + str(i)] for i in range(12)]
         ids_to_read -= 12
 
         if not inode_dict['i_blocki'] == 0:
-            iblocks, ids_to_read = self.iblock_ids(inode_dict['i_blocki'], ids_to_read)
+            iblocks, ids_to_read = self._iblock_ids(inode_dict['i_blocki'], ids_to_read)
             block_ids += iblocks
         if not inode_dict['i_blockii'] == 0:
-            iiblocks, ids_to_read = self.iiblock_ids(inode_dict['i_blockii'], ids_to_read)
+            iiblocks, ids_to_read = self._iiblock_ids(inode_dict['i_blockii'], ids_to_read)
             block_ids += iiblocks
 
         return block_ids[:inode_dict['blocks']]
 
-    def read_file_dict(self, block_ids):
+    def _read_file_dict(self, block_ids):
         """Reads blocks specified by IDs into a dict with IDs as key"""
         block_dict = {}
         for block_id in block_ids:
-            percent = int(35 + 60 * block_ids.index(block_id) / len(block_ids))
-            self.progress.update(percent, localize(30048))
+            if self.progress:
+                percent = int(35 + 60 * block_ids.index(block_id) / len(block_ids))
+                self.progress.update(percent, localize(30048))
             seek_pos = self.part_offset + self.blocksize * block_id
             self.seek_stream(seek_pos)
             block_dict[block_id] = self.read_stream(self.blocksize)
@@ -331,7 +316,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
     def read_file(self, block_ids):
         """Reads a file (can be directory or anything ext2 considers a file) as one binary string"""
         block_ids_sorted = sorted(block_ids)
-        block_dict = self.read_file_dict(block_ids_sorted)
+        block_dict = self._read_file_dict(block_ids_sorted)
 
         file_str = b''
         for block_id in block_ids:
@@ -340,7 +325,7 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
         return file_str
 
     @staticmethod
-    def write_file_chunk(opened_file, chunk, bytes_to_write):
+    def _write_file_chunk(opened_file, chunk, bytes_to_write):
         """Writes bytes to file in chunks"""
         if len(chunk) > bytes_to_write:
             opened_file.write(chunk[:bytes_to_write])
@@ -352,11 +337,11 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
     def write_file(self, inode_dict, filepath):
         """Writes file specified by its inode to filepath"""
         bytes_to_write = inode_dict['i_size']
-        block_ids = self.get_block_ids(inode_dict)
+        block_ids = self._get_block_ids(inode_dict)
 
         block_ids_sorted = block_ids[:]
         block_ids_sorted.sort()
-        block_dict = self.read_file_dict(block_ids_sorted)  # Maybe replace with read_file in the future, but may use more memory.
+        block_dict = self._read_file_dict(block_ids_sorted)  # Maybe replace with read_file in the future, but may use more memory.
 
         write_dir = os.path.join(os.path.dirname(filepath), '')
         if not exists(write_dir):
@@ -364,14 +349,14 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
 
         with open(compat_path(filepath), 'wb') as opened_file:
             for block_id in block_ids:
-                bytes_to_write = self.write_file_chunk(opened_file, block_dict[block_id], bytes_to_write)
+                bytes_to_write = self._write_file_chunk(opened_file, block_dict[block_id], bytes_to_write)
                 if bytes_to_write == 0:
                     return True
 
         return False
 
     @staticmethod
-    def get_bstream(imgpath):
+    def _get_bstream(imgpath):
         """Get a bytestream of the image"""
         if imgpath.endswith('.zip'):
             bstream = ZipFile(compat_path(imgpath), 'r').open(os.path.basename(imgpath).strip('.zip'), 'r')  # pylint: disable=consider-using-with
@@ -379,3 +364,17 @@ class ChromeOSImage:  # pylint: disable=too-many-public-methods
             bstream = open(compat_path(imgpath), 'rb')  # pylint: disable=consider-using-with
 
         return [bstream, 0]
+
+    def extract_file(self, filename, extract_path):
+        """Extracts the file from the image"""
+
+        if self.progress:
+            self.progress.update(5, localize(30061))
+        dir_dict = self.find_file(filename)
+
+        if self.progress:
+            self.progress.update(32, localize(30062))
+        inode_pos = self._calc_inode_pos(dir_dict["inode"])
+        inode_dict, _ = self._inode_table(inode_pos)
+
+        return self.write_file(inode_dict, os.path.join(extract_path, filename))

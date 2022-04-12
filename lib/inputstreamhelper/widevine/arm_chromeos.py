@@ -13,6 +13,10 @@ from .. import config
 from ..unicodes import compat_path
 
 
+class ChromeOSError(Exception):
+    """Custom Exception if something fails during extraction from ChromeOSImage"""
+
+
 class ChromeOSImage:
     """
     The main class handling a Chrome OS image
@@ -54,8 +58,7 @@ class ChromeOSImage:
         self.seek_stream(entries_start * lba_size)
 
         if not calcsize(part_format) == entry_size:
-            log(4, 'Partition table entries are not 128 bytes long')
-            return 0
+            raise ChromeOSError('Partition table entries are not 128 bytes long')
 
         for _ in range(1, entries_num + 1):
             # Entry: type_guid, unique_guid, first_lba, last_lba, attr_flags, part_name
@@ -66,8 +69,7 @@ class ChromeOSImage:
                 break
 
         if not offset:
-            log(4, 'Failed to calculate losetup offset.')
-            return 0
+            raise ChromeOSError('Failed to calculate losetup offset.')
 
         return offset
 
@@ -79,18 +81,28 @@ class ChromeOSImage:
         Assumes the path is roughly correct, else it might take long.
         """
         root_inode_pos = self._calc_inode_pos(2)
-        root_inode_dict, _ = self._inode_table(root_inode_pos)
+        root_inode_dict = self._inode_table(root_inode_pos)
         root_dir_entries = self.dir_entries(self.read_file(self._get_block_ids(root_inode_dict)))
 
         dentries = root_dir_entries
         try:
             for dir_name in path_to_file:
-                inode_dict, _ = self._inode_table(self._calc_inode_pos(dentries[dir_name]["inode"]))
+                inode_dict = self._inode_table(self._calc_inode_pos(dentries[dir_name]["inode"]))
                 dentries = self.dir_entries(self.read_file(self._get_block_ids(inode_dict)))
 
-            return self._find_file_in_dir(filename, dentries)
         except KeyError:
+            log(0, "Path to {filename} does not exist: {path}".format(filename=filename, path=path_to_file))
             return self.find_file(filename, path_to_file[:-1])
+
+        file_entry = self._find_file_in_dir(filename, dentries)
+        if file_entry:
+            return file_entry
+
+        log(0, "{filename} not found in path: {path}".format(filename=filename, path=path_to_file))
+        if path_to_file:
+            return self.find_file(filename, path_to_file[:-1])
+
+        return None
 
     def _find_file_in_dir(self, filename, dentries):
         """
@@ -107,7 +119,7 @@ class ChromeOSImage:
                 if dentry in (".", "..") or not dentries[dentry]["file_type"] == 2:  # makes sure it's not recursive and checks if a directory
                     continue
 
-                inode_dict, _ = self._inode_table(self._calc_inode_pos(dentries[dentry]["inode"]))
+                inode_dict = self._inode_table(self._calc_inode_pos(dentries[dentry]["inode"]))
                 subdentries = self.dir_entries(self.read_file(self._get_block_ids(inode_dict)))
 
                 file_entry = self._find_file_in_dir(filename, subdentries)
@@ -140,13 +152,16 @@ class ChromeOSImage:
         sb_dict = dict(list(zip(names, unpack(fmt, pack))))
 
         sb_dict['s_magic'] = hex(sb_dict['s_magic'])
-        assert sb_dict['s_magic'] == '0xef53'  # assuming/checking this is an ext2 fs
+        if not sb_dict['s_magic'] == '0xef53':  # assuming/checking this is an ext2 fs
+            raise ChromeOSError("Filesystem is not ext2!")
 
         block_groups_count1 = sb_dict['s_blocks_count'] / sb_dict['s_blocks_per_group']
         block_groups_count1 = int(block_groups_count1) if float(int(block_groups_count1)) == block_groups_count1 else int(block_groups_count1) + 1
         block_groups_count2 = sb_dict['s_inodes_count'] / sb_dict['s_inodes_per_group']
         block_groups_count2 = int(block_groups_count2) if float(int(block_groups_count2)) == block_groups_count2 else int(block_groups_count2) + 1
-        assert block_groups_count1 == block_groups_count2
+        if block_groups_count1 != block_groups_count2:
+            raise ChromeOSError("Calculated 2 different numbers of block groups!")
+
         sb_dict['block_groups_count'] = block_groups_count1
 
         self.blocksize = 1024 << sb_dict['s_log_block_size']
@@ -199,8 +214,8 @@ class ChromeOSImage:
         blocks = inode_dict['i_size'] / self.blocksize
         inode_dict['blocks'] = int(blocks) if float(int(blocks)) == blocks else int(blocks) + 1
 
-        self.read_stream(inode_size - fmt_len)
-        return inode_dict, inode_size
+        self.read_stream(inode_size - fmt_len)  # move to end of entry
+        return inode_dict
 
     @staticmethod
     def dir_entry(chunk):
@@ -218,7 +233,7 @@ class ChromeOSImage:
         dirs = {}
         while dir_file:
             dir_entry = self.dir_entry(dir_file)
-            dir_file = dir_file[dir_entry["rec_len"]:]  # Maybe in the future check for IndexError, just to be safe
+            dir_file = dir_file[dir_entry["rec_len"]:]
             if dir_entry['inode'] == 0:
                 continue
 
@@ -287,6 +302,9 @@ class ChromeOSImage:
 
     def _get_block_ids(self, inode_dict):
         """Get all block indices/IDs of an inode"""
+        if not inode_dict['i_blockiii'] == 0:
+            raise ChromeOSError("Triply indirect blocks detected, but not implemented!")
+
         ids_to_read = inode_dict['blocks']
         block_ids = [inode_dict['i_block' + str(i)] for i in range(12)]
         ids_to_read -= 12
@@ -324,36 +342,18 @@ class ChromeOSImage:
 
         return file_str
 
-    @staticmethod
-    def _write_file_chunk(opened_file, chunk, bytes_to_write):
-        """Writes bytes to file in chunks"""
-        if len(chunk) > bytes_to_write:
-            opened_file.write(chunk[:bytes_to_write])
-            return 0
-
-        opened_file.write(chunk)
-        return bytes_to_write - len(chunk)
-
     def write_file(self, inode_dict, filepath):
         """Writes file specified by its inode to filepath"""
         bytes_to_write = inode_dict['i_size']
         block_ids = self._get_block_ids(inode_dict)
-
-        block_ids_sorted = block_ids[:]
-        block_ids_sorted.sort()
-        block_dict = self._read_file_dict(block_ids_sorted)  # Maybe replace with read_file in the future, but may use more memory.
+        bin_file = self.read_file(block_ids)[:bytes_to_write]
 
         write_dir = os.path.join(os.path.dirname(filepath), '')
         if not exists(write_dir):
             mkdirs(write_dir)
 
         with open(compat_path(filepath), 'wb') as opened_file:
-            for block_id in block_ids:
-                bytes_to_write = self._write_file_chunk(opened_file, block_dict[block_id], bytes_to_write)
-                if bytes_to_write == 0:
-                    return True
-
-        return False
+            opened_file.write(bin_file)
 
     @staticmethod
     def _get_bstream(imgpath):
@@ -368,13 +368,20 @@ class ChromeOSImage:
     def extract_file(self, filename, extract_path):
         """Extracts the file from the image"""
 
-        if self.progress:
-            self.progress.update(5, localize(30061))
-        dir_dict = self.find_file(filename)
+        try:
+            if self.progress:
+                self.progress.update(5, localize(30061))
+            dir_dict = self.find_file(filename)
 
-        if self.progress:
-            self.progress.update(32, localize(30062))
-        inode_pos = self._calc_inode_pos(dir_dict["inode"])
-        inode_dict, _ = self._inode_table(inode_pos)
+            if self.progress:
+                self.progress.update(32, localize(30062))
+            inode_pos = self._calc_inode_pos(dir_dict["inode"])
+            inode_dict = self._inode_table(inode_pos)
 
-        return self.write_file(inode_dict, os.path.join(extract_path, filename))
+            self.write_file(inode_dict, os.path.join(extract_path, filename))
+
+            return True
+
+        except ChromeOSError as error:
+            log(4, "Extracting {filename} failed with {error}!".format(filename=filename, error=error))
+            return False

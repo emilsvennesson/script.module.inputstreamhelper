@@ -137,10 +137,9 @@ def extract_widevine(backup_path, image_path, image_version):
     progress = progress_dialog()
     progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
 
-    extracted = ChromeOSImage(image_path).extract_file(
+    extracted = ChromeOSImage(image_path, progress=progress).extract_file(
         filename=config.WIDEVINE_CDM_FILENAME[system_os()],
-        extract_path=os.path.join(backup_path, image_version),
-        progress=progress)
+        extract_path=os.path.join(backup_path, image_version))
 
     if not extracted:
         log(4, 'Extracting widevine from the zip failed!')

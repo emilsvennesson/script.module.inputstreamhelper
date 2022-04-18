@@ -104,6 +104,7 @@ CHROMEOS_RECOVERY_ARM_HWIDS = [
     'KAPPA-EWFK',
     'KATSU',
     'KENZO-IGRW',
+    'KEVIN',
     'KODAMA',
     'KRANE-ZDKS',
     'LAZOR',

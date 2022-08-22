@@ -277,6 +277,10 @@ msgctxt "#30070"
 msgid "Something seems wrong with the downloaded {filename}. Shall we try to continue anyway?"
 msgstr ""
 
+msgctxt "#30071"
+msgid "Could not find the Widevine CDM by a quick scan. Now doing a proper search, but this might take very long..."
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

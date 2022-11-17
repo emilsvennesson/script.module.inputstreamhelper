@@ -10,7 +10,7 @@ from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS
 def get_devices():
     """Get Chrome OS devices as json object"""
     url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
     html = response.text.split('<table>')[3].split('</table>')[0]
     html = '<table>' + html + '</table>'
@@ -45,7 +45,7 @@ def get_arm_devices():
 def get_serves():
     """Get Chrome OS serving updates as json object"""
     url = 'https://chromiumdash.appspot.com/cros/fetch_serving_builds?deviceCategory=Chrome%20OS'
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
     serves = response.json().get('builds')
     return serves
@@ -54,7 +54,7 @@ def get_serves():
 def get_recoveries():
     """Get Chrome OS recovery items as json object"""
     url = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.json'
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     response.raise_for_status()
     recoveries = response.json()
     return recoveries

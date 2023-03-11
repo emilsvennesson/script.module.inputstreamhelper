@@ -110,7 +110,7 @@ class Helper:
 
     def _has_inputstream(self):
         """Checks if selected InputStream add-on is installed."""
-        data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon))
+        data = jsonrpc(method='Addons.GetAddonDetails', params={'addonid': self.inputstream_addon})
         if 'error' in data:
             log(3, '{addon} is not installed.', addon=self.inputstream_addon)
             return False
@@ -120,7 +120,7 @@ class Helper:
 
     def _inputstream_enabled(self):
         """Returns whether selected InputStream add-on is enabled.."""
-        data = jsonrpc(method='Addons.GetAddonDetails', params=dict(addonid=self.inputstream_addon, properties=['enabled']))
+        data = jsonrpc(method='Addons.GetAddonDetails', params={'addonid': self.inputstream_addon, 'properties': ['enabled']})
         if data.get('result', {}).get('addon', {}).get('enabled'):
             log(0, '{addon} {version} is enabled.', addon=self.inputstream_addon, version=self._inputstream_version())
             return True
@@ -130,7 +130,7 @@ class Helper:
 
     def _enable_inputstream(self):
         """Enables selected InputStream add-on."""
-        data = jsonrpc(method='Addons.SetAddonEnabled', params=dict(addonid=self.inputstream_addon, enabled=True))
+        data = jsonrpc(method='Addons.SetAddonEnabled', params={'addonid': self.inputstream_addon, 'enabled': True})
         if 'error' in data:
             return False
         return True
@@ -232,7 +232,7 @@ class Helper:
     @cleanup_decorator
     def install_widevine_from(self):
         """Install Widevine from a given URL or file."""
-        if yesno_dialog(None, localize(30066)): # download resource with widevine from url? no means specify local
+        if yesno_dialog(None, localize(30066)):  # download resource with widevine from url? no means specify local
             result = dl_extract_widevine(get_setting("image_url"), backup_path())
             if not result:
                 return result
@@ -254,7 +254,6 @@ class Helper:
                 return True
 
         return False
-
 
     @staticmethod
     def remove_widevine():

@@ -7,6 +7,14 @@ import requests
 from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS
 
 
+class OutdatedException(Exception):
+    """Is thrown when InputStreamHelper configuration should be updated."""
+
+    def __init__(self, message):
+        self.message = message
+        super(OutdatedException, self).__init__(self.message)
+
+
 def get_devices():
     """Get Chrome OS devices as json object"""
     url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
@@ -107,7 +115,7 @@ def check_hwids():
         if item not in CHROMEOS_RECOVERY_ARM_HWIDS:
             messages.append('{} is missing, please add it to inputstreamhelper config'.format(item))
     if messages:
-        raise Exception(messages)
+        raise OutdatedException(messages)
 
     smallest = get_smallest()
     hwid = smallest.get('hwidmatch').strip('^.*-').split(' ')[0]

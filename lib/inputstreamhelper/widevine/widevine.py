@@ -180,7 +180,7 @@ def latest_available_widevine_from_repo():
         cdm_url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
         http_status = http_head(cdm_url)
         if http_status == 200:
-            available_cdms.append(dict(version=cdm_version, url=cdm_url))
+            available_cdms.append({'version': cdm_version, 'url': cdm_url})
     return available_cdms[-1]
 
 

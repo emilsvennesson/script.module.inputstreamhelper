@@ -231,13 +231,13 @@ def set_setting_bool(key, value):
 
 def get_global_setting(key):
     """Get a Kodi setting"""
-    result = jsonrpc(method='Settings.GetSettingValue', params=dict(setting=key))
+    result = jsonrpc(method='Settings.GetSettingValue', params={'setting': key})
     return result.get('result', {}).get('value')
 
 
 def get_current_window_id():
     """Get current window id"""
-    result = jsonrpc(method='GUI.GetProperties', params=dict(properties=['currentwindow']))
+    result = jsonrpc(method='GUI.GetProperties', params={'properties': ['currentwindow']})
     if result.get('error'):
         return None
     return result.get('result', {}).get('currentwindow').get('id')
@@ -276,13 +276,13 @@ def get_proxies():
 
     proxy_types = ['http', 'socks4', 'socks4a', 'socks5', 'socks5h']
 
-    proxy = dict(
-        scheme=proxy_types[httpproxytype] if 0 <= httpproxytype < 5 else 'http',
-        server=get_global_setting('network.httpproxyserver'),
-        port=get_global_setting('network.httpproxyport'),
-        username=get_global_setting('network.httpproxyusername'),
-        password=get_global_setting('network.httpproxypassword'),
-    )
+    proxy = {
+        'scheme': proxy_types[httpproxytype] if 0 <= httpproxytype < 5 else 'http',
+        'server': get_global_setting('network.httpproxyserver'),
+        'port': get_global_setting('network.httpproxyport'),
+        'username': get_global_setting('network.httpproxyusername'),
+        'password': get_global_setting('network.httpproxypassword'),
+    }
 
     if proxy.get('username') and proxy.get('password') and proxy.get('server') and proxy.get('port'):
         proxy_address = '{scheme}://{username}:{password}@{server}:{port}'.format(**proxy)
@@ -295,7 +295,7 @@ def get_proxies():
     else:
         return None
 
-    return dict(http=proxy_address, https=proxy_address)
+    return {'http': proxy_address, 'https': proxy_address}
 
 
 def log(level=0, message='', **kwargs):

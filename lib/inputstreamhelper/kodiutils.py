@@ -80,9 +80,9 @@ def translate_path(path):
     return to_unicode(translatePath(from_unicode(path)))
 
 
-def get_addon_info(key):
+def get_addon_info(key, addon=ADDON):
     """Return addon information"""
-    return to_unicode(ADDON.getAddonInfo(key))
+    return to_unicode(addon.getAddonInfo(key))
 
 
 def addon_id():
@@ -95,9 +95,14 @@ def addon_profile():
     return translate_path(get_addon_info('profile'))
 
 
-def addon_version():
+def addon_version(addon_name=None):
     """Cache and return add-on version"""
-    return get_addon_info('version')
+    if not addon_name:
+        addon = ADDON
+    else:
+        addon = xbmcaddon.Addon(addon_name)
+
+    return get_addon_info('version', addon)
 
 
 def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):  # pylint: disable=invalid-name,redefined-builtin

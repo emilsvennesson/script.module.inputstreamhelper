@@ -4,7 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from xml.etree import ElementTree as ET
 import requests
-from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS
+from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS, CHROMEOS_RECOVERY_ARM64_HWIDS
 
 
 class OutdatedException(Exception):
@@ -108,11 +108,11 @@ def check_hwids():
         if hwid not in hwids:
             hwids.append(hwid)
 
-    for item in CHROMEOS_RECOVERY_ARM_HWIDS:
+    for item in CHROMEOS_RECOVERY_ARM_HWIDS + CHROMEOS_RECOVERY_ARM64_HWIDS:
         if item not in hwids:
             messages.append('{} is end-of-life, consider removing it from inputstreamhelper config'.format(item))
     for item in hwids:
-        if item not in CHROMEOS_RECOVERY_ARM_HWIDS:
+        if item not in CHROMEOS_RECOVERY_ARM_HWIDS + CHROMEOS_RECOVERY_ARM64_HWIDS:
             messages.append('{} is missing, please add it to inputstreamhelper config'.format(item))
     if messages:
         raise OutdatedException(messages)

@@ -8,7 +8,7 @@ import json
 
 from .. import config
 from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, store, system_os, update_temp_path
+from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, store, system_os, update_temp_path, userspace64
 from .arm_chromeos import ChromeOSImage
 
 
@@ -16,8 +16,12 @@ def select_best_chromeos_image(devices):
     """Finds the newest and smallest of the ChromeOS images given"""
     log(0, 'Find best ARM image to use from the Chrome OS recovery.json')
 
-    arm_hwids = [h for arm_hwid in config.CHROMEOS_RECOVERY_ARM_HWIDS
-                   for h in ['^{} '.format(arm_hwid), '^{}-.*'.format(arm_hwid), '^{}.*'.format(arm_hwid)]]
+    if userspace64():
+        arm_hwids = config.CHROMEOS_RECOVERY_ARM64_HWIDS
+    else:
+        arm_hwids = config.CHROMEOS_RECOVERY_ARM_HWIDS
+
+    arm_hwids = [h for arm_hwid in arm_hwids for h in ['^{} '.format(arm_hwid), '^{}-.*'.format(arm_hwid), '^{}.*'.format(arm_hwid)]]
     best = None
     for device in devices:
         # Select ARM hardware only

@@ -7,6 +7,8 @@ import os
 from time import time
 from socket import timeout
 from ssl import SSLError
+import struct
+
 
 try:  # Python 3
     from urllib.error import HTTPError, URLError
@@ -309,6 +311,11 @@ def arch():
 
     arch.cached = sys_arch
     return sys_arch
+
+
+def userspace64():
+    """To check if userspace is 64bit or 32bit"""
+    return struct.calcsize('P') * 8 == 64
 
 
 def hardlink(src, dest):

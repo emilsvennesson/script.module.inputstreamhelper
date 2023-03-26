@@ -16,11 +16,13 @@ def select_best_chromeos_image(devices):
     """Finds the newest and smallest of the ChromeOS images given"""
     log(0, 'Find best ARM image to use from the Chrome OS recovery.json')
 
+    arm_hwids = [h for arm_hwid in config.CHROMEOS_RECOVERY_ARM_HWIDS
+                   for h in ['^{} '.format(arm_hwid), '^{}-.*'.format(arm_hwid), '^{}.*'.format(arm_hwid)]]
     best = None
     for device in devices:
         # Select ARM hardware only
-        for arm_hwid in config.CHROMEOS_RECOVERY_ARM_HWIDS:
-            if '^{0} '.format(arm_hwid) in device['hwidmatch']:
+        for arm_hwid in arm_hwids:
+            if arm_hwid in device['hwidmatch']:
                 hwid = arm_hwid
                 break  # We found an ARM device, rejoice !
         else:

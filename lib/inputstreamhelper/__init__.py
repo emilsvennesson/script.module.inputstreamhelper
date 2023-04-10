@@ -9,7 +9,7 @@ from . import config
 from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
                         kodi_to_ascii, kodi_version, listdir, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
-from .utils import arch, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip
+from .utils import arch, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine, extract_widevine, install_widevine_arm
 from .widevine.widevine import (backup_path, cdm_from_repo, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_available_widevine_from_repo,
                                 latest_widevine_version, load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
@@ -135,20 +135,24 @@ class Helper:
             return False
         return True
 
-    @staticmethod
-    def _supports_widevine():
+    def _supports_widevine(self):
         """Checks if Widevine is supported on the architecture/operating system/Kodi version."""
         if arch() not in config.WIDEVINE_SUPPORTED_ARCHS:
             log(4, 'Unsupported Widevine architecture found: {arch}', arch=arch())
             ok_dialog(localize(30004), localize(30007, arch=arch()))  # Widevine not available on this architecture
             return False
 
-        # Widevine for ARM64 is only natively supported on Android and Mac
-        if arch() == 'arm64' and system_os() not in ['Android', 'Darwin']:
-            import struct
-            if struct.calcsize('P') * 8 == 64:
-                log(4, 'Unsupported 64-bit userspace found. User needs 32-bit userspace on {arch}', arch=arch())
-                ok_dialog(localize(30004), localize(30039))  # Widevine not available on ARM64
+        if arch() == 'arm64' and system_os() not in ['Android', 'Darwin'] and userspace64():
+            is_version = parse_version(addon_version(self.inputstream_addon))
+            try:
+                compat_version = parse_version(config.MINIMUM_INPUTSTREAM_VERSION_ARM64[self.inputstream_addon])
+            except KeyError:
+                log(4, 'Minimum version of {addon} for 64bit support unknown. Continuing into the unknown...'.format(addon=self.inputstream_addon))
+                compat_version = parse_version("0.0.0")
+
+            if is_version < compat_version:
+                log(4, 'Unsupported 64bit userspace found. Needs 32bit or newer ISA (currently {v}) on {arch}', arch=arch(), v=is_version)
+                ok_dialog(localize(30004), localize(30068, addon=self.inputstream_addon, version=compat_version))  # Need newer ISA or 32bit userspace
                 return False
 
         if system_os() not in config.WIDEVINE_SUPPORTED_OS:

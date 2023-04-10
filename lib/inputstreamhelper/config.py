@@ -42,9 +42,10 @@ WIDEVINE_SUPPORTED_ARCHS = [
     'arm64'
 ]
 
-WIDEVINE_ARCH_MAP_X86 = {
+WIDEVINE_ARCH_MAP_REPO = {
     'x86_64': 'x64',
-    'x86': 'ia32'
+    'x86': 'ia32',
+    'arm64': 'arm64'
 }
 
 WIDEVINE_OS_MAP = {

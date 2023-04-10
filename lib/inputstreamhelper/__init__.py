@@ -11,7 +11,7 @@ from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine, extract_widevine, install_widevine_arm
-from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_available_widevine_from_repo,
+from .widevine.widevine import (backup_path, cdm_from_repo, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_available_widevine_from_repo,
                                 latest_widevine_version, load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
 from .unicodes import compat_path
 
@@ -142,7 +142,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30007, arch=arch()))  # Widevine not available on this architecture
             return False
 
-        if arch() == 'arm64' and system_os() != 'Android' and userspace64():
+        if arch() == 'arm64' and system_os() not in ['Android', 'Darwin'] and userspace64():
             is_version = parse_version(addon_version(self.inputstream_addon))
             try:
                 compat_version = parse_version(config.MINIMUM_INPUTSTREAM_VERSION_ARM64[self.inputstream_addon])
@@ -173,8 +173,8 @@ class Helper:
         return True
 
     @staticmethod
-    def _install_widevine_x86(bpath):
-        """Install Widevine CDM on x86 based architectures."""
+    def _install_widevine_from_repo(bpath):
+        """Install Widevine CDM from Google's library CDM repository"""
         cdm = latest_available_widevine_from_repo()
         cdm_version = cdm.get('version')
 
@@ -219,8 +219,8 @@ class Helper:
         if not widevine_eula():
             return False
 
-        if 'x86' in arch():
-            result = self._install_widevine_x86(backup_path())
+        if cdm_from_repo():
+            result = self._install_widevine_from_repo(backup_path())
         else:
             result = install_widevine_arm(backup_path())
         if not result:
@@ -307,7 +307,7 @@ class Helper:
         if not wv_config:
             log(3, 'Widevine config missing. Could not determine current version, forcing update.')
             current_version = '0'
-        elif 'x86' in arch():
+        elif cdm_from_repo():
             component = 'Widevine CDM'
             current_version = wv_config['version']
             latest_version = latest_available_widevine_from_repo().get('version')
@@ -343,9 +343,9 @@ class Helper:
             ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
             return self.install_widevine()
 
-        if 'x86' in arch():  # check that widevine arch matches system arch
+        if cdm_from_repo():  # check that widevine arch matches system arch
             wv_config = load_widevine_config()
-            if config.WIDEVINE_ARCH_MAP_X86[arch()] != wv_config['arch']:
+            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config['arch']:
                 log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()
@@ -454,7 +454,7 @@ class Helper:
             else:
                 wv_updated = 'Never'
             text += localize(30821, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
-            if arch() in ('arm', 'arm64'):  # Chrome OS version
+            if arch() == 'arm' or arch() == 'arm64' and system_os() != 'Darwin':  # Chrome OS version
                 wv_cfg = load_widevine_config()
                 if wv_cfg:
                     text += localize(30822, name=wv_cfg['hwidmatch'].split()[0].lstrip('^'), version=wv_cfg['version']) + '\n'
@@ -485,7 +485,7 @@ class Helper:
         installed_version = load_widevine_config()['version']
         del versions[versions.index(installed_version)]
 
-        if 'x86' in arch():
+        if cdm_from_repo():
             show_versions = versions
         else:
             show_versions = []

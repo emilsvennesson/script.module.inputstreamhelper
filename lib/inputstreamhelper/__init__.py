@@ -9,10 +9,10 @@ from . import config
 from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
                         kodi_to_ascii, kodi_version, listdir, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
-from .utils import arch, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
+from .utils import arch, download_path, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine, extract_widevine, install_widevine_arm
-from .widevine.widevine import (backup_path, cdm_from_repo, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_available_widevine_from_repo,
-                                latest_widevine_version, load_widevine_config, missing_widevine_libs, widevine_config_path, widevine_eula, widevinecdm_path)
+from .widevine.widevine import (backup_path, cdm_from_repo, choose_widevine_from_repo, has_widevinecdm, ia_cdm_path, install_cdm_from_backup, latest_widevine_available_from_repo,
+                                latest_widevine_version, load_widevine_config, missing_widevine_libs, widevines_available_from_repo, widevine_config_path, widevine_eula, widevinecdm_path)
 from .unicodes import compat_path
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -173,12 +173,15 @@ class Helper:
         return True
 
     @staticmethod
-    def _install_widevine_from_repo(bpath):
+    def _install_widevine_from_repo(bpath, choose_version=False):
         """Install Widevine CDM from Google's library CDM repository"""
-        cdm = latest_available_widevine_from_repo()
+        if choose_version:
+            cdm = choose_widevine_from_repo()
+        else:
+            cdm = latest_widevine_available_from_repo()
         cdm_version = cdm.get('version')
 
-        if not store('download_path'):
+        if not exists(download_path(cdm.get('url'))):
             downloaded = http_download(cdm.get('url'))
         else:
             downloaded = True
@@ -211,7 +214,7 @@ class Helper:
         return False
 
     @cleanup_decorator
-    def install_widevine(self):
+    def install_widevine(self, choose_version=False):
         """Wrapper function that calls Widevine installer method depending on architecture"""
         if not self._supports_widevine():
             return False
@@ -220,8 +223,10 @@ class Helper:
             return False
 
         if cdm_from_repo():
-            result = self._install_widevine_from_repo(backup_path())
+            result = self._install_widevine_from_repo(backup_path(), choose_version=choose_version)
         else:
+            if choose_version:
+                log(1, "Choosing a version to install is only implemented if the lib is found in googles repo.")
             result = install_widevine_arm(backup_path())
         if not result:
             return result
@@ -310,7 +315,7 @@ class Helper:
         elif cdm_from_repo():
             component = 'Widevine CDM'
             current_version = wv_config['version']
-            latest_version = latest_available_widevine_from_repo().get('version')
+            latest_version = latest_widevine_available_from_repo().get('version')
         else:
             component = 'Chrome OS'
             current_version = wv_config['version']

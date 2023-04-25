@@ -137,7 +137,7 @@ def select_dialog(heading='', opt_list=None, autoclose=0, preselect=-1, useDetai
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
-    return Dialog().select(heading, opt_list, autoclose=autoclose, preselect=preselect, useDetails=useDetails)
+    return Dialog().select(heading, [str(opt) for opt in opt_list], autoclose=autoclose, preselect=preselect, useDetails=useDetails)
 
 
 def textviewer(heading='', text='', usemono=False):

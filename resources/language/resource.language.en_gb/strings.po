@@ -265,6 +265,10 @@ msgctxt "#30068"
 msgid "On ARM64 with 64bit userspace, a newer version of {addon} is needed to use [B]Widevine CDM[/B] natively. Please either switch to a 32-bit userspace or install {addon} in version {version} or later."
 msgstr ""
 
+msgctxt "#30069"
+msgid "Choose which version to install"
+msgstr ""
+
 
 ### INFORMATION DIALOG
 msgctxt "#30800"

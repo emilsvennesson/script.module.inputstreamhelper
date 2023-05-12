@@ -73,7 +73,28 @@ class ChromeOSImage:
 
         return offset
 
-    def _find_file_naive(self, filename):
+    def _find_file_in_chunk(self, bfname, chunk):
+        """
+        Checks if the filename is found in the given chunk.
+        Then makes some plausibility checks, to see if it is in fact a proper dentry.
+
+        returns the dentry if found, else False.
+        """
+
+        if bfname in chunk:
+            i_index_pos = chunk.index(bfname) - 8  # the filename is the last element of the dentry, the elements before are 8 bytes total
+            file_entry = self.dir_entry(chunk[i_index_pos:i_index_pos + len(bfname) + 8])  # 8 because see above
+            if file_entry['inode'] < self.sb_dict['s_inodes_count'] and file_entry['name_len'] == len(bfname):
+                return file_entry
+
+            log(0, 'Found filename, but checks did not pass:')
+            log(0, 'inode number: {inode} < {count}, name_len: {name_len} == {len_fname}'.format(inode=file_entry['inode'],
+                                                                                                 count=self.sb_dict['s_inodes_count'],
+                                                                                                 name_len=file_entry['name_len'],
+                                                                                                 len_fname=len(bfname)))
+        return False
+
+    def _find_file_naive(self, fname):
         """
         Finds a file by basically searching for the filename as bytes in the bytestream.
         Searches through the whole image only once, making it fast, but may be unreliable at times.
@@ -81,26 +102,25 @@ class ChromeOSImage:
         Returns a directory entry.
         """
 
-        bin_filename = filename.encode('ascii')
+        fname_alt = fname + '#new'  # Sometimes the filename has "#new" at the end
+        bfname = fname.encode('ascii')
+        bfname_alt = fname_alt.encode('ascii')
         chunksize = 4 * 1024**2
         chunk1 = self.read_stream(chunksize)
         while True:
             chunk2 = self.read_stream(chunksize)
             if not chunk2:
-                raise ChromeOSError('File {filename} not found in the ChromeOS image'.format(filename=filename))
+                raise ChromeOSError('File {fname} not found in the ChromeOS image'.format(fname=fname))
 
             chunk = chunk1 + chunk2
-            if bin_filename in chunk:
-                i_index_pos = chunk.index(bin_filename) - 8
-                file_entry = self.dir_entry(chunk[i_index_pos:i_index_pos + len(filename) + 8])
-                if file_entry['inode'] < self.sb_dict['s_inodes_count'] and file_entry['name_len'] == len(filename):
-                    break
 
-                log(0, 'Found filename, but checks did not pass:')
-                log(0, 'inode number: {inode} < {count}, name_len: {name_len} == {len_filename}'.format(inode=file_entry['inode'],
-                                                                                                       count=self.sb_dict['s_inodes_count'],
-                                                                                                       name_len=file_entry['name_len'],
-                                                                                                       len_filename=len(filename)))
+            file_entry = self._find_file_in_chunk(bfname, chunk)
+            if file_entry:
+                break
+
+            file_entry = self._find_file_in_chunk(bfname_alt, chunk)
+            if file_entry:
+                break
 
             chunk1 = chunk2
 

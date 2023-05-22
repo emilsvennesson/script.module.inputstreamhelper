@@ -4,7 +4,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 from xml.etree import ElementTree as ET
 import requests
-from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_HWIDS, CHROMEOS_RECOVERY_ARM64_HWIDS
+from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_BNAMES, CHROMEOS_RECOVERY_ARM64_BNAMES, CHROMEOS_RECOVERY_URL
 
 
 class OutdatedException(Exception):
@@ -33,9 +33,8 @@ def get_devices():
             device[keys[num]] = None
             if value.text:
                 device[keys[num]] = value.text.strip()
-            elif value.find('a') is not None:
-                if value.find('a').text is not None:
-                    device[keys[num]] = value.find('a').text.strip()
+            elif value.find('a') is not None and value.find('a').text is not None:
+                device[keys[num]] = value.find('a').text.strip()
         devices.append(device)
     return devices
 
@@ -61,8 +60,7 @@ def get_serves():
 
 def get_recoveries():
     """Get Chrome OS recovery items as json object"""
-    url = 'https://dl.google.com/dl/edgedl/chromeos/recovery/recovery.json'
-    response = requests.get(url, timeout=10)
+    response = requests.get(CHROMEOS_RECOVERY_URL, timeout=10)
     response.raise_for_status()
     recoveries = response.json()
     return recoveries
@@ -98,33 +96,33 @@ def get_smallest():
     return smallest
 
 
-def check_hwids():
-    """Check if hardware id's in inputstreamhelper.config are up to date"""
+def check_boardnames():
+    """Check if boardnames in inputstreamhelper.config are up to date"""
     compatibles = get_compatibles()
-    hwids = []
+    bnames = []
     messages = []
     for compatible in compatibles:
-        hwid = compatible.get('hwidmatch').strip('^.*-').split(' ')[0]
-        if hwid not in hwids:
-            hwids.append(hwid)
+        bname = compatible.get('file').split('_')[2]
+        if bname not in bnames:
+            bnames.append(bname)
 
-    for item in CHROMEOS_RECOVERY_ARM_HWIDS + CHROMEOS_RECOVERY_ARM64_HWIDS:
-        if item not in hwids:
+    for item in CHROMEOS_RECOVERY_ARM_BNAMES + CHROMEOS_RECOVERY_ARM64_BNAMES:
+        if item not in bnames:
             messages.append('{} is end-of-life, consider removing it from inputstreamhelper config'.format(item))
-    for item in hwids:
-        if item not in CHROMEOS_RECOVERY_ARM_HWIDS + CHROMEOS_RECOVERY_ARM64_HWIDS:
+    for item in bnames:
+        if item not in CHROMEOS_RECOVERY_ARM_BNAMES + CHROMEOS_RECOVERY_ARM64_BNAMES:
             messages.append('{} is missing, please add it to inputstreamhelper config'.format(item))
     if messages:
         raise OutdatedException(messages)
 
     smallest = get_smallest()
-    hwid = smallest.get('hwidmatch').strip('^.*-').split(' ')[0]
-    print('Chrome OS hardware id\'s are up to date, current smallest recovery image is {}'.format(hwid))
+    bname = smallest.get('file').split('_')[2]
+    print('Chrome OS boardnames are up to date, current smallest recovery image is {}'.format(bname))
 
 
 def run():
     """Main function"""
-    check_hwids()
+    check_boardnames()
 
 
 if __name__ == '__main__':

@@ -14,15 +14,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libxml2-utils
-          make multizip release=1
-      - name: Get Krypton filename
-        id: get-krypton-filename
-        run: |
-          echo ::set-output name=krypton-filename::$(cd ..;ls script.module.inputstreamhelper*.zip | grep -v '+matrix.' | head -1)
+          make zip release=1
       - name: Get Matrix filename
         id: get-matrix-filename
         run: |
-          echo ::set-output name=matrix-filename::$(cd ..;ls script.module.inputstreamhelper*+matrix.*.zip | head -1)
+          echo ::set-output name=matrix-filename::$(cd ..;ls script.module.inputstreamhelper*.zip | head -1)
       - name: Get body
         id: get-body
         run: |
@@ -43,16 +39,6 @@ jobs:
           body: ${{ steps.get-body.outputs.body }}
           draft: false
           prerelease: false
-      - name: Upload Krypton/Leia zip
-        id: upload-krypton-zip 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_name: ${{ steps.get-krypton-filename.outputs.krypton-filename }}
-          asset_path: ../${{ steps.get-krypton-filename.outputs.krypton-filename }}
-          asset_content_type: application/zip
       - name: Upload Matrix zip
         id: upload-matrix-zip 
         uses: actions/upload-release-asset@v1
@@ -65,12 +51,12 @@ jobs:
           asset_content_type: application/zip
       - name: Generate distribution zip and submit to official kodi repository
         id: kodi-addon-submitter
-        uses: mediaminister/action-kodi-addon-submitter@master
+        uses: xbmc/action-kodi-addon-submitter@master
         with:
           kodi-repository: repo-scripts
-          kodi-version: krypton
+          kodi-version: matrix
           addon-id: script.module.inputstreamhelper
-          kodi-matrix: true
+          kodi-matrix: false
         env:
           GH_USERNAME: ${{secrets.GH_USERNAME}}
           GH_TOKEN: ${{secrets.GH_TOKEN}}

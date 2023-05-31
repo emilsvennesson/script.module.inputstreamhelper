@@ -1,8 +1,7 @@
 coverage
 kodi-addon-checker
 polib
-proxy.py; python_version != '2.7'
+proxy.py
 pylint
 setuptools >= 41
 tox
-xmlschema==1.0.18; python_version == '2.7'

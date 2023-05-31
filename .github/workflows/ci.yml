@@ -18,13 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        python-version: [ '2.7', '3.7', '3.8', '3.9', '3.10', '3.11' ]
-        include:
-          # End-of-life Python versions are not available anymore with ubuntu-latest
-          - os: ubuntu-20.04
-            python-version: '3.5'
-          - os: ubuntu-20.04
-            python-version: '3.6'
+        python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
     steps:
     - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
       uses: actions/checkout@v2
@@ -47,10 +41,8 @@ jobs:
     - name: Check for untranslated strings
       run: make check-untranslated
       continue-on-error: true
-    # Python 2.7 and Python 3.5 are no longer supported by proxy.py
-    - name: Start proxy server, when supported
+    - name: Start proxy server
       run: python -m proxy --threaded --hostname 127.0.0.1 --log-level DEBUG &
-      if: matrix.python-version != '2.7' && matrix.python-version != '3.5'
     - name: Run unit tests
       run: coverage run -m unittest discover
     - name: Run addon using cli

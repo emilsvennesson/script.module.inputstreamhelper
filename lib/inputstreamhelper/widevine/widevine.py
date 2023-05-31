@@ -7,9 +7,11 @@ import os
 from time import time
 
 from .. import config
-from ..kodiutils import addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs, ok_dialog, open_file, select_dialog, set_setting, translate_path, yesno_dialog
+from ..kodiutils import (addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs,
+                         ok_dialog, open_file, select_dialog, set_setting, translate_path, yesno_dialog)
 from ..utils import arch, cmd_exists, hardlink, http_download, http_get, http_head, parse_version, remove_tree, run_cmd, store, system_os
 from ..unicodes import compat_path, to_unicode
+from .arm import cdm_from_lacros
 
 
 def install_cdm_from_backup(version):
@@ -58,6 +60,7 @@ def cdm_from_repo():
         return True
     return False
 
+
 def backup_path():
     """Return the path to the cdm backups"""
     path = os.path.join(addon_profile(), 'backup', '')
@@ -71,7 +74,7 @@ def widevine_config_path():
     iacdm = ia_cdm_path()
     if iacdm is None:
         return None
-    if cdm_from_repo():
+    if cdm_from_repo() or cdm_from_lacros():
         return os.path.join(iacdm, config.WIDEVINE_CONFIG_NAME)
     return os.path.join(iacdm, 'config.json')
 
@@ -162,7 +165,7 @@ def missing_widevine_libs():
 
 def latest_widevine_version(eula=False):
     """Returns the latest available version of Widevine CDM/Chrome OS."""
-    if eula or cdm_from_repo():
+    if eula or cdm_from_repo() or cdm_from_lacros():
         url = config.WIDEVINE_VERSIONS_URL
         versions = http_get(url)
         return versions.split()[-1]
@@ -175,6 +178,7 @@ def latest_widevine_version(eula=False):
         ok_dialog(localize(30004), localize(30005))
         return ''
     return arm_device.get('version')
+
 
 def widevines_available_from_repo():
     """Returns all available Widevine CDM versions and urls from Google's library CDM repository"""
@@ -190,6 +194,7 @@ def widevines_available_from_repo():
 
     return available_cdms
 
+
 def latest_widevine_available_from_repo(available_cdms=None):
     """Returns the latest available Widevine CDM version and url from Google's library CDM repository"""
     if not available_cdms:
@@ -200,6 +205,7 @@ def latest_widevine_available_from_repo(available_cdms=None):
             latest = cdm
 
     return latest
+
 
 def choose_widevine_from_repo():
     """Choose from the widevine versions available in Google's library CDM repository"""
@@ -218,6 +224,7 @@ def choose_widevine_from_repo():
     log(0, 'User chose to install Widevine version {version} from {url}', version=cdm['version'], url=cdm['url'])
 
     return cdm
+
 
 def remove_old_backups(bpath):
     """Removes old Widevine backups, if number of allowed backups is exceeded"""

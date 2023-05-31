@@ -102,11 +102,21 @@ CHROMEOS_RECOVERY_ARM64_BNAMES = [
     'trogdor',
 ]
 
+CHROMEOS_BLOCK_SIZE = 512
+
+LACROS_DOWNLOAD_URL = "https://gsdview.appspot.com/chromeos-localmirror/distfiles/chromeos-lacros-{arch}-squash-zstd-{version}"
+
+LACROS_LATEST = "https://chromiumdash.appspot.com/fetch_releases?channel=Beta&platform=Lacros&num=1"
+
+LACROS_LICENSE_PATH = "WidevineCdm/LICENSE"
+
+LACROS_MANIFEST_PATH = "WidevineCdm/manifest.json"
+
+LACROS_LIB_PATH = "WidevineCdm/_platform_specific/cros_{arch}/libwidevinecdm.so"
+
 MINIMUM_INPUTSTREAM_VERSION_ARM64 = {
     'inputstream.adaptive': '20.3.5',
 }
-
-CHROMEOS_BLOCK_SIZE = 512
 
 HLS_MINIMUM_IA_VERSION = '2.0.10'
 

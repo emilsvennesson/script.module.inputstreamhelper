@@ -7,10 +7,10 @@ import os
 import json
 
 from .. import config
-from ..kodiutils import browsesingle, copy, localize, log, mkdirs, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import (cmd_exists, diskspace, http_download, http_get, parse_version, run_cmd,
-                     sizeof_fmt, store, system_os, temp_path, update_temp_path, userspace64)
+from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
+from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, store, system_os, update_temp_path, userspace64
 from .arm_chromeos import ChromeOSImage
+from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
 
 
 def select_best_chromeos_image(devices):
@@ -151,54 +151,6 @@ def extract_widevine_chromeos(backup_path, image_path, image_version):
         return False
 
     return progress
-
-
-def cdm_from_lacros():
-    """Whether the Widevine CDM can/should be extracted from a lacros image"""
-    if cmd_exists("unsquashfs"):
-        return True
-
-    return False
-
-
-def latest_lacros():
-    """Finds the version of the latest lacros beta image (stable images are not available for download)"""
-    lacros = json.loads(http_get(config.LACROS_LATEST))
-    return lacros[0]["version"]
-
-
-def extract_widevine_lacros(backup_path, arch, img_version):
-    """Extract Widevine from the given Lacros image"""
-    progress = progress_dialog()
-    progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM, prepping image
-
-    run_cmd(("unsquashfs", "-d", temp_path(), store("download_path")) + "WidevineCdm")
-    mkdirs(os.path.join(backup_path, img_version))
-    # Maybe in the future just os.walk the extracted dir and copy every file instead of the following:
-    paths = (config.LACROS_LICENSE_PATH, config.LACROS_MANIFEST_PATH, config.LACROS_LIB_PATH.format(arch=arch))
-    for num, path in enumerate(paths):
-        copy(os.path.join(temp_path(), path), os.path.join(backup_path, img_version, os.path.basename(path)))
-        progress.update(int(90 / len(paths) * (num + 1)), localize(30048))  # Extracting from image
-
-    return progress
-
-
-def install_widevine_arm_lacros(backup_path, img_version=None):
-    """Installs Widevine CDM extracted from a Chrome browser SquashFS image on ARM-based architectures."""
-
-    if not img_version:
-        img_version = latest_lacros()
-
-    arch = "arm64" if userspace64() else "arm"
-    url = config.LACROS_DOWNLOAD_URL.format(version=img_version, arch=arch)
-
-    downloaded = http_download(url, message=localize(30072))
-
-    if downloaded:
-        progress = extract_widevine_lacros(backup_path, arch, img_version)
-        return (progress, img_version)
-
-    return False
 
 
 def install_widevine_arm(backup_path):

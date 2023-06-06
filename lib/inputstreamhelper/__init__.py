@@ -10,8 +10,9 @@ from . import config
 from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
                         kodi_to_ascii, kodi_version, listdir, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
-from .utils import arch, download_path, http_download, http_get, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
-from .widevine.arm import cdm_from_lacros, dl_extract_widevine_chromeos, extract_widevine_chromeos, install_widevine_arm
+from .utils import arch, download_path, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
+from .widevine.arm import dl_extract_widevine_chromeos, extract_widevine_chromeos, install_widevine_arm
+from .widevine.arm_lacros import cdm_from_lacros
 from .widevine.widevine import (backup_path, cdm_from_repo, choose_widevine_from_repo, has_widevinecdm, ia_cdm_path,
                                 install_cdm_from_backup, latest_widevine_available_from_repo, latest_widevine_version,
                                 load_widevine_config, missing_widevine_libs, widevine_config_path,
@@ -228,7 +229,7 @@ class Helper:
         if cdm_from_repo():
             result = self._install_widevine_from_repo(backup_path(), choose_version=choose_version)
         else:
-            if choose_version:
+            if choose_version:  # TODO: to some extend this can be implemented now (with the lacros images)
                 log(1, "Choosing a version to install is only implemented if the lib is found in googles repo.")
             result = install_widevine_arm(backup_path())
         if not result:
@@ -322,8 +323,8 @@ class Helper:
         elif cdm_from_lacros():
             component = "Lacros image"
             current_version = wv_config['version']
-            # Assuming the lib in the lacros image will have the same version as available in the repo:
-            latest_version = http_get(config.WIDEVINE_VERSIONS_URL).strip('\n').split('\n')[-1]
+            # Assuming the lib in the latest lacros image will have the same version as available in the repo:
+            latest_version = latest_widevine_version()
         else:
             component = 'Chrome OS'
             current_version = wv_config['version']
@@ -335,7 +336,7 @@ class Helper:
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
-        # TODO: manage version mismatch between Chrome OS image and lacros (where it's the lib version)
+        # TODO: manage version mismatch between Chrome OS image and lacros (where it's the lib version read from manifest.json)
         if parse_version(latest_version) > parse_version(current_version):
             log(2, 'There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):

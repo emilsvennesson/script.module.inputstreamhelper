@@ -108,12 +108,6 @@ LACROS_DOWNLOAD_URL = "https://gsdview.appspot.com/chromeos-localmirror/distfile
 
 LACROS_LATEST = "https://chromiumdash.appspot.com/fetch_releases?channel=Beta&platform=Lacros&num=1"
 
-LACROS_LICENSE_PATH = "WidevineCdm/LICENSE"
-
-LACROS_MANIFEST_PATH = "WidevineCdm/manifest.json"
-
-LACROS_LIB_PATH = "WidevineCdm/_platform_specific/cros_{arch}/libwidevinecdm.so"
-
 MINIMUM_INPUTSTREAM_VERSION_ARM64 = {
     'inputstream.adaptive': '20.3.5',
 }

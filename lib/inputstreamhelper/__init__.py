@@ -12,11 +12,12 @@ from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, download_path, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine_chromeos, extract_widevine_chromeos, install_widevine_arm
-from .widevine.arm_lacros import cdm_from_lacros
-from .widevine.widevine import (backup_path, cdm_from_repo, choose_widevine_from_repo, has_widevinecdm, ia_cdm_path,
-                                install_cdm_from_backup, latest_widevine_available_from_repo, latest_widevine_version,
+from .widevine.arm_lacros import cdm_from_lacros, latest_lacros
+from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path,
+                                install_cdm_from_backup, latest_widevine_version,
                                 load_widevine_config, missing_widevine_libs, widevine_config_path,
                                 widevine_eula, widevinecdm_path)
+from .widevine.repo import cdm_from_repo, choose_widevine_from_repo, latest_widevine_available_from_repo
 from .unicodes import compat_path
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -183,6 +184,10 @@ class Helper:
             cdm = choose_widevine_from_repo()
         else:
             cdm = latest_widevine_available_from_repo()
+
+        if not cdm:
+            return cdm
+
         cdm_version = cdm.get('version')
 
         if not exists(download_path(cdm.get('url'))):
@@ -321,10 +326,9 @@ class Helper:
             current_version = wv_config['version']
             latest_version = latest_widevine_available_from_repo().get('version')
         elif cdm_from_lacros():
-            component = "Lacros image"
-            current_version = wv_config['version']
-            # Assuming the lib in the latest lacros image will have the same version as available in the repo:
-            latest_version = latest_widevine_version()
+            component = 'Lacros image'
+            current_version = wv_config['img_version']  # TODO: if lib was installed from chromeos image, there is no img_version
+            latest_version = latest_lacros()
         else:
             component = 'Chrome OS'
             current_version = wv_config['version']
@@ -336,7 +340,7 @@ class Helper:
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
-        # TODO: manage version mismatch between Chrome OS image and lacros (where it's the lib version read from manifest.json)
+        # TODO: manage version mismatch between Chrome OS image and lacros (where it's the chrome version)
         if parse_version(latest_version) > parse_version(current_version):
             log(2, 'There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
@@ -369,7 +373,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30032, libs=', '.join(missing_widevine_libs())))  # Missing libraries
             return False
 
-        self._update_widevine()
+        self._update_widevine()  # TODO: check should not also update. maybe just rename function/ split checks out
         return True
 
     @staticmethod
@@ -469,9 +473,11 @@ class Helper:
             else:
                 wv_updated = 'Never'
             text += localize(30821, version=self._get_lib_version(widevinecdm_path()), date=wv_updated) + '\n'
-            if not cdm_from_repo() and not cdm_from_lacros():  # Chrome OS version
+            if not cdm_from_repo():
                 wv_cfg = load_widevine_config()
-                if wv_cfg:
+                if wv_cfg and cdm_from_lacros():  # Lacros image version
+                    text += localize(30825, image="Lacros", version=wv_cfg['img_version']) + '\n'
+                elif wv_cfg:  # Chrome OS version
                     text += localize(30822, name=wv_cfg['hwidmatch'].split()[0].lstrip('^'), version=wv_cfg['version']) + '\n'
             if get_setting_float('last_check', 0.0):
                 wv_check = strftime('%Y-%m-%d %H:%M', localtime(get_setting_float('last_check', 0.0)))
@@ -497,18 +503,15 @@ class Helper:
             notification(localize(30004), localize(30041))
             return
 
-        installed_version = load_widevine_config()['version']
+        try:
+            installed_version = load_widevine_config()['img_version']
+        except KeyError:
+            installed_version = load_widevine_config()['version']
+
         del versions[versions.index(installed_version)]
 
         if cdm_from_repo():
             show_versions = versions
-        elif cdm_from_lacros():
-            show_versions = []
-
-            for version in versions:
-                with open(os.path.join(bpath, version, config.WIDEVINE_MANIFEST_FILE)) as manifest:  # pylint: disable=unspecified-encoding
-                    lib_version = json.loads(manifest)["version"]
-                show_versions.append('{}    ({})'.format(lib_version, version))
         else:
             show_versions = []
 

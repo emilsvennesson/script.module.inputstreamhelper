@@ -6,19 +6,20 @@ import os
 import json
 from ctypes.util import find_library
 
-from lib.PySquashfsImage import SquashFsImage
+from .repo import cdm_from_repo
 from .. import config
 from ..kodiutils import localize, log, mkdirs, open_file, progress_dialog
 from ..utils import http_download, http_get, store, system_os, userspace64
+from ..unsquash import SquashFs
 
 
 def cdm_from_lacros():
     """Whether the Widevine CDM can/should be extracted from a lacros image"""
-    return bool(find_library("zstd"))  # The lacros images are compressed with zstd
+    return not cdm_from_repo() and bool(find_library("zstd"))  # The lacros images are compressed with zstd
 
 
 def latest_lacros():
-    """Finds the version of the latest lacros beta image (stable images are not available for download)"""
+    """Finds the version of the latest stable lacros image"""
     latest = json.loads(http_get(config.LACROS_LATEST))[0]["version"]
     log(0, f"latest lacros image version is {latest}")
     return latest
@@ -29,18 +30,30 @@ def extract_widevine_lacros(dl_path, backup_path, img_version):
     progress = progress_dialog()
     progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM, prepping image
 
-    with SquashFsImage(dl_path) as img:
-        fnames = (config.WIDEVINE_CDM_FILENAME[system_os()], config.WIDEVINE_MANIFEST_FILE, "LICENSE")  # Here it's not LICENSE.txt, as defined in the config.py
-        mkdirs(os.path.join(backup_path, img_version))
-        for num, fname in enumerate(fnames):
-            cfile = img.find(fname)
-            if not cfile:
-                log(3, f"{fname} not found in {os.path.basename(dl_path)}")
-                return False
+    try:
+        sfs = SquashFs(dl_path)
+    except IOError as err:
+        log(4, "SquashFs raised IOError")
+        log(4, err)
+        return False
 
-            with open_file(os.path.join(backup_path, img_version, cfile.name), 'wb') as outfile:
-                outfile.write(cfile.read_bytes())
-            progress.update(int(90 / len(fnames) * (num + 1)), localize(30048))  # Extracting from image
+    fnames = (config.WIDEVINE_CDM_FILENAME[system_os()], config.WIDEVINE_MANIFEST_FILE, "LICENSE")  # Here it's not LICENSE.txt, as defined in the config.py
+    mkdirs(os.path.join(backup_path, img_version))
+    for num, fname in enumerate(fnames):
+        extracted = sfs.extract_file(fname, os.path.join(backup_path, img_version))
+        if not extracted:
+            log(4, f"{fname} not found in {os.path.basename(dl_path)}")
+            return False
+
+        progress.update(int(90 / len(fnames) * (num + 1)), localize(30048))  # Extracting from image
+
+    with open_file(os.path.join(backup_path, img_version, config.WIDEVINE_MANIFEST_FILE), "r") as manifest_file:
+        manifest_json = json.load(manifest_file)
+
+    manifest_json.update({"img_version": img_version})
+
+    with open_file(os.path.join(backup_path, img_version, config.WIDEVINE_MANIFEST_FILE), "w") as manifest_file:
+        json.dump(manifest_json, manifest_file, indent=2)
 
     log(0, f"Successfully extracted all files from lacros image {os.path.basename(dl_path)}")
     return progress

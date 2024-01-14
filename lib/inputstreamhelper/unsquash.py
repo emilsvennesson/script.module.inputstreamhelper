@@ -153,7 +153,7 @@ class DirectoryEntry:
     offset: int
     inode_number: int
     itype: int
-    name_size: int
+    name_size: int  # name is 1 byte longer than given in name_size
     name: bytes
 
     def __len__(self):
@@ -168,7 +168,6 @@ class FragmentBlockEntry:
     size: int
     unused: int  # This field has no meaning
 
-# TODO: add more debug logging
 class SquashFs:
     """
     Main class to handle a squashfs image, find and extract files from it.
@@ -176,10 +175,11 @@ class SquashFs:
     def __init__(self, fpath):
         self.zdecomp = ZstdDecompressor()
         self.imfile = open(fpath, "rb")
-        self.sblk = self.get_sblk()
-        self.frag_entries = self.get_fragment_table()
+        self.sblk = self._get_sblk()
+        self.frag_entries = self._get_fragment_table()
+        log(0, "squashfs image initialized")
 
-    def get_sblk(self):
+    def _get_sblk(self):
         """
         Read and check the superblock.
         """
@@ -190,7 +190,7 @@ class SquashFs:
         return SBlk(*unpack(fmt, self.imfile.read(size)))
 
     @staticmethod
-    def fragment_block_entry(chunk):
+    def _fragment_block_entry(chunk):
         """
         Interpret <chunk> as fragment block entry.
         """
@@ -198,7 +198,7 @@ class SquashFs:
         chunk = chunk[:calcsize(fmt)]
         return FragmentBlockEntry(*unpack(fmt, chunk))
 
-    def get_fragment_table(self):
+    def _get_fragment_table(self):
         """
         Read the fragment table.
 
@@ -213,16 +213,16 @@ class SquashFs:
 
         frag_entries = []
         for pos in mblocks_poss:
-            data = self.get_metablock(pos)
+            data = self._get_metablock(pos)
             while len(data) > 0:
-                entry = self.fragment_block_entry(data)
+                entry = self._fragment_block_entry(data)
                 frag_entries.append(entry)
                 data = data[16:]  # each entry is 16 bytes
 
         return tuple(frag_entries)
 
     @staticmethod
-    def get_size(csize):
+    def _get_size(csize):
         """
         For fragment entries and fragment blocks, the information if the data is compressed or not is contained in the (1 << 24) bit of the size.
         """
@@ -231,7 +231,7 @@ class SquashFs:
         return compressed, size
 
     @staticmethod
-    def metadata_header(chunk):
+    def _metadata_header(chunk):
         """
         Interprets <chunk> as header of a metadata block
         """
@@ -241,13 +241,13 @@ class SquashFs:
 
         return MetaDataHeader(compressed, size)
 
-    def get_metablock(self, block_pos):
+    def _get_metablock(self, block_pos):
         """
         Reads the header of a metadata block at block_pos and returns the extraced data.
         """
         self.imfile.seek(block_pos)
 
-        mheader = self.metadata_header(self.imfile.read(2))
+        mheader = self._metadata_header(self.imfile.read(2))
 
         data = self.imfile.read(mheader.size)
         if mheader.compressed:
@@ -256,7 +256,7 @@ class SquashFs:
         return data
 
     @staticmethod
-    def inode_header(chunk):
+    def _inode_header(chunk):
         """
         Interprets <chunk> as inode header.
         """
@@ -264,7 +264,7 @@ class SquashFs:
         chunk = chunk[:calcsize(fmt)]
         return InodeHeader(*unpack(fmt, chunk))
 
-    def basic_file_inode(self, chunk):
+    def _basic_file_inode(self, chunk):
         """
         Interprets <chunk> as inode of a basic file.
         """
@@ -284,7 +284,7 @@ class SquashFs:
         return BasicFileInode(start_block, fragment, offset, file_size, block_sizes)
 
     @staticmethod
-    def directory_header(chunk):
+    def _directory_header(chunk):
         """
         Interprets <chunk> as a header in the directory table.
         """
@@ -293,17 +293,23 @@ class SquashFs:
         return DirectoryHeader(*unpack(fmt, chunk))
 
     @staticmethod
-    def directory_entry(chunk):
+    def _directory_entry(chunk):
         """
         Interprets <chunk> as an entry in the directory table.
         """
-        fmt = f"<HhHH{min(30, len(chunk) - 8)}s"
-        chunk = chunk[:calcsize(fmt)]
-        dentry = list(unpack(fmt, chunk))
-        dentry[-1] = dentry[-1][:dentry[-2]+1]
-        return DirectoryEntry(*dentry)
+        rest_fmt = "<HhHH"
+        rest_size = calcsize(rest_fmt)
+        rest_chunk, name_chunk = chunk[:rest_size], chunk[rest_size:]
+        rest = unpack(rest_fmt, rest_chunk)
 
-    def get_fragment(self, file_inode):
+        name_len = rest[-1] + 1  # name is 1 byte longer than given in name_size
+        name_fmt = f"<{name_len}s"
+        name_chunk = name_chunk[:name_len]  # calcsize(name_fmt) should be equal to name_len
+
+        name = unpack(name_fmt, name_chunk)
+        return DirectoryEntry(*rest, *name)
+
+    def _get_fragment(self, file_inode):
         """
         Get the fragment of a file.
 
@@ -318,7 +324,7 @@ class SquashFs:
 
         self.imfile.seek(entry.start_block)
 
-        compressed, size = self.get_size(entry.size)
+        compressed, size = self._get_size(entry.size)
         data = self.imfile.read(size)
 
         if compressed:
@@ -330,47 +336,48 @@ class SquashFs:
 
         return data
 
-    def get_dentry(self, name):
+    def _get_dentry(self, name):
         """
         Searches the directory table for the entry for <name>.
         """
-        data = self.get_metablock(self.sblk.directory_table_start)
+        data = self._get_metablock(self.sblk.directory_table_start)
         bname = name.encode()
 
         while len(data) > 0:
-            header = self.directory_header(data)
+            header = self._directory_header(data)
             data = data[12:]
 
             for _ in range(header.count+1):
-                dentry = self.directory_entry(data)
+                dentry = self._directory_entry(data)
                 if dentry.name == bname:
+                    log(0, f"found {bname} in dentry {dentry} after dir header {header}")
                     return header, dentry
 
                 data = data[len(dentry):]
 
         raise FileNotFoundError(f"{name} not found!")
 
-    def get_inode_from_pos(self, block_pos, pos_in_block):
+    def _get_inode_from_pos(self, block_pos, pos_in_block):
         """
         Get the inode for a basic file from the starting point of the block and the position in the block.
         """
-        data = self.get_metablock(block_pos)
+        data = self._get_metablock(block_pos)
         data = data[pos_in_block:]
 
-        header = self.inode_header(data)
+        header = self._inode_header(data)
         data = data[16:]
 
-        if header.inode_type == 2:  # 2 is basic file
-            return self.basic_file_inode(data)
+        if header.inode_type == 2:  # 2 is a basic file
+            return self._basic_file_inode(data)
 
         log(4, "inode types other than basic file are not implemented!")
         return None
 
-    def get_inode(self, name):
+    def _get_inode(self, name):
         """
         Get the inode for a basic file by its name.
         """
-        head_entry = self.get_dentry(name)
+        head_entry = self._get_dentry(name)
         if not head_entry:
             return head_entry
 
@@ -379,23 +386,23 @@ class SquashFs:
         block_pos = self.sblk.inode_table_start + dhead.start_block
         pos_in_block = dentry.offset
 
-        return self.get_inode_from_pos(block_pos, pos_in_block)
+        return self._get_inode_from_pos(block_pos, pos_in_block)
 
     def read_file_blocks(self, filename):
         """
         Generator where each iteration returns a block of file <filename> as bytes.
         """
 
-        inode = self.get_inode(filename)
+        inode = self._get_inode(filename)
 
-        fragment = self.get_fragment(inode)
+        fragment = self._get_fragment(inode)
         file_len = len(fragment)
 
         self.imfile.seek(inode.start_block)
         curr_pos = self.imfile.tell()
 
         for bsize in inode.block_list:
-            compressed, size = self.get_size(bsize)
+            compressed, size = self._get_size(bsize)
 
             if not curr_pos == self.imfile.tell():
                 log(3, "Pointer not at correct position. Moving.")
@@ -411,9 +418,11 @@ class SquashFs:
             yield block
 
         if file_len != inode.file_size:
-            log(4, "Size of extracted file not correct. Something went wrong!")
-            log(4, f"calculated file_len: {file_len}, given file_size: {inode.file_size}")
-            return False
+            msg = f"""
+            Size of extracted file not correct. Something went wrong!
+            calculated file_len: {file_len}, given file_size: {inode.file_size}
+            """
+            raise IOError(msg)
 
         yield fragment
 

@@ -234,7 +234,7 @@ class Helper:
         if cdm_from_repo():
             result = self._install_widevine_from_repo(backup_path(), choose_version=choose_version)
         else:
-            if choose_version:  # TODO: to some extend this can be implemented now (with the lacros images)
+            if choose_version:
                 log(1, "Choosing a version to install is only implemented if the lib is found in googles repo.")
             result = install_widevine_arm(backup_path())
         if not result:
@@ -327,7 +327,10 @@ class Helper:
             latest_version = latest_widevine_available_from_repo().get('version')
         elif cdm_from_lacros():
             component = 'Lacros image'
-            current_version = wv_config['img_version']  # TODO: if lib was installed from chromeos image, there is no img_version
+            try:
+                current_version = wv_config['img_version']  # if lib was installed from chromeos image, there is no img_version
+            except KeyError:
+                current_version = '0.0.0.0'
             latest_version = latest_lacros()
         else:
             component = 'Chrome OS'
@@ -340,7 +343,6 @@ class Helper:
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)
 
-        # TODO: manage version mismatch between Chrome OS image and lacros (where it's the chrome version)
         if parse_version(latest_version) > parse_version(current_version):
             log(2, 'There is an update available for {component}', component=component)
             if yesno_dialog(localize(30040), localize(30033), nolabel=localize(30028), yeslabel=localize(30034)):
@@ -373,7 +375,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30032, libs=', '.join(missing_widevine_libs())))  # Missing libraries
             return False
 
-        self._update_widevine()  # TODO: check should not also update. maybe just rename function/ split checks out
+        self._update_widevine()
         return True
 
     @staticmethod

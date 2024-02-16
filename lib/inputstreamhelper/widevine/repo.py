@@ -29,6 +29,9 @@ def widevines_available_from_repo():
         if http_status == 200:
             available_cdms.append({'version': cdm_version, 'url': cdm_url})
 
+    if not available_cdms:
+        log(4, "could not find any available cdm in repo")
+
     return available_cdms
 
 
@@ -36,7 +39,9 @@ def latest_widevine_available_from_repo(available_cdms=None):
     """Returns the latest available Widevine CDM version and url from Google's library CDM repository"""
     if not available_cdms:
         available_cdms = widevines_available_from_repo()
+
     latest = available_cdms[-1]  # That's probably correct, but the following for loop makes sure
+
     for cdm in available_cdms:
         if parse_version(cdm['version']) > parse_version(latest['version']):
             latest = cdm

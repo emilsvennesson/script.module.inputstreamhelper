@@ -8,7 +8,7 @@ from ctypes.util import find_library
 
 from .repo import cdm_from_repo
 from .. import config
-from ..kodiutils import localize, log, mkdirs, open_file, progress_dialog
+from ..kodiutils import exists, localize, log, mkdirs, open_file, progress_dialog
 from ..utils import http_download, http_get, store, system_os, userspace64
 from ..unsquash import SquashFs
 
@@ -30,29 +30,29 @@ def extract_widevine_lacros(dl_path, backup_path, img_version):
     progress = progress_dialog()
     progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM, prepping image
 
+    fnames = (config.WIDEVINE_CDM_FILENAME[system_os()], config.WIDEVINE_MANIFEST_FILE, "LICENSE")  # Here it's not LICENSE.txt, as defined in the config.py
+    bpath = os.path.join(backup_path, img_version)
+    if not exists(bpath):
+        mkdirs(bpath)
+
     try:
-        sfs = SquashFs(dl_path)
-    except IOError as err:
-        log(4, "SquashFs raised IOError")
+        with SquashFs(dl_path) as sfs:
+            for num, fname in enumerate(fnames):
+                sfs.extract_file(fname, bpath)
+                progress.update(int(90 / len(fnames) * (num + 1)), localize(30048))  # Extracting from image
+
+    except (IOError, FileNotFoundError) as err:
+        log(4, "SquashFs raised an error")
         log(4, err)
         return False
 
-    fnames = (config.WIDEVINE_CDM_FILENAME[system_os()], config.WIDEVINE_MANIFEST_FILE, "LICENSE")  # Here it's not LICENSE.txt, as defined in the config.py
-    mkdirs(os.path.join(backup_path, img_version))
-    for num, fname in enumerate(fnames):
-        extracted = sfs.extract_file(fname, os.path.join(backup_path, img_version))
-        if not extracted:
-            log(4, f"{fname} not found in {os.path.basename(dl_path)}")
-            return False
 
-        progress.update(int(90 / len(fnames) * (num + 1)), localize(30048))  # Extracting from image
-
-    with open_file(os.path.join(backup_path, img_version, config.WIDEVINE_MANIFEST_FILE), "r") as manifest_file:
+    with open_file(os.path.join(bpath, config.WIDEVINE_MANIFEST_FILE), "r") as manifest_file:
         manifest_json = json.load(manifest_file)
 
     manifest_json.update({"img_version": img_version})
 
-    with open_file(os.path.join(backup_path, img_version, config.WIDEVINE_MANIFEST_FILE), "w") as manifest_file:
+    with open_file(os.path.join(bpath, config.WIDEVINE_MANIFEST_FILE), "w") as manifest_file:
         json.dump(manifest_json, manifest_file, indent=2)
 
     log(0, f"Successfully extracted all files from lacros image {os.path.basename(dl_path)}")

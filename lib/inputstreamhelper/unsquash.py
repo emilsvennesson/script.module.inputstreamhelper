@@ -26,7 +26,7 @@ from math import log2, ceil
 from .kodiutils import log
 
 
-class ZstdDecompressor:
+class ZstdDecompressor: # pylint: disable=too-few-public-methods
     """
     zstdandard decompressor class
 
@@ -53,7 +53,7 @@ class ZstdDecompressor:
 
 
 @dataclass(frozen=True)
-class SBlk:
+class SBlk:  # pylint: disable=too-many-instance-attributes
     """superblock as dataclass, does some checks after initialization"""
     s_magic: int
     inodes: int
@@ -129,7 +129,7 @@ class BasicFileInode:
     fragment: int
     offset: int
     file_size: int
-    block_list: tuple[int]
+    block_list: tuple  # once we remove support for python below 3.9 this can be: tuple[int]
 
 
 @dataclass(frozen=True)
@@ -174,10 +174,16 @@ class SquashFs:
     """
     def __init__(self, fpath):
         self.zdecomp = ZstdDecompressor()
-        self.imfile = open(fpath, "rb")
+        self.imfile = open(fpath, "rb")  # pylint: disable=consider-using-with  # we have our own context manager
         self.sblk = self._get_sblk()
         self.frag_entries = self._get_fragment_table()
         log(0, "squashfs image initialized")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.imfile.close()
 
     def _get_sblk(self):
         """
@@ -404,7 +410,7 @@ class SquashFs:
         for bsize in inode.block_list:
             compressed, size = self._get_size(bsize)
 
-            if not curr_pos == self.imfile.tell():
+            if curr_pos != self.imfile.tell():
                 log(3, "Pointer not at correct position. Moving.")
                 self.imfile.seek(curr_pos)
 
@@ -431,11 +437,5 @@ class SquashFs:
         Extracts file <filename> to <target_dir>
         """
         with open(os.path.join(target_dir, filename), "wb") as outfile:
-            try:
-                for block in self.read_file_blocks(filename):
-                    outfile.write(block)
-
-                return True
-            except FileNotFoundError as err:
-                log(4, err)
-                return False
+            for block in self.read_file_blocks(filename):
+                outfile.write(block)

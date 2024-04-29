@@ -43,8 +43,22 @@ jobs:
       continue-on-error: true
     - name: Start proxy server
       run: python -m proxy --threaded --hostname 127.0.0.1 --log-level DEBUG &
-    - name: Run unit tests
-      run: coverage run -m unittest discover
+    - name: Run unit tests for API
+      run: coverage run -m unittest tests/test_api.py
+    - name: Run unit tests for Android ARM
+      run: coverage run -m unittest tests/test_ishelper_android_arm.py
+    - name: Run unit tests for Linux ARM
+      run: coverage run -m unittest tests/test_ishelper_linux_arm.py
+    - name: Run unit tests for Linux x64
+      run: coverage run -m unittest tests/test_ishelper_linux_x64.py
+    - name: Run unit tests for MacOS x64
+      run: coverage run -m unittest tests/test_ishelper_macos_x64.py
+    - name: Run unit tests for Windows x64
+      run: coverage run -m unittest tests/test_ishelper_windows_x64.py
+    - name: Run unit tests for proxy
+      run: coverage run -m unittest tests/test_proxy.py
+    - name: Run unit tests for utils
+      run: coverage run -m unittest tests/test_utils.py
     - name: Run addon using cli
       run: coverage run -a default.py
     - name: Upload code coverage to CodeCov

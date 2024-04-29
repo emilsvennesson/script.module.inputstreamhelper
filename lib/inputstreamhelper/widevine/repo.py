@@ -20,8 +20,12 @@ def cdm_from_repo():
 def widevines_available_from_repo():
     """Returns all available Widevine CDM versions and urls from Google's library CDM repository"""
     cdm_versions = http_get(config.WIDEVINE_VERSIONS_URL).strip('\n').split('\n')
-    cdm_os = config.WIDEVINE_OS_MAP[system_os()]
-    cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
+    try:
+        cdm_os = config.WIDEVINE_OS_MAP[system_os()]
+        cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
+    except KeyError:
+        cdm_os = "mac"
+        cdm_arch = "x64"
     available_cdms = []
     for cdm_version in cdm_versions:
         cdm_url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
@@ -40,7 +44,11 @@ def latest_widevine_available_from_repo(available_cdms=None):
     if not available_cdms:
         available_cdms = widevines_available_from_repo()
 
-    latest = available_cdms[-1]  # That's probably correct, but the following for loop makes sure
+    try:
+        latest = available_cdms[-1]  # That's probably correct, but the following for loop makes sure
+    except IndexError:
+        # widevines_available_from_repo() already logged if there are no available cdms
+        return None
 
     for cdm in available_cdms:
         if parse_version(cdm['version']) > parse_version(latest['version']):

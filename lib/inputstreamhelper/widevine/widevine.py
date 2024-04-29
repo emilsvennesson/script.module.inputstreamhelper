@@ -9,7 +9,7 @@ from time import time
 from .. import config
 from ..kodiutils import (addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs,
                          ok_dialog, open_file, set_setting, translate_path, yesno_dialog)
-from ..utils import arch, cmd_exists, hardlink, http_download, http_get, parse_version, remove_tree, run_cmd, store, system_os
+from ..utils import arch, cmd_exists, hardlink, http_download, parse_version, remove_tree, run_cmd, store, system_os
 from ..unicodes import compat_path, to_unicode
 from .arm_lacros import cdm_from_lacros, latest_lacros
 from .repo import cdm_from_repo, latest_widevine_available_from_repo
@@ -159,9 +159,7 @@ def missing_widevine_libs():
 def latest_widevine_version(eula=False):
     """Returns the latest available version of Widevine CDM/Chrome OS/Lacros Image."""
     if eula or cdm_from_repo():
-        url = config.WIDEVINE_VERSIONS_URL
-        versions = http_get(url)
-        return versions.split()[-1]
+        return latest_widevine_available_from_repo().get('version')
 
     if cdm_from_lacros():
         return latest_lacros()

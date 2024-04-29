@@ -302,6 +302,29 @@ class Helper:
             return True
         return False
 
+    @staticmethod
+    def get_current_wv():
+        """Returns which component is used (widevine/chromeos/lacros) and the current version"""
+        wv_config = load_widevine_config()
+        component = 'Widevine CDM'
+        current_version = '0'
+
+        if not wv_config:
+            log(3, 'Widevine config missing. Could not determine current version, forcing update.')
+        elif cdm_from_repo():
+            current_version = wv_config['version']
+        elif cdm_from_lacros():
+            component = 'Lacros image'
+            try:
+                current_version = wv_config['img_version']  # if lib was installed from chromeos image, there is no img_version
+            except KeyError:
+                pass
+        else:
+            component = 'Chrome OS'
+            current_version = wv_config['version']
+
+        return component, current_version
+
     def _update_widevine(self):
         """Prompts user to upgrade Widevine CDM when a newer version is available."""
         from time import localtime, strftime, time
@@ -317,28 +340,9 @@ class Helper:
                 log(2, 'Widevine update check was made on {date}', date=strftime('%Y-%m-%d %H:%M', localtime(last_check)))
                 return
 
-        wv_config = load_widevine_config()
-        if not wv_config:
-            log(3, 'Widevine config missing. Could not determine current version, forcing update.')
-            current_version = '0'
-        elif cdm_from_repo():
-            component = 'Widevine CDM'
-            current_version = wv_config['version']
-            latest_version = latest_widevine_available_from_repo().get('version')
-        elif cdm_from_lacros():
-            component = 'Lacros image'
-            try:
-                current_version = wv_config['img_version']  # if lib was installed from chromeos image, there is no img_version
-            except KeyError:
-                current_version = '0.0.0.0'
-            latest_version = latest_lacros()
-        else:
-            component = 'Chrome OS'
-            current_version = wv_config['version']
-            latest_version = latest_widevine_version()
-        if not latest_version:
-            log(3, 'Updating Widevine CDM failed. Could not determine latest version.')
-            return
+        component, current_version = self.get_current_wv()
+
+        latest_version = latest_widevine_version()
 
         log(0, 'Latest {component} version is {version}', component=component, version=latest_version)
         log(0, 'Current {component} version installed is {version}', component=component, version=current_version)

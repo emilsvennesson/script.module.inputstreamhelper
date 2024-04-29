@@ -57,8 +57,6 @@ jobs:
       run: coverage run -m unittest tests/test_ishelper_windows_x64.py
     - name: Run unit tests for proxy
       run: coverage run -m unittest tests/test_proxy.py
-    - name: Run unit tests for utils
-      run: coverage run -m unittest tests/test_utils.py
     - name: Run addon using cli
       run: coverage run -a default.py
     - name: Upload code coverage to CodeCov

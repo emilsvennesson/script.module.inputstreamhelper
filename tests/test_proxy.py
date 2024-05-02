@@ -8,8 +8,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import sys
 import unittest
 import platform
+
 import inputstreamhelper
-from test_utils import delete_cached
+from test_utils import delete_cached, cleanup
 
 xbmc = __import__('xbmc')
 xbmcaddon = __import__('xbmcaddon')
@@ -26,6 +27,7 @@ class LinuxProxyTests(unittest.TestCase):
         xbmc.settings['network.httpproxyserver'] = '127.0.0.1'
         xbmc.settings['network.httpproxyport'] = '8899'
         delete_cached()
+        cleanup()
 
     def tearDown(self):
         xbmc.settings['network.usehttpproxy'] = False

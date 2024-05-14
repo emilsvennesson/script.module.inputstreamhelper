@@ -8,6 +8,8 @@ from time import time
 from socket import timeout
 from ssl import SSLError
 import struct
+from typing import NamedTuple
+from functools import total_ordering
 
 
 try:  # Python 3
@@ -20,6 +22,31 @@ from . import config
 from .kodiutils import (bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs,
                         progress_dialog, set_setting, stat_file, translate_path, yesno_dialog)
 from .unicodes import compat_path, from_unicode, to_unicode
+
+
+@total_ordering
+class Version(NamedTuple):
+    """Minimal version class used for parse_version. Should be enough for our purpose."""
+    major: int = 0
+    minor: int = 0
+    micro: int = 0
+    nano: int = 0
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.micro}.{self.nano}"
+
+    def __lt__(self, other):
+        if self.major != other.major:
+            return self.major < other.major
+        if self.minor != other.minor:
+            return self.minor < other.minor
+        if self.micro != other.micro:
+            return self.micro < other.micro
+
+        return self.nano < other.nano
+
+    def __eq__(self, other):
+        return all((self.major == other.major, self.minor == other.minor, self.micro == other.micro, self.nano == other.nano))
 
 
 def temp_path():
@@ -350,11 +377,18 @@ def remove_tree(path):
     rmtree(compat_path(path))
 
 
-def parse_version(version):
+def parse_version(vstring):
     """Parse a version string and return a comparable version object"""
+    vstring = vstring.strip('v')
+    vstrings = vstring.split('.')
     try:
-        from packaging.version import parse
-        return parse(version)
-    except ImportError:
-        from distutils.version import LooseVersion  # pylint: disable=deprecated-module
-        return LooseVersion(version)
+        vnums = tuple(int(v) for v in vstrings)
+    except ValueError:
+        log(3, f"Version string {vstring} can't be interpreted! Contains non-numerics.")
+        return Version(0, 0, 0, 0)
+
+    if len(vnums) > 4:
+        log(3, f"Version string {vstring} can't be interpreted! Too long.")
+        return Version(0, 0, 0, 0)
+
+    return Version(*vnums)

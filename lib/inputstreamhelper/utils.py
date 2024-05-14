@@ -211,8 +211,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
         else:
             return False
 
-    store('download_path', dl_path)
-    return True
+    return dl_path
 
 
 def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value
@@ -254,19 +253,6 @@ def system_os():
 
     system_os.cached = sys_name
     return sys_name
-
-
-def store(name, val=None):
-    """Store arbitrary value across functions"""
-
-    if val is not None:
-        setattr(store, name, val)
-        log(0, 'Stored {} in {}'.format(val, name))
-        return val
-
-    if not hasattr(store, name):
-        return None
-    return getattr(store, name)
 
 
 def diskspace():

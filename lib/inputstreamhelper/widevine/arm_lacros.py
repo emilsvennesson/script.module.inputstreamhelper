@@ -9,7 +9,7 @@ from ctypes.util import find_library
 from .repo import cdm_from_repo
 from .. import config
 from ..kodiutils import exists, localize, log, mkdirs, open_file, progress_dialog
-from ..utils import http_download, http_get, store, system_os, userspace64
+from ..utils import http_download, http_get, system_os, userspace64
 from ..unsquash import SquashFs
 
 
@@ -67,10 +67,10 @@ def install_widevine_arm_lacros(backup_path, img_version=None):
 
     url = config.LACROS_DOWNLOAD_URL.format(version=img_version, arch=("arm64" if userspace64() else "arm"))
 
-    downloaded = http_download(url, message=localize(30072))
+    dl_path = http_download(url, message=localize(30072))
 
-    if downloaded:
-        progress = extract_widevine_lacros(store("download_path"), backup_path, img_version)
+    if dl_path:
+        progress = extract_widevine_lacros(dl_path, backup_path, img_version)
         if progress:
             return (progress, img_version)
 

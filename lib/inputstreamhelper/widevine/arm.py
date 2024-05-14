@@ -8,7 +8,7 @@ import json
 
 from .. import config
 from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, store, system_os, update_temp_path, userspace64
+from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, system_os, update_temp_path, userspace64
 from .arm_chromeos import ChromeOSImage
 from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
 
@@ -111,19 +111,17 @@ def install_widevine_arm_chromeos(backup_path):
 def dl_extract_widevine_chromeos(url, backup_path, arm_device=None):
     """Download the ChromeOS image and extract Widevine from it"""
     if arm_device:
-        downloaded = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1',
+        dl_path = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1',
                                    dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
         image_version = arm_device['version']
     else:
-        downloaded = http_download(url, message=localize(30022))
+        dl_path = http_download(url, message=localize(30022))
         image_version = os.path.basename(url).split('_')[1]
         # minimal info for config.json, "version" is definitely needed e.g. in load_widevine_config:
         arm_device = {"file": os.path.basename(url), "url": url, "version": image_version}
 
-    if downloaded:
-        image_path = store('download_path')
-
-        progress = extract_widevine_chromeos(backup_path, image_path, image_version)
+    if dl_path:
+        progress = extract_widevine_chromeos(backup_path, dl_path, image_version)
         if not progress:
             return False
 

@@ -10,7 +10,7 @@ from . import config
 from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
                         kodi_to_ascii, kodi_version, listdir, localize, log, notification, ok_dialog, progress_dialog, select_dialog,
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
-from .utils import arch, download_path, http_download, parse_version, remove_tree, store, system_os, temp_path, unzip, userspace64
+from .utils import arch, download_path, http_download, parse_version, remove_tree, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine_chromeos, extract_widevine_chromeos, install_widevine_arm
 from .widevine.arm_lacros import cdm_from_lacros, latest_lacros
 from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path,
@@ -189,16 +189,15 @@ class Helper:
             return cdm
 
         cdm_version = cdm.get('version')
+        dl_path = download_path(cdm.get('url'))
 
-        if not exists(download_path(cdm.get('url'))):
-            downloaded = http_download(cdm.get('url'))
-        else:
-            downloaded = True
+        if not exists(dl_path):
+            dl_path = http_download(cdm.get('url'))
 
-        if downloaded:
+        if dl_path:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
-            unzip(store('download_path'), os.path.join(bpath, cdm_version, ''))
+            unzip(dl_path, os.path.join(bpath, cdm_version, ''))
 
             return (progress, cdm_version)
 

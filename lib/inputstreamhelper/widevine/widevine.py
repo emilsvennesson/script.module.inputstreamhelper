@@ -9,7 +9,7 @@ from time import time
 from .. import config
 from ..kodiutils import (addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs,
                          ok_dialog, open_file, set_setting, translate_path, yesno_dialog)
-from ..utils import arch, cmd_exists, hardlink, http_download, parse_version, remove_tree, run_cmd, store, system_os
+from ..utils import arch, cmd_exists, hardlink, http_download, parse_version, remove_tree, run_cmd, system_os
 from ..unicodes import compat_path, to_unicode
 from .arm_lacros import cdm_from_lacros, latest_lacros
 from .repo import cdm_from_repo, latest_widevine_available_from_repo
@@ -42,12 +42,12 @@ def widevine_eula():
         cdm_arch = 'x64'
 
     url = config.WIDEVINE_DOWNLOAD_URL.format(version=cdm_version, os=cdm_os, arch=cdm_arch)
-    downloaded = http_download(url, message=localize(30025), background=True)  # Acquiring EULA
-    if not downloaded:
+    dl_path = http_download(url, message=localize(30025), background=True)  # Acquiring EULA
+    if not dl_path:
         return False
 
     from zipfile import ZipFile
-    with ZipFile(compat_path(store('download_path'))) as archive:
+    with ZipFile(compat_path(dl_path)) as archive:
         with archive.open(config.WIDEVINE_LICENSE_FILE) as file_obj:
             eula = file_obj.read().decode().strip().replace('\n', ' ')
 

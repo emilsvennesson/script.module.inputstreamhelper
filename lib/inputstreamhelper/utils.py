@@ -377,6 +377,10 @@ def parse_version(vstring):
         else:
             vnums.append(0)  # default to 0 if no numeric part found
 
+    # ensure the version tuple always has 4 components
+    while len(vnums) < 4:
+        vnums.append(0)
+
     if len(vnums) > 4:
         log(3, f"Version string {vstring} can't be interpreted! Too long.")
         return Version(0, 0, 0, 0)

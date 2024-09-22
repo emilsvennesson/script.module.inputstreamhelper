@@ -364,14 +364,18 @@ def remove_tree(path):
 
 
 def parse_version(vstring):
-    """Parse a version string and return a comparable version object"""
+    """Parse a version string and return a comparable version object, stripping non-numeric suffixes."""
     vstring = vstring.strip('v')
     vstrings = vstring.split('.')
-    try:
-        vnums = tuple(int(v) for v in vstrings)
-    except ValueError:
-        log(3, f"Version string {vstring} can't be interpreted! Contains non-numerics.")
-        return Version(0, 0, 0, 0)
+    vnums = []
+
+    for v in vstrings:
+        # remove any non-numeric characters from each version component
+        numeric_part = ''.join(filter(str.isdigit, v))
+        if numeric_part:
+            vnums.append(int(numeric_part))
+        else:
+            vnums.append(0)  # default to 0 if no numeric part found
 
     if len(vnums) > 4:
         log(3, f"Version string {vstring} can't be interpreted! Too long.")

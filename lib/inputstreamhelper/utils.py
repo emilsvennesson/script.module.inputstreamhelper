@@ -363,26 +363,26 @@ def remove_tree(path):
     rmtree(compat_path(path))
 
 
-def parse_version(vstring):
+def parse_version(v_string):
     """Parse a version string and return a comparable version object, stripping non-numeric suffixes."""
-    vstring = vstring.strip('v')
-    vstrings = vstring.split('.')
-    vnums = []
+    v_string = v_string.strip('v')
+    v_strings = v_string.split('.')
+    v_nums = []
 
-    for v in vstrings:
+    for version in v_strings:
         # remove any non-numeric characters from each version component
-        numeric_part = ''.join(filter(str.isdigit, v))
+        numeric_part = ''.join(filter(str.isdigit, version))
         if numeric_part:
-            vnums.append(int(numeric_part))
+            v_nums.append(int(numeric_part))
         else:
-            vnums.append(0)  # default to 0 if no numeric part found
+            v_nums.append(0)  # default to 0 if no numeric part found
 
     # ensure the version tuple always has 4 components
-    while len(vnums) < 4:
-        vnums.append(0)
+    while len(v_nums) < 4:
+        v_nums.append(0)
 
-    if len(vnums) > 4:
-        log(3, f"Version string {vstring} can't be interpreted! Too long.")
+    if len(v_nums) > 4:
+        log(3, f"Version string {v_string} can't be interpreted! Too long.")
         return Version(0, 0, 0, 0)
 
-    return Version(*vnums)
+    return Version(*v_nums)

@@ -4,13 +4,13 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
+import re
 from time import time
 from socket import timeout
 from ssl import SSLError
 import struct
 from typing import NamedTuple
 from functools import total_ordering
-
 
 try:  # Python 3
     from urllib.error import HTTPError, URLError
@@ -363,26 +363,21 @@ def remove_tree(path):
     rmtree(compat_path(path))
 
 
-def parse_version(v_string):
-    """Parse a version string and return a comparable version object, stripping non-numeric suffixes."""
-    v_string = v_string.strip('v')
-    v_strings = v_string.split('.')
-    v_nums = []
+def parse_version(vstring):
+    """Parse a version string and return a comparable version object, properly handling non-numeric prefixes."""
+    vstring = vstring.strip('v').lower()
+    parts = re.split(r'\.', vstring)  # split on periods first
 
-    for version in v_strings:
-        # remove any non-numeric characters from each version component
-        numeric_part = ''.join(filter(str.isdigit, version))
+    vnums = []
+    for part in parts:
+        # extract numeric part, ignoring non-numeric prefixes
+        numeric_part = re.search(r'\d+', part)
         if numeric_part:
-            v_nums.append(int(numeric_part))
+            vnums.append(int(numeric_part.group()))
         else:
-            v_nums.append(0)  # default to 0 if no numeric part found
+            vnums.append(0)  # default to 0 if no numeric part found
 
     # ensure the version tuple always has 4 components
-    while len(v_nums) < 4:
-        v_nums.append(0)
+    vnums = (vnums + [0] * 4)[:4]
 
-    if len(v_nums) > 4:
-        log(3, f"Version string {v_string} can't be interpreted! Too long.")
-        return Version(0, 0, 0, 0)
-
-    return Version(*v_nums)
+    return Version(*vnums)

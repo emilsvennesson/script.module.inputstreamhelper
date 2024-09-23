@@ -4,13 +4,13 @@
 
 from __future__ import absolute_import, division, unicode_literals
 import os
+import re
 from time import time
 from socket import timeout
 from ssl import SSLError
 import struct
 from typing import NamedTuple
 from functools import total_ordering
-
 
 try:  # Python 3
     from urllib.error import HTTPError, URLError
@@ -364,17 +364,20 @@ def remove_tree(path):
 
 
 def parse_version(vstring):
-    """Parse a version string and return a comparable version object"""
-    vstring = vstring.strip('v')
-    vstrings = vstring.split('.')
-    try:
-        vnums = tuple(int(v) for v in vstrings)
-    except ValueError:
-        log(3, f"Version string {vstring} can't be interpreted! Contains non-numerics.")
-        return Version(0, 0, 0, 0)
+    """Parse a version string and return a comparable version object, properly handling non-numeric prefixes."""
+    vstring = vstring.strip('v').lower()
+    parts = re.split(r'\.', vstring)  # split on periods first
 
-    if len(vnums) > 4:
-        log(3, f"Version string {vstring} can't be interpreted! Too long.")
-        return Version(0, 0, 0, 0)
+    vnums = []
+    for part in parts:
+        # extract numeric part, ignoring non-numeric prefixes
+        numeric_part = re.search(r'\d+', part)
+        if numeric_part:
+            vnums.append(int(numeric_part.group()))
+        else:
+            vnums.append(0)  # default to 0 if no numeric part found
+
+    # ensure the version tuple always has 4 components
+    vnums = (vnums + [0] * 4)[:4]
 
     return Version(*vnums)

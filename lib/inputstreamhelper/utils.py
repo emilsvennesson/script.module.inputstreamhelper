@@ -3,24 +3,22 @@
 """Implements various Helper functions"""
 
 from __future__ import absolute_import, division, unicode_literals
+
 import os
 import re
-from time import time
+import struct
+from functools import total_ordering
 from socket import timeout
 from ssl import SSLError
-import struct
+from time import time
 from typing import NamedTuple
-from functools import total_ordering
-
-try:  # Python 3
-    from urllib.error import HTTPError, URLError
-    from urllib.request import Request, urlopen
-except ImportError:  # Python 2
-    from urllib2 import HTTPError, Request, URLError, urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from . import config
-from .kodiutils import (bg_progress_dialog, copy, delete, exists, get_setting, localize, log, mkdirs,
-                        progress_dialog, set_setting, stat_file, translate_path, yesno_dialog)
+from .kodiutils import (bg_progress_dialog, copy, delete, exists, get_setting,
+                        localize, log, mkdirs, progress_dialog, set_setting,
+                        stat_file, translate_path, yesno_dialog)
 from .unicodes import compat_path, from_unicode, to_unicode
 
 
@@ -123,7 +121,7 @@ def http_head(url):
 def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:
-        from hashlib import sha1, md5
+        from hashlib import md5, sha1
         if hash_alg == 'sha1':
             calc_checksum = sha1()
         elif hash_alg == 'md5':
@@ -324,7 +322,6 @@ def arch():
             sys_arch = 'x86'  # else, sys_arch = AMD64
 
     elif 'armv' in sys_arch:
-        import re
         arm_version = re.search(r'\d+', sys_arch.split('v')[1])
         if arm_version:
             sys_arch = 'armv' + arm_version.group()

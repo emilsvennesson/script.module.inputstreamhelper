@@ -3,14 +3,17 @@
 """Implements generic widevine functions used across architectures"""
 
 from __future__ import absolute_import, division, unicode_literals
+
 import os
 from time import time
 
 from .. import config
-from ..kodiutils import (addon_profile, exists, get_setting_int, listdir, localize, log, mkdirs,
-                         ok_dialog, open_file, set_setting, translate_path, yesno_dialog)
-from ..utils import arch, cmd_exists, hardlink, http_download, parse_version, remove_tree, run_cmd, system_os
+from ..kodiutils import (addon_profile, exists, get_setting_int, listdir,
+                         localize, log, mkdirs, ok_dialog, open_file,
+                         set_setting, translate_path, yesno_dialog)
 from ..unicodes import compat_path, to_unicode
+from ..utils import (arch, cmd_exists, hardlink, http_download, parse_version,
+                     remove_tree, run_cmd, system_os)
 from .arm_lacros import cdm_from_lacros, latest_lacros
 from .repo import cdm_from_repo, latest_widevine_available_from_repo
 
@@ -37,7 +40,7 @@ def widevine_eula():
         cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
     else:  # Grab the license from the x86 files
         log(0, 'Acquiring Widevine EULA from x86 files.')
-        cdm_version = latest_widevine_version(eula=True)
+        cdm_version = '4.10.2830.0' # fine to hardcode as it's only used for the EULA
         cdm_os = 'mac'
         cdm_arch = 'x64'
 
@@ -156,9 +159,9 @@ def missing_widevine_libs():
     return None
 
 
-def latest_widevine_version(eula=False):
+def latest_widevine_version():
     """Returns the latest available version of Widevine CDM/Chrome OS/Lacros Image."""
-    if eula or cdm_from_repo():
+    if cdm_from_repo():
         return latest_widevine_available_from_repo().get('version')
 
     if cdm_from_lacros():

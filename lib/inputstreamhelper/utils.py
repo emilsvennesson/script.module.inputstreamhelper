@@ -72,12 +72,10 @@ def download_path(url):
 
     return os.path.join(temp_path(), filename)
 
-
-
 def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return the response and content."""
-    headers = headers or {}
-
+    """Perform an HTTP request and return the response object and content."""
+    if headers is None:
+        headers = {}
     log(0, 'Request URL: {url}', url=url)
     request = Request(url, headers=headers)
 
@@ -86,14 +84,14 @@ def _http_request(url, headers=None, time_out=10):
             log(0, 'Response code: {code}', code=response.getcode())
             if 400 <= response.getcode() < 600:
                 raise HTTPError(url, response.getcode(), f'HTTP {response.getcode()} Error for url: {url}', response.headers, None)
-            # Read the content inside the `with` block
             content = response.read()
+            # Return both response object and content
             return response, content
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
             return _http_request(url, headers, time_out)
-        return None
+        return None, None
 
 def http_get(url):
     """Perform an HTTP GET request and return content."""
@@ -131,7 +129,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
             checksum = None
 
-    req = _http_request(url)
+    req, _ = _http_request(url)
     if req is None:
         return None
 
@@ -166,7 +164,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
                     return False
 
                 headers = {'Range': 'bytes={}-{}'.format(size, total_length)}
-                req = _http_request(url, headers=headers)
+                req, _ = _http_request(url, headers=headers)
                 if req is None:
                     return None
                 continue

@@ -71,18 +71,19 @@ def download_path(url):
 
     return os.path.join(temp_path(), filename)
 
+
 def _http_request(url, headers=None, time_out=30):
     """Make a robust HTTP request handling redirections."""
     try:
-        with urlopen(url, timeout=time_out) as response:
-            if response.status in [301, 302, 303, 307, 308]:  # Handle redirections
-                new_url = response.getheader('Location')
-                log(1, f"Redirecting to {new_url}")
-                return _http_request(new_url, time_out)
-            return response
+        response = urlopen(url, timeout=time_out) # pylint: disable=consider-using-with:w
+        if response.status in [301, 302, 303, 307, 308]:  # Handle redirections
+            new_url = response.getheader('Location')
+            log(1, f"Redirecting to {new_url}")
+            return _http_request(new_url, time_out)
+        return response  # Return the response for streaming
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
-        if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
+        if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):
             return _http_request(url, headers, time_out)
         return None
     except timeout as err:
@@ -110,8 +111,7 @@ def http_head(url):
     except HTTPError as exc:
         return exc.getcode()
 
-
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False): # pylint: disable=too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:
         from hashlib import md5, sha1
@@ -123,19 +123,16 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
             checksum = None
 
-    req = _http_request(url)
-    if req is None:
+    response = _http_request(url)
+    if response is None:
         return None
 
     dl_path = download_path(url)
     filename = os.path.basename(dl_path)
-    if not message:  # display "downloading [filename]"
+    if not message:
         message = localize(30015, filename=filename)  # Downloading file
 
-    total_length = int(req.info().get('content-length', 0))
-    if total_length == 0:
-        log(2, 'No content-length header available, download may not progress as expected.')
-
+    total_length = int(response.info().get('content-length', 0))
     if dl_size and dl_size != total_length:
         log(2, 'The given file size does not match the request!')
         dl_size = total_length
@@ -151,7 +148,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     size = 0
     with open(compat_path(dl_path), 'wb') as image:
         while True:
-            chunk = req.read(chunk_size)
+            chunk = response.read(chunk_size)
             if not chunk:
                 break
 
@@ -162,7 +159,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             percent = int(round(size * 100 / total_length)) if total_length > 0 else 0
             if not background and progress.iscanceled():
                 progress.close()
-                req.close()
+                response.close()
                 return False
             if time() - starttime > 5 and size > 0:
                 time_left = int(round((total_length - size) * (time() - starttime) / size))
@@ -175,7 +172,7 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
             progress.update(percent, prog_message)
 
     progress.close()
-    req.close()
+    response.close()
 
     checksum_ok = (not checksum or calc_checksum.hexdigest() == checksum)
     size_ok = (not dl_size or stat_file(dl_path).st_size() == dl_size)

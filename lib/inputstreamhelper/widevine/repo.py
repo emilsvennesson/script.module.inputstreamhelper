@@ -19,7 +19,10 @@ def cdm_from_repo():
 
 def widevines_available_from_repo():
     """Returns all available Widevine CDM versions and urls from Google's library CDM repository"""
-    cdm_versions = http_get(config.WIDEVINE_VERSIONS_URL).strip('\n').split('\n')
+    cdm_versions = http_get(config.WIDEVINE_VERSIONS_URL)
+    log(0, f"Available Widevine versions from repo: {cdm_versions}")
+    cdm_versions = cdm_versions.strip('\n').split('\n')
+    log(0, f"Available Widevine versions from repo: {cdm_versions}")
     try:
         cdm_os = config.WIDEVINE_OS_MAP[system_os()]
         cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]

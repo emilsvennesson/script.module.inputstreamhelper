@@ -360,8 +360,10 @@ def remove_tree(path):
 
     try:
         rmtree(compat_path(path))
+        return True
     except FileNotFoundError as e:
-        log(4, f'Error removing tree: {e}')
+        log(4, f"Error removing tree: {e}")
+        return False
 
 
 def parse_version(vstring):

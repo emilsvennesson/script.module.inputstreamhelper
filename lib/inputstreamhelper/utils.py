@@ -74,7 +74,7 @@ def download_path(url):
 
 
 def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return request"""
+    """Perform an HTTP request and return the response."""
     log(0, 'Request URL: {url}', url=url)
 
     try:
@@ -82,10 +82,10 @@ def _http_request(url, headers=None, time_out=10):
             request = Request(url, headers=headers)
         else:
             request = Request(url)
-        req = urlopen(request, timeout=time_out)
-        log(0, 'Response code: {code}', code=req.getcode())
-        if 400 <= req.getcode() < 600:
-            raise HTTPError('HTTP {} Error for url: {}'.format(req.getcode(), url), response=req)
+        with urlopen(request, timeout=time_out) as req:
+            log(0, 'Response code: {code}', code=req.getcode())
+            if 400 <= req.getcode() < 600:
+                raise HTTPError(url, req.getcode(), f'HTTP {req.getcode()} Error for url: {url}', req.headers, req)
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
@@ -93,7 +93,6 @@ def _http_request(url, headers=None, time_out=10):
         return None
 
     return req
-
 
 def http_get(url):
     """Perform an HTTP GET request and return content"""
@@ -106,14 +105,13 @@ def http_get(url):
     # log(0, 'Response: {response}', response=content)
     return content.decode("utf-8")
 
-
 def http_head(url):
-    """Perform an HTTP HEAD request and return status code"""
+    """Perform an HTTP HEAD request and return status code."""
     req = Request(url)
     req.get_method = lambda: 'HEAD'
     try:
-        resp = urlopen(req)
-        return resp.getcode()
+        with urlopen(req) as resp:
+            return resp.getcode()
     except HTTPError as exc:
         return exc.getcode()
 

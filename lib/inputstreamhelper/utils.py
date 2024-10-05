@@ -11,7 +11,6 @@ from functools import total_ordering
 from socket import timeout
 from ssl import SSLError
 from time import time
-from typing import NamedTuple
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -23,29 +22,30 @@ from .unicodes import compat_path, from_unicode, to_unicode
 
 
 @total_ordering
-class Version(NamedTuple):
-    """Minimal version class used for parse_version. Should be enough for our purpose."""
-    major: int = 0
-    minor: int = 0
-    micro: int = 0
-    nano: int = 0
+class Version:
+    def __init__(self, *components):
+        self.components = list(components)
 
     def __str__(self):
-        return f"{self.major}.{self.minor}.{self.micro}.{self.nano}"
+        return '.'.join(map(str, self.components))
 
     def __lt__(self, other):
-        if self.major != other.major:
-            return self.major < other.major
-        if self.minor != other.minor:
-            return self.minor < other.minor
-        if self.micro != other.micro:
-            return self.micro < other.micro
+        # extended comparison that accounts for different lengths by padding with zeros
+        max_length = max(len(self.components), len(other.components))
+        # extend both lists with zeros up to the maximum length
+        extended_self = self.components + [0] * (max_length - len(self.components))
+        extended_other = other.components + [0] * (max_length - len(other.components))
 
-        return self.nano < other.nano
+        for self_comp, other_comp in zip(extended_self, extended_other):
+            if self_comp < other_comp:
+                return True
+            elif self_comp > other_comp:
+                return False
+        return False  # return False if all comparisons are equal
 
     def __eq__(self, other):
-        return all((self.major == other.major, self.minor == other.minor, self.micro == other.micro, self.nano == other.nano))
-
+        # Uses the same logic for equality
+        return not self < other and not other < self
 
 def temp_path():
     """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/"""
@@ -373,8 +373,5 @@ def parse_version(vstring):
             vnums.append(int(numeric_part.group()))
         else:
             vnums.append(0)  # default to 0 if no numeric part found
-
-    # ensure the version tuple always has 4 components
-    vnums = (vnums + [0] * 4)[:4]
 
     return Version(*vnums)

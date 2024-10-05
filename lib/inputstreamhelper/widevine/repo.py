@@ -32,6 +32,8 @@ def widevines_available_from_repo():
         http_status = http_head(cdm_url)
         if http_status == 200:
             available_cdms.append({'version': cdm_version, 'url': cdm_url})
+            continue
+        log(2, f'Widevine version {cdm_version} is not available from {cdm_url}')
 
     if not available_cdms:
         log(4, "could not find any available cdm in repo")

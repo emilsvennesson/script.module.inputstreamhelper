@@ -104,8 +104,8 @@ def http_get(url):
     try:
         decoded_content = content.decode("utf-8")
         return decoded_content
-    except UnicodeDecodeError as e:
-        log(2, 'Failed to decode content. Error: {error}', error=str(e))
+    except UnicodeDecodeError as error:
+        log(2, 'Failed to decode content. Error: {error}', error=str(error))
         return None
 
 def http_head(url):

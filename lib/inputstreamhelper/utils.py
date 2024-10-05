@@ -9,7 +9,6 @@ import re
 import struct
 from functools import total_ordering
 from socket import timeout
-from ssl import SSLError
 from time import time
 from typing import NamedTuple
 from urllib.error import HTTPError, URLError
@@ -86,8 +85,8 @@ def _http_request(url, headers=None, time_out=30):
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
             return _http_request(url, headers, time_out)
         return None
-    except timeout as e:
-        log(2, f"HTTP request timed out: {e}")
+    except timeout as err:
+        log(2, f"HTTP request timed out: {err}")
         return None
 
 def http_get(url):

@@ -73,37 +73,40 @@ def download_path(url):
     return os.path.join(temp_path(), filename)
 
 
+
 def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return the response."""
+    """Perform an HTTP request and return the response and content."""
+    headers = headers or {}
+
     log(0, 'Request URL: {url}', url=url)
+    request = Request(url, headers=headers)
 
     try:
-        if headers:
-            request = Request(url, headers=headers)
-        else:
-            request = Request(url)
-        with urlopen(request, timeout=time_out) as req:
-            log(0, 'Response code: {code}', code=req.getcode())
-            if 400 <= req.getcode() < 600:
-                raise HTTPError(url, req.getcode(), f'HTTP {req.getcode()} Error for url: {url}', req.headers, req)
+        with urlopen(request, timeout=time_out) as response:
+            log(0, 'Response code: {code}', code=response.getcode())
+            if 400 <= response.getcode() < 600:
+                raise HTTPError(url, response.getcode(), f'HTTP {response.getcode()} Error for url: {url}', response.headers, None)
+            # Read the content inside the `with` block
+            content = response.read()
+            return response, content
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
             return _http_request(url, headers, time_out)
         return None
 
-    return req
-
 def http_get(url):
-    """Perform an HTTP GET request and return content"""
-    req = _http_request(url)
-    if req is None:
+    """Perform an HTTP GET request and return content."""
+    response, content = _http_request(url)
+    if response is None or content is None:
         return None
 
-    content = req.read()
-    # NOTE: Do not log reponse (as could be large)
-    # log(0, 'Response: {response}', response=content)
-    return content.decode("utf-8")
+    try:
+        decoded_content = content.decode("utf-8")
+        return decoded_content
+    except UnicodeDecodeError as e:
+        log(2, 'Failed to decode content. Error: {error}', error=str(e))
+        return None
 
 def http_head(url):
     """Perform an HTTP HEAD request and return status code."""

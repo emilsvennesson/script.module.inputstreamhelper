@@ -72,41 +72,34 @@ def download_path(url):
 
     return os.path.join(temp_path(), filename)
 
-
-
-def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return the response and content."""
-    headers = headers or {}
-
-    log(0, 'Request URL: {url}', url=url)
-    request = Request(url, headers=headers)
-
+def _http_request(url, headers=None, time_out=30):
+    """Make a robust HTTP request handling redirections."""
     try:
-        with urlopen(request, timeout=time_out) as response:
-            log(0, 'Response code: {code}', code=response.getcode())
-            if 400 <= response.getcode() < 600:
-                raise HTTPError(url, response.getcode(), f'HTTP {response.getcode()} Error for url: {url}', response.headers, None)
-            # Read the content inside the `with` block
-            content = response.read()
-            return response, content
+        with urlopen(url, timeout=time_out) as response:
+            if response.status in [301, 302, 303, 307, 308]:  # Handle redirections
+                new_url = response.getheader('Location')
+                log(1, f"Redirecting to {new_url}")
+                return _http_request(new_url, time_out)
+            return response
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
             return _http_request(url, headers, time_out)
         return None
+    except timeout as e:
+        log(2, f"HTTP request timed out: {e}")
+        return None
 
 def http_get(url):
-    """Perform an HTTP GET request and return content."""
-    response, content = _http_request(url)
-    if response is None or content is None:
+    """Perform an HTTP GET request and return content"""
+    req = _http_request(url)
+    if req is None:
         return None
 
-    try:
-        decoded_content = content.decode("utf-8")
-        return decoded_content
-    except UnicodeDecodeError as error:
-        log(2, 'Failed to decode content. Error: {error}', error=str(error))
-        return None
+    content = req.read()
+    # NOTE: Do not log reponse (as could be large)
+    # log(0, 'Response: {response}', response=content)
+    return content.decode("utf-8")
 
 def http_head(url):
     """Perform an HTTP HEAD request and return status code."""
@@ -140,10 +133,13 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     if not message:  # display "downloading [filename]"
         message = localize(30015, filename=filename)  # Downloading file
 
-    total_length = int(req.info().get('content-length'))
+    total_length = int(req.info().get('content-length', 0))
+    if total_length == 0:
+        log(2, 'No content-length header available, download may not progress as expected.')
+
     if dl_size and dl_size != total_length:
         log(2, 'The given file size does not match the request!')
-        dl_size = total_length  # Otherwise size check at end would fail even if dl succeeded
+        dl_size = total_length
 
     if background:
         progress = bg_progress_dialog()
@@ -153,38 +149,27 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
     starttime = time()
     chunk_size = 32 * 1024
+    size = 0
     with open(compat_path(dl_path), 'wb') as image:
-        size = 0
-        while size < total_length:
-            try:
-                chunk = req.read(chunk_size)
-            except (timeout, SSLError):
-                req.close()
-                if not yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30064),
-                                                                               line2=localize(30065))):  # Could not finish dl. Try again?
-                    progress.close()
-                    return False
-
-                headers = {'Range': 'bytes={}-{}'.format(size, total_length)}
-                req = _http_request(url, headers=headers)
-                if req is None:
-                    return None
-                continue
+        while True:
+            chunk = req.read(chunk_size)
+            if not chunk:
+                break
 
             image.write(chunk)
             if checksum:
                 calc_checksum.update(chunk)
             size += len(chunk)
-            percent = int(round(size * 100 / total_length))
+            percent = int(round(size * 100 / total_length)) if total_length > 0 else 0
             if not background and progress.iscanceled():
                 progress.close()
                 req.close()
                 return False
-            if time() - starttime > 5:
+            if time() - starttime > 5 and size > 0:
                 time_left = int(round((total_length - size) * (time() - starttime) / size))
                 prog_message = '{line1}\n{line2}'.format(
                     line1=message,
-                    line2=localize(30058, mins=time_left // 60, secs=time_left % 60))  # Time remaining
+                    line2=localize(30058, mins=time_left // 60, secs=time_left % 60))
             else:
                 prog_message = message
 
@@ -197,15 +182,13 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
     size_ok = (not dl_size or stat_file(dl_path).st_size() == dl_size)
 
     if not all((checksum_ok, size_ok)):
-        free_space = sizeof_fmt(diskspace())
         log(4, 'Something may be wrong with the downloaded file.')
         if not checksum_ok:
             log(4, 'Provided checksum: {}\nCalculated checksum: {}'.format(checksum, calc_checksum.hexdigest()))
         if not size_ok:
             free_space = sizeof_fmt(diskspace())
             log(4, 'Expected filesize: {}\nReal filesize: {}\nRemaining diskspace: {}'.format(dl_size, stat_file(dl_path).st_size(), free_space))
-
-        if yesno_dialog(localize(30003), localize(30070, filename=filename)):  # file maybe broken. Continue anyway?
+        if yesno_dialog(localize(30003), localize(30070, filename=filename)):
             log(4, 'Continuing despite possibly corrupt file!')
         else:
             return False

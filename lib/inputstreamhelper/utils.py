@@ -355,9 +355,13 @@ def hardlink(src, dest):
 
 
 def remove_tree(path):
-    """Remove an entire directory tree"""
+    """Remove an entire directory tree and log any file not found errors."""
     from shutil import rmtree
-    rmtree(compat_path(path))
+
+    try:
+        rmtree(compat_path(path))
+    except FileNotFoundError as e:
+        log(4, f'Error removing tree: {e}')
 
 
 def parse_version(vstring):

@@ -3,12 +3,15 @@
 """Implements ARM specific widevine functions"""
 
 from __future__ import absolute_import, division, unicode_literals
-import os
+
 import json
+import os
 
 from .. import config
-from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, system_os, update_temp_path, userspace64
+from ..kodiutils import (browsesingle, localize, log, ok_dialog, open_file,
+                         progress_dialog, yesno_dialog)
+from ..utils import (diskspace, http_download, http_get, parse_version,
+                     sizeof_fmt, system_os, update_temp_path, userspace64)
 from .arm_chromeos import ChromeOSImage
 from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
 

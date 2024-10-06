@@ -94,7 +94,8 @@ def addon_version(addon_name=None):
     return get_addon_info('version', addon)
 
 
-def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):  # pylint: disable=invalid-name,redefined-builtin
+# pylint: disable=invalid-name,redefined-builtin,too-many-positional-arguments
+def browsesingle(type, heading, shares='', mask='', useThumbs=False, treatAsFolder=False, defaultt=None):
     """Show a Kodi browseSingle dialog"""
     from xbmcgui import Dialog
     if not heading:

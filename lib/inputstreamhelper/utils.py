@@ -75,7 +75,7 @@ def download_path(url):
 def _http_request(url, headers=None, time_out=30):
     """Make a robust HTTP request handling redirections."""
     try:
-        response = urlopen(url, timeout=time_out) # pylint: disable=consider-using-with:w
+        response = urlopen(url, timeout=time_out)  # pylint: disable=consider-using-with:w
         if response.status in [301, 302, 303, 307, 308]:  # Handle redirections
             new_url = response.getheader('Location')
             log(1, f"Redirecting to {new_url}")
@@ -90,16 +90,17 @@ def _http_request(url, headers=None, time_out=30):
         log(2, f"HTTP request timed out: {err}")
         return None
 
+
 def http_get(url):
     """Perform an HTTP GET request and return content"""
     req = _http_request(url)
     if req is None:
         return None
-
     content = req.read()
     # NOTE: Do not log reponse (as could be large)
     # log(0, 'Response: {response}', response=content)
     return content.decode("utf-8")
+
 
 def http_head(url):
     """Perform an HTTP HEAD request and return status code."""
@@ -111,7 +112,8 @@ def http_head(url):
     except HTTPError as exc:
         return exc.getcode()
 
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False): # pylint: disable=too-many-statements
+
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:
         from hashlib import md5, sha1

@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 
-from .xbmcextra import kodi_to_ansi
+from xbmcextra import kodi_to_ansi
 
 
 class Control:

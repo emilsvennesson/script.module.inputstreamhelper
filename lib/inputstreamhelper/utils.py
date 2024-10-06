@@ -113,17 +113,12 @@ def http_head(url):
         return exc.getcode()
 
 
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
+# pylint: disable=too-many-positional-arguments
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):
     """Makes HTTP request and displays a progress dialog on download."""
-    if checksum:
-        from hashlib import md5, sha1
-        if hash_alg == 'sha1':
-            calc_checksum = sha1()
-        elif hash_alg == 'md5':
-            calc_checksum = md5()
-        else:
-            log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
-            checksum = None
+    calc_checksum = _initialize_checksum(checksum, hash_alg)
+    if checksum and not calc_checksum:
+        checksum = None
 
     response = _http_request(url)
     if response is None:
@@ -139,15 +134,51 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
         log(2, 'The given file size does not match the request!')
         dl_size = total_length
 
-    if background:
-        progress = bg_progress_dialog()
-    else:
-        progress = progress_dialog()
-    progress.create(localize(30014), message=message)  # Download in progress
+    progress = _create_progress_dialog(background, message)
 
+    success = _download_file(response, dl_path, calc_checksum, total_length, message, progress, background)
+
+    progress.close()
+    response.close()
+
+    if not success:
+        return False
+
+    checksum_ok = _verify_checksum(checksum, calc_checksum)
+    size_ok = _verify_size(dl_size, dl_path)
+
+    if not checksum_ok or not size_ok:
+        if not _handle_corrupt_file(dl_size, dl_path, checksum, calc_checksum, filename):
+            return False
+
+    return dl_path
+
+
+def _initialize_checksum(checksum, hash_alg):
+    if not checksum:
+        return None
+
+    from hashlib import md5, sha1
+    if hash_alg == 'sha1':
+        return sha1()
+    if hash_alg == 'md5':
+        return md5()
+    log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
+    return None
+
+
+def _create_progress_dialog(background, message):
+    progress = bg_progress_dialog() if background else progress_dialog()
+    progress.create(localize(30014), message=message)  # Download in progress
+    return progress
+
+
+# pylint: disable=too-many-positional-arguments
+def _download_file(response, dl_path, calc_checksum, total_length, message, progress, background):
     starttime = time()
     chunk_size = 32 * 1024
     size = 0
+
     with open(compat_path(dl_path), 'wb') as image:
         while True:
             chunk = response.read(chunk_size)
@@ -155,14 +186,14 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
                 break
 
             image.write(chunk)
-            if checksum:
+            if calc_checksum:
                 calc_checksum.update(chunk)
             size += len(chunk)
             percent = int(round(size * 100 / total_length)) if total_length > 0 else 0
+
             if not background and progress.iscanceled():
-                progress.close()
-                response.close()
                 return False
+
             if time() - starttime > 5 and size > 0:
                 time_left = int(round((total_length - size) * (time() - starttime) / size))
                 prog_message = '{line1}\n{line2}'.format(
@@ -173,25 +204,36 @@ def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=Non
 
             progress.update(percent, prog_message)
 
-    progress.close()
-    response.close()
+    return True
 
-    checksum_ok = (not checksum or calc_checksum.hexdigest() == checksum)
-    size_ok = (not dl_size or stat_file(dl_path).st_size() == dl_size)
 
-    if not all((checksum_ok, size_ok)):
-        log(4, 'Something may be wrong with the downloaded file.')
-        if not checksum_ok:
-            log(4, 'Provided checksum: {}\nCalculated checksum: {}'.format(checksum, calc_checksum.hexdigest()))
-        if not size_ok:
-            free_space = sizeof_fmt(diskspace())
-            log(4, 'Expected filesize: {}\nReal filesize: {}\nRemaining diskspace: {}'.format(dl_size, stat_file(dl_path).st_size(), free_space))
-        if yesno_dialog(localize(30003), localize(30070, filename=filename)):
-            log(4, 'Continuing despite possibly corrupt file!')
-        else:
-            return False
+def _verify_checksum(checksum, calc_checksum):
+    if not checksum:
+        return True
+    if calc_checksum:
+        return calc_checksum.hexdigest() == checksum
+    return False
 
-    return dl_path
+
+def _verify_size(dl_size, dl_path):
+    if not dl_size:
+        return True
+    return stat_file(dl_path).st_size() == dl_size
+
+
+def _handle_corrupt_file(dl_size, dl_path, checksum, calc_checksum, filename):
+    log(4, 'Something may be wrong with the downloaded file.')
+    if checksum and calc_checksum:
+        log(4, 'Provided checksum: {}\nCalculated checksum: {}'.format(checksum, calc_checksum.hexdigest()))
+    if dl_size:
+        free_space = sizeof_fmt(diskspace())
+        log(4, 'Expected filesize: {}\nReal filesize: {}\nRemaining diskspace: {}'.format(
+            dl_size, stat_file(dl_path).st_size(), free_space))
+    if yesno_dialog(localize(30003), localize(30070, filename=filename)):
+        log(4, 'Continuing despite possibly corrupt file!')
+        return True
+
+    return False
 
 
 def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value

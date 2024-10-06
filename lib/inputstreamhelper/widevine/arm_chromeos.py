@@ -3,13 +3,14 @@
 """Implements a class with methods related to the Chrome OS image"""
 
 from __future__ import absolute_import, division, unicode_literals
+
 import os
+from io import UnsupportedOperation
 from struct import calcsize, unpack
 from zipfile import ZipFile
-from io import UnsupportedOperation
 
-from ..kodiutils import exists, localize, log, mkdirs
 from .. import config
+from ..kodiutils import exists, localize, log, mkdirs
 from ..unicodes import compat_path
 
 

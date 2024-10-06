@@ -3,7 +3,6 @@
 """Configuration variables for inpustreamhelper"""
 from __future__ import absolute_import, division, unicode_literals
 
-
 INPUTSTREAM_PROTOCOLS = {
     'mpd': 'inputstream.adaptive',
     'ism': 'inputstream.adaptive',

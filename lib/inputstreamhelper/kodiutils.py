@@ -3,16 +3,13 @@
 """Implements Kodi Helper functions"""
 
 from __future__ import absolute_import, division, unicode_literals
+
 from contextlib import contextmanager
+
 import xbmc
 import xbmcaddon
 from xbmcgui import DialogProgress, DialogProgressBG
-
-try:  # Kodi v19 or newer
-    from xbmcvfs import translatePath
-except ImportError:  # Kodi v18 and older
-    # pylint: disable=ungrouped-imports
-    from xbmc import translatePath
+from xbmcvfs import translatePath
 
 from .unicodes import from_unicode, to_unicode
 
@@ -33,18 +30,10 @@ class progress_dialog(DialogProgress, object):  # pylint: disable=invalid-name,u
 
     def create(self, heading, message=''):  # pylint: disable=arguments-differ
         """Create and show a progress dialog"""
-        if kodi_version_major() < 19:
-            lines = message.split('\n', 2)
-            line1, line2, line3 = (lines + [None] * (3 - len(lines)))
-            return super(progress_dialog, self).create(heading, line1=line1, line2=line2, line3=line3)
         return super(progress_dialog, self).create(heading, message=message)
 
     def update(self, percent, message=''):  # pylint: disable=arguments-differ
         """Update the progress dialog"""
-        if kodi_version_major() < 19:
-            lines = message.split('\n', 2)
-            line1, line2, line3 = (lines + [None] * (3 - len(lines)))
-            return super(progress_dialog, self).update(percent, line1=line1, line2=line2, line3=line3)
         return super(progress_dialog, self).update(percent, message=message)
 
 
@@ -127,8 +116,6 @@ def ok_dialog(heading='', message=''):
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
-    if kodi_version_major() < 19:
-        return Dialog().ok(heading=heading, line1=message)
     return Dialog().ok(heading=heading, message=message)
 
 
@@ -155,8 +142,6 @@ def yesno_dialog(heading='', message='', nolabel=None, yeslabel=None, autoclose=
     from xbmcgui import Dialog
     if not heading:
         heading = ADDON.getAddonInfo('name')
-    if kodi_version_major() < 19:
-        return Dialog().yesno(heading=heading, line1=message, nolabel=nolabel, yeslabel=yeslabel, autoclose=autoclose)
     return Dialog().yesno(heading=heading, message=message, nolabel=nolabel, yeslabel=yeslabel, autoclose=autoclose)
 
 

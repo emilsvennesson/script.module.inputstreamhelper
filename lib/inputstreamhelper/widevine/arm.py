@@ -10,7 +10,10 @@ from .. import config
 from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
 from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, system_os, update_temp_path, userspace64
 from .arm_chromeos import ChromeOSImage
-from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
+try:
+    from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
+except (ImportError, OSError):
+    cdm_from_lacros = install_widevine_arm_lacros = None
 
 
 def select_best_chromeos_image(devices):
@@ -153,7 +156,7 @@ def extract_widevine_chromeos(backup_path, image_path, image_version):
 
 def install_widevine_arm(backup_path):
     """Wrapper for installing widevine either from Chrome browser image or Chrome OS image"""
-    if cdm_from_lacros():
+    if cdm_from_lacros and cdm_from_lacros():
         return install_widevine_arm_lacros(backup_path)
 
     return install_widevine_arm_chromeos(backup_path)

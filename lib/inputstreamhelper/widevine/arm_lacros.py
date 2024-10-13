@@ -4,7 +4,11 @@
 
 import os
 import json
-from ctypes.util import find_library
+try:
+    from ctypes.util import find_library
+except FileNotFoundError:
+    def find_library(name):
+        return None
 
 from .repo import cdm_from_repo
 from .. import config

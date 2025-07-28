@@ -20,7 +20,8 @@ WIDEVINE_CDM_FILENAME = {
     'Android': None,
     'Linux': 'libwidevinecdm.so',
     'Windows': 'widevinecdm.dll',
-    'Darwin': 'libwidevinecdm.dylib'
+    'Darwin': 'libwidevinecdm.dylib',
+    'webOS': None
 }
 
 ARCH_MAP = {
@@ -58,14 +59,16 @@ WIDEVINE_SUPPORTED_OS = [
     'Android',
     'Linux',
     'Windows',
-    'Darwin'
+    'Darwin',
+    'webOS'
 ]
 
 WIDEVINE_MINIMUM_KODI_VERSION = {
     'Android': '18.0',
     'Windows': '18.0',
     'Linux': '18.0',
-    'Darwin': '18.0'
+    'Darwin': '18.0',
+    'webOS': '22.0'
 }
 
 WIDEVINE_VERSIONS_URL = 'https://dl.google.com/widevine-cdm/versions.txt'

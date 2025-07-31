@@ -359,7 +359,7 @@ class Helper:
 
     def _check_widevine(self):
         """Checks that all Widevine components are installed and available."""
-        if system_os() == 'Android':  # no checks needed for Android
+        if system_os() == 'Android' or system_os() == 'webOS':  # no checks needed for Android or webOS
             return True
 
         if not exists(widevine_config_path()):
@@ -471,6 +471,8 @@ class Helper:
 
         if system_os() == 'Android':
             text += localize(30820) + '\n'
+        elif system_os() == 'webOS':
+            text += localize(30826) + '\n'
         else:
             from time import localtime, strftime
             if get_setting_float('last_modified', 0.0):

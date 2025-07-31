@@ -96,7 +96,7 @@ def widevinecdm_path():
 
 def has_widevinecdm():
     """Whether a Widevine CDM is installed on the system"""
-    if system_os() == 'Android':  # Widevine CDM is built into Android
+    if system_os() == 'Android' or system_os() == 'webOS':  # Widevine CDM is built into Android and webOS
         return True
 
     widevinecdm = widevinecdm_path()

@@ -245,6 +245,8 @@ def system_os():
     from xbmc import getCondVisibility
     if getCondVisibility('system.platform.android'):
         sys_name = 'Android'
+    elif getCondVisibility('system.platform.webos'):
+        sys_name = 'webOS'
     else:
         from platform import system
         sys_name = system()

@@ -9,7 +9,6 @@ import re
 import struct
 from functools import total_ordering
 from socket import timeout
-from ssl import SSLError
 from time import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -73,26 +72,23 @@ def download_path(url):
     return os.path.join(temp_path(), filename)
 
 
-def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return request"""
-    log(0, 'Request URL: {url}', url=url)
-
+def _http_request(url, headers=None, time_out=30):
+    """Make a robust HTTP request handling redirections."""
     try:
-        if headers:
-            request = Request(url, headers=headers)
-        else:
-            request = Request(url)
-        req = urlopen(request, timeout=time_out)
-        log(0, 'Response code: {code}', code=req.getcode())
-        if 400 <= req.getcode() < 600:
-            raise HTTPError('HTTP {} Error for url: {}'.format(req.getcode(), url), response=req)
+        response = urlopen(url, timeout=time_out)  # pylint: disable=consider-using-with:w
+        if response.status in [301, 302, 303, 307, 308]:  # Handle redirections
+            new_url = response.getheader('Location')
+            log(1, f"Redirecting to {new_url}")
+            return _http_request(new_url, time_out)
+        return response  # Return the response for streaming
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
-        if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
+        if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):
             return _http_request(url, headers, time_out)
         return None
-
-    return req
+    except timeout as err:
+        log(2, f"HTTP request timed out: {err}")
+        return None
 
 
 def http_get(url):
@@ -100,7 +96,6 @@ def http_get(url):
     req = _http_request(url)
     if req is None:
         return None
-
     content = req.read()
     # NOTE: Do not log reponse (as could be large)
     # log(0, 'Response: {response}', response=content)
@@ -108,108 +103,137 @@ def http_get(url):
 
 
 def http_head(url):
-    """Perform an HTTP HEAD request and return status code"""
+    """Perform an HTTP HEAD request and return status code."""
     req = Request(url)
     req.get_method = lambda: 'HEAD'
     try:
-        resp = urlopen(req)
-        return resp.getcode()
+        with urlopen(req) as resp:
+            return resp.getcode()
     except HTTPError as exc:
         return exc.getcode()
 
 
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
+# pylint: disable=too-many-positional-arguments
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):
     """Makes HTTP request and displays a progress dialog on download."""
-    if checksum:
-        from hashlib import md5, sha1
-        if hash_alg == 'sha1':
-            calc_checksum = sha1()
-        elif hash_alg == 'md5':
-            calc_checksum = md5()
-        else:
-            log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
-            checksum = None
+    calc_checksum = _initialize_checksum(checksum, hash_alg)
+    if checksum and not calc_checksum:
+        checksum = None
 
-    req = _http_request(url)
-    if req is None:
+    response = _http_request(url)
+    if response is None:
         return None
 
     dl_path = download_path(url)
     filename = os.path.basename(dl_path)
-    if not message:  # display "downloading [filename]"
+    if not message:
         message = localize(30015, filename=filename)  # Downloading file
 
-    total_length = int(req.info().get('content-length'))
+    total_length = int(response.info().get('content-length', 0))
     if dl_size and dl_size != total_length:
         log(2, 'The given file size does not match the request!')
-        dl_size = total_length  # Otherwise size check at end would fail even if dl succeeded
+        dl_size = total_length
 
-    if background:
-        progress = bg_progress_dialog()
-    else:
-        progress = progress_dialog()
+    progress = _create_progress_dialog(background, message)
+
+    success = _download_file(response, dl_path, calc_checksum, total_length, message, progress, background)
+
+    progress.close()
+    response.close()
+
+    if not success:
+        return False
+
+    checksum_ok = _verify_checksum(checksum, calc_checksum)
+    size_ok = _verify_size(dl_size, dl_path)
+
+    if not checksum_ok or not size_ok:
+        if not _handle_corrupt_file(dl_size, dl_path, checksum, calc_checksum, filename):
+            return False
+
+    return dl_path
+
+
+def _initialize_checksum(checksum, hash_alg):
+    if not checksum:
+        return None
+
+    from hashlib import md5, sha1
+    if hash_alg == 'sha1':
+        return sha1()
+    if hash_alg == 'md5':
+        return md5()
+    log(4, 'Invalid hash algorithm specified: {}'.format(hash_alg))
+    return None
+
+
+def _create_progress_dialog(background, message):
+    progress = bg_progress_dialog() if background else progress_dialog()
     progress.create(localize(30014), message=message)  # Download in progress
+    return progress
 
+
+# pylint: disable=too-many-positional-arguments
+def _download_file(response, dl_path, calc_checksum, total_length, message, progress, background):
     starttime = time()
     chunk_size = 32 * 1024
-    with open(compat_path(dl_path), 'wb') as image:
-        size = 0
-        while size < total_length:
-            try:
-                chunk = req.read(chunk_size)
-            except (timeout, SSLError):
-                req.close()
-                if not yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30064),
-                                                                               line2=localize(30065))):  # Could not finish dl. Try again?
-                    progress.close()
-                    return False
+    size = 0
 
-                headers = {'Range': 'bytes={}-{}'.format(size, total_length)}
-                req = _http_request(url, headers=headers)
-                if req is None:
-                    return None
-                continue
+    with open(compat_path(dl_path), 'wb') as image:
+        while True:
+            chunk = response.read(chunk_size)
+            if not chunk:
+                break
 
             image.write(chunk)
-            if checksum:
+            if calc_checksum:
                 calc_checksum.update(chunk)
             size += len(chunk)
-            percent = int(round(size * 100 / total_length))
+            percent = int(round(size * 100 / total_length)) if total_length > 0 else 0
+
             if not background and progress.iscanceled():
-                progress.close()
-                req.close()
                 return False
-            if time() - starttime > 5:
+
+            if time() - starttime > 5 and size > 0:
                 time_left = int(round((total_length - size) * (time() - starttime) / size))
                 prog_message = '{line1}\n{line2}'.format(
                     line1=message,
-                    line2=localize(30058, mins=time_left // 60, secs=time_left % 60))  # Time remaining
+                    line2=localize(30058, mins=time_left // 60, secs=time_left % 60))
             else:
                 prog_message = message
 
             progress.update(percent, prog_message)
 
-    progress.close()
-    req.close()
+    return True
 
-    checksum_ok = (not checksum or calc_checksum.hexdigest() == checksum)
-    size_ok = (not dl_size or stat_file(dl_path).st_size() == dl_size)
 
-    if not all((checksum_ok, size_ok)):
+def _verify_checksum(checksum, calc_checksum):
+    if not checksum:
+        return True
+    if calc_checksum:
+        return calc_checksum.hexdigest() == checksum
+    return False
+
+
+def _verify_size(dl_size, dl_path):
+    if not dl_size:
+        return True
+    return stat_file(dl_path).st_size() == dl_size
+
+
+def _handle_corrupt_file(dl_size, dl_path, checksum, calc_checksum, filename):
+    log(4, 'Something may be wrong with the downloaded file.')
+    if checksum and calc_checksum:
+        log(4, 'Provided checksum: {}\nCalculated checksum: {}'.format(checksum, calc_checksum.hexdigest()))
+    if dl_size:
         free_space = sizeof_fmt(diskspace())
-        log(4, 'Something may be wrong with the downloaded file.')
-        if not checksum_ok:
-            log(4, 'Provided checksum: {}\nCalculated checksum: {}'.format(checksum, calc_checksum.hexdigest()))
-        if not size_ok:
-            free_space = sizeof_fmt(diskspace())
-            log(4, 'Expected filesize: {}\nReal filesize: {}\nRemaining diskspace: {}'.format(dl_size, stat_file(dl_path).st_size(), free_space))
+        log(4, 'Expected filesize: {}\nReal filesize: {}\nRemaining diskspace: {}'.format(
+            dl_size, stat_file(dl_path).st_size(), free_space))
+    if yesno_dialog(localize(30003), localize(30070, filename=filename)):
+        log(4, 'Continuing despite possibly corrupt file!')
+        return True
 
-        if yesno_dialog(localize(30003), localize(30070, filename=filename)):  # file maybe broken. Continue anyway?
-            log(4, 'Continuing despite possibly corrupt file!')
-        else:
-            return False
-
-    return dl_path
+    return False
 
 
 def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disable=dangerous-default-value

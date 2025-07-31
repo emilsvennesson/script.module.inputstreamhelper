@@ -40,7 +40,7 @@ def widevine_eula():
         cdm_arch = config.WIDEVINE_ARCH_MAP_REPO[arch()]
     else:  # Grab the license from the x86 files
         log(0, 'Acquiring Widevine EULA from x86 files.')
-        cdm_version = '4.10.2830.0' # fine to hardcode as it's only used for the EULA
+        cdm_version = '4.10.2830.0'  # fine to hardcode as it's only used for the EULA
         cdm_os = 'mac'
         cdm_arch = 'x64'
 

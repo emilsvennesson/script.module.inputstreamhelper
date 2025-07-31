@@ -194,7 +194,11 @@ def remove_old_backups(bpath):
     while len(versions) > max_backups + 1:
         remove_version = str(versions[1] if versions[0] == parse_version(installed_version) else versions[0])
         log(0, 'Removing oldest backup which is not installed: {version}', version=remove_version)
-        remove_tree(os.path.join(bpath, remove_version))
+        removed = remove_tree(os.path.join(bpath, remove_version))
+        if not removed:
+            log(4, 'Failed to remove {version} backup.', version=remove_version)
+            break
+
         versions = sorted([parse_version(version) for version in listdir(bpath)])
 
     return

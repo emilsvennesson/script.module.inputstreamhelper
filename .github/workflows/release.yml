@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
       - name: Build zip files
         run: |
           sudo apt-get update
@@ -18,19 +18,19 @@ jobs:
       - name: Get Matrix filename
         id: get-matrix-filename
         run: |
-          echo ::set-output name=matrix-filename::$(cd ..;ls script.module.inputstreamhelper*.zip | head -1)
+          echo matrix-filename=$(cd ..;ls script.module.inputstreamhelper*.zip | head -1) >> $GITHUB_OUTPUT
       - name: Get body
         id: get-body
         run: |
           description=$(sed '1,/^## Releases$/d;/## v[0-9\.]* ([0-9-]*)/d;/^$/,$d' README.md)
           echo $description
-          description="${description//'%'/'%25'}"
-          description="${description//$'\n'/'%0A'}"
-          description="${description//$'\r'/'%0D'}" 
-          echo ::set-output name=body::$description
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "body<<$EOF" >> $GITHUB_OUTPUT
+          echo "$description" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -39,19 +39,11 @@ jobs:
           body: ${{ steps.get-body.outputs.body }}
           draft: false
           prerelease: false
-      - name: Upload Matrix zip
-        id: upload-matrix-zip 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_name: ${{ steps.get-matrix-filename.outputs.matrix-filename }}
-          asset_path: ../${{ steps.get-matrix-filename.outputs.matrix-filename }}
-          asset_content_type: application/zip
+          files: |
+            ../${{ steps.get-matrix-filename.outputs.matrix-filename }}
       - name: Generate distribution zip and submit to official kodi repository
         id: kodi-addon-submitter
-        uses: xbmc/action-kodi-addon-submitter@master
+        uses: mediaminister/action-kodi-addon-submitter@master
         with:
           kodi-repository: repo-scripts
           kodi-version: matrix

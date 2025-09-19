@@ -5,7 +5,6 @@
 
 # flake8: noqa: FI14; pylint: disable=invalid-name,no-self-use,unused-argument
 
-from __future__ import absolute_import, division, print_function
 import os
 import json
 import time
@@ -229,7 +228,7 @@ def executeJSONRPC(jsonrpccommand):
 
 def getCondVisibility(string):
     """A reimplementation of the xbmc getCondVisibility() function"""
-    if string == 'system.platform.android':
+    if string in ('system.platform.android', 'system.platform.webos'):
         return False
     if string.startswith('System.HasAddon'):
         return True

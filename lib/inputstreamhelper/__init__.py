@@ -2,9 +2,7 @@
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements the main InputStream Helper class"""
 
-from __future__ import absolute_import, division, unicode_literals
 import os
-import json
 
 from . import config
 from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies, get_setting, get_setting_bool, get_setting_float, get_setting_int, jsonrpc,
@@ -12,12 +10,12 @@ from .kodiutils import (addon_version, browsesingle, delete, exists, get_proxies
                         set_setting, set_setting_bool, textviewer, translate_path, yesno_dialog)
 from .utils import arch, download_path, http_download, parse_version, remove_tree, system_os, temp_path, unzip, userspace64
 from .widevine.arm import dl_extract_widevine_chromeos, extract_widevine_chromeos, install_widevine_arm
-from .widevine.arm_lacros import cdm_from_lacros, latest_lacros
+from .widevine.arm_lacros import cdm_from_lacros
 from .widevine.widevine import (backup_path, has_widevinecdm, ia_cdm_path,
                                 install_cdm_from_backup, latest_widevine_version,
                                 load_widevine_config, missing_widevine_libs, widevine_config_path,
                                 widevine_eula, widevinecdm_path)
-from .widevine.repo import cdm_from_repo, choose_widevine_from_repo, latest_widevine_available_from_repo
+from .widevine.repo import cdm_from_repo, latest_widevine_available_from_repo
 from .unicodes import compat_path
 
 # NOTE: Work around issue caused by platform still using os.popen()
@@ -33,8 +31,7 @@ class InputStreamException(Exception):
 def cleanup_decorator(func):
     """Decorator which runs cleanup before and after a function"""
 
-    def clean_before_after(self, *args, **kwargs):  # pylint: disable=missing-docstring
-        # pylint only complains about a missing docstring on py2.7?
+    def clean_before_after(self, *args, **kwargs):
         self.cleanup()
         result = func(self, *args, **kwargs)
         self.cleanup()
@@ -68,10 +65,7 @@ class Helper:
         # Add proxy support to HTTP requests
         proxies = get_proxies()
         if proxies:
-            try:  # Python 3
-                from urllib.request import build_opener, install_opener, ProxyHandler
-            except ImportError:  # Python 2
-                from urllib2 import build_opener, install_opener, ProxyHandler
+            from urllib.request import build_opener, install_opener, ProxyHandler
             install_opener(build_opener(ProxyHandler(proxies)))
 
     def __repr__(self):
@@ -178,12 +172,9 @@ class Helper:
         return True
 
     @staticmethod
-    def _install_widevine_from_repo(bpath, choose_version=False):
+    def _install_widevine_from_repo(bpath):
         """Install Widevine CDM from Google's library CDM repository"""
-        if choose_version:
-            cdm = choose_widevine_from_repo()
-        else:
-            cdm = latest_widevine_available_from_repo()
+        cdm = latest_widevine_available_from_repo(config.WIDEVINE_OS_MAP[system_os()], config.WIDEVINE_ARCH_MAP_REPO[arch()])
 
         if not cdm:
             return cdm
@@ -197,7 +188,8 @@ class Helper:
         if dl_path:
             progress = progress_dialog()
             progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
-            unzip(dl_path, os.path.join(bpath, cdm_version, ''))
+            unzip(dl_path, os.path.join(bpath, cdm_version, ''), file_to_unzip=[config.WIDEVINE_LICENSE_FILE,
+                  config.WIDEVINE_MANIFEST_FILE, config.WIDEVINE_CDM_FILENAME[system_os()]])
 
             return (progress, cdm_version)
 
@@ -231,7 +223,7 @@ class Helper:
             return False
 
         if cdm_from_repo():
-            result = self._install_widevine_from_repo(backup_path(), choose_version=choose_version)
+            result = self._install_widevine_from_repo(backup_path())
         else:
             if choose_version:
                 log(1, "Choosing a version to install is only implemented if the lib is found in googles repo.")
@@ -369,7 +361,7 @@ class Helper:
 
         if cdm_from_repo():  # check that widevine arch matches system arch
             wv_config = load_widevine_config()
-            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config['arch']:
+            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config['platforms'][0]['arch']:
                 log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()

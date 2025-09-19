@@ -3,7 +3,6 @@
 # Copyright: (c) 2019, Dag Wieers (@dagwieers) <dag@wieers.com>
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from __future__ import absolute_import, division, unicode_literals
 from setuptools import setup, find_packages
 import os
 from xml.dom.minidom import parse

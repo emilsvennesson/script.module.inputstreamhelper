@@ -3,9 +3,8 @@
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """This file implements the Kodi xbmcgui module, either using stubs or alternative functionality"""
 
-# flake8: noqa: FI14; pylint: disable=invalid-name,super-on-old-class,too-few-public-methods,too-many-arguments,unused-argument,useless-super-delegation
+# flake8: noqa: FI14; pylint: disable=invalid-name,super-on-old-class,too-few-public-methods,too-many-positional-arguments,unused-argument,useless-super-delegation
 
-from __future__ import absolute_import, division, print_function
 import sys
 from xbmcextra import kodi_to_ansi
 
@@ -24,7 +23,7 @@ class Control:
 class ControlLabel(Control):
     """A reimplementation of the xbmcgui ControlLabel class"""
 
-    def __init__(self):  # pylint: disable=super-init-not-called
+    def __init__(self):
         """A stub constructor for the xbmcgui ControlLabel class"""
 
     @staticmethod

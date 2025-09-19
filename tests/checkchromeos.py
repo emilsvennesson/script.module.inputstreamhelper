@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Check Chrome OS recovery images availability"""
 
-from __future__ import absolute_import, division, print_function, unicode_literals
 from xml.etree import ElementTree as ET
 import requests
 from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_BNAMES, CHROMEOS_RECOVERY_ARM64_BNAMES, CHROMEOS_RECOVERY_URL

@@ -2,8 +2,6 @@
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements various Helper functions"""
 
-from __future__ import absolute_import, division, unicode_literals
-
 import os
 import re
 import struct
@@ -23,6 +21,7 @@ from .unicodes import compat_path, from_unicode, to_unicode
 
 @total_ordering
 class Version:
+    """Implements Version"""
     def __init__(self, *components):
         self.components = list(components)
 
@@ -39,7 +38,7 @@ class Version:
         for self_comp, other_comp in zip(extended_self, extended_other):
             if self_comp < other_comp:
                 return True
-            elif self_comp > other_comp:
+            if self_comp > other_comp:
                 return False
         return False  # return False if all comparisons are equal
 
@@ -47,9 +46,10 @@ class Version:
         # Uses the same logic for equality
         return not self < other and not other < self
 
+
 def temp_path():
     """Return temporary path, usually ~/.kodi/userdata/addon_data/script.module.inputstreamhelper/temp/"""
-    tmp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp', ''))
+    tmp_path = translate_path(os.path.join(get_setting('temp_path', 'special://masterprofile/addon_data/script.module.inputstreamhelper'), 'temp'))
     if not exists(tmp_path):
         mkdirs(tmp_path)
 
@@ -73,26 +73,26 @@ def download_path(url):
     return os.path.join(temp_path(), filename)
 
 
-def _http_request(url, headers=None, time_out=10):
-    """Perform an HTTP request and return request"""
+def _http_request(url, data=None, headers=None, time_out=10):
+    """Perform an HTTP request and return response"""
     log(0, 'Request URL: {url}', url=url)
 
     try:
+        request = Request(url)
         if headers:
-            request = Request(url, headers=headers)
-        else:
-            request = Request(url)
-        req = urlopen(request, timeout=time_out)
-        log(0, 'Response code: {code}', code=req.getcode())
-        if 400 <= req.getcode() < 600:
-            raise HTTPError('HTTP {} Error for url: {}'.format(req.getcode(), url), response=req)
+            request.headers = headers
+        if data:
+            request.data = data
+        response = urlopen(request, timeout=time_out)  # pylint: disable=consider-using-with
+        log(0, 'Response code: {code}', code=response.getcode())
+        if 400 <= response.getcode() < 600:
+            raise HTTPError
     except (HTTPError, URLError) as err:
         log(2, 'Download failed with error {}'.format(err))
         if yesno_dialog(localize(30004), '{line1}\n{line2}'.format(line1=localize(30063), line2=localize(30065))):  # Internet down, try again?
             return _http_request(url, headers, time_out)
         return None
-
-    return req
+    return response
 
 
 def http_get(url):
@@ -112,13 +112,25 @@ def http_head(url):
     req = Request(url)
     req.get_method = lambda: 'HEAD'
     try:
-        resp = urlopen(req)
-        return resp.getcode()
+        with urlopen(req) as response:
+            return response.getcode()
     except HTTPError as exc:
         return exc.getcode()
 
 
-def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-statements
+def http_post(url, data, headers):
+    """Perform an HTTP POST request and return content"""
+    resp = _http_request(url, data, headers)
+    if resp is None:
+        return None
+
+    content = resp.read()
+    # NOTE: Do not log reponse (as could be large)
+    # log(0, 'Response: {response}', response=content)
+    return content.decode("utf-8")
+
+
+def http_download(url, message=None, checksum=None, hash_alg='sha1', dl_size=None, background=False):  # pylint: disable=too-many-positional-arguments, too-many-statements
     """Makes HTTP request and displays a progress dialog on download."""
     if checksum:
         from hashlib import md5, sha1
@@ -218,11 +230,19 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
     if not exists(destination):
         mkdirs(destination)
 
+    from shutil import copyfileobj
     from zipfile import ZipFile
     with ZipFile(compat_path(source)) as zip_obj:
         for filename in zip_obj.namelist():
-            if file_to_unzip and filename != file_to_unzip:
-                continue
+            if file_to_unzip:
+                # normalize to list
+                if isinstance(file_to_unzip, str):
+                    files = [file_to_unzip]
+                else:
+                    files = list(file_to_unzip)
+
+                if os.path.basename(filename) not in files:
+                    continue
 
             # Detect and remove (dangling) symlinks before extraction
             fullname = os.path.join(destination, filename)
@@ -230,7 +250,11 @@ def unzip(source, destination, file_to_unzip=None, result=[]):  # pylint: disabl
                 log(3, 'Remove (dangling) symlink at {symlink}', symlink=fullname)
                 delete(fullname)
 
-            zip_obj.extract(filename, compat_path(destination))
+            source = zip_obj.open(filename)
+            target = open(os.path.join(compat_path(destination), os.path.basename(filename)), 'wb')
+            with source, target:
+                copyfileobj(source, target)
+
             result.append(True)  # Pass by reference for Thread
 
     return bool(result)

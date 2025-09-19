@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Configuration variables for inpustreamhelper"""
-from __future__ import absolute_import, division, unicode_literals
 
 
 INPUTSTREAM_PROTOCOLS = {
@@ -45,12 +44,12 @@ WIDEVINE_SUPPORTED_ARCHS = [
 
 WIDEVINE_ARCH_MAP_REPO = {
     'x86_64': 'x64',
-    'x86': 'ia32',
+    'x86': 'x86',
     'arm64': 'arm64'
 }
 
 WIDEVINE_OS_MAP = {
-    'Linux': 'linux',
+    'Linux': 'Linux',
     'Windows': 'win',
     'Darwin': 'mac'
 }
@@ -75,7 +74,7 @@ WIDEVINE_VERSIONS_URL = 'https://dl.google.com/widevine-cdm/versions.txt'
 
 WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{version}-{os}-{arch}.zip'
 
-WIDEVINE_LICENSE_FILE = 'LICENSE.txt'
+WIDEVINE_LICENSE_FILE = 'LICENSE'
 
 WIDEVINE_MANIFEST_FILE = 'manifest.json'
 

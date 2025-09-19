@@ -2,7 +2,6 @@
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements various helper functions"""
 
-from __future__ import absolute_import, division, unicode_literals
 from shutil import rmtree
 
 import inputstreamhelper
@@ -14,6 +13,7 @@ def delete_cached():
     """Delete cached property from one or more objects"""
     if hasattr(inputstreamhelper.arch, 'cached'):
         del inputstreamhelper.arch.cached
+
 
 def cleanup():
     """Delete cdm directory before starting tests for different platform"""

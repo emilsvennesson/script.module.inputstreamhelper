@@ -2,7 +2,6 @@
 # MIT License (see LICENSE.txt or https://opensource.org/licenses/MIT)
 """Implements ARM specific widevine functions"""
 
-from __future__ import absolute_import, division, unicode_literals
 import os
 import json
 
@@ -100,7 +99,7 @@ def install_widevine_arm_chromeos(backup_path):
         extracted = dl_extract_widevine_chromeos(url, backup_path, arm_device)
         if extracted:
             recovery_file = os.path.join(backup_path, arm_device['version'], os.path.basename(config.CHROMEOS_RECOVERY_URL))
-            with open_file(recovery_file, 'w') as reco_file:  # pylint: disable=unspecified-encoding
+            with open_file(recovery_file, 'w') as reco_file:
                 reco_file.write(json.dumps(devices, indent=4))
 
             return extracted
@@ -112,7 +111,7 @@ def dl_extract_widevine_chromeos(url, backup_path, arm_device=None):
     """Download the ChromeOS image and extract Widevine from it"""
     if arm_device:
         dl_path = http_download(url, message=localize(30022), checksum=arm_device['sha1'], hash_alg='sha1',
-                                   dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
+                                dl_size=int(arm_device['zipfilesize']))  # Downloading the recovery image
         image_version = arm_device['version']
     else:
         dl_path = http_download(url, message=localize(30022))

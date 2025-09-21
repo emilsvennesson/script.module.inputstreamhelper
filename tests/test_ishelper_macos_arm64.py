@@ -21,6 +21,7 @@ class DarwinARM64Tests(unittest.TestCase):
         delete_cached()
         cleanup()
         inputstreamhelper.system_os = lambda: 'Darwin'
+        inputstreamhelper.widevine.widevine.system_os = lambda: 'Darwin'
         inputstreamhelper.widevine.repo.system_os = lambda: 'Darwin'
 
     def test_check_inputstream_mpd(self):

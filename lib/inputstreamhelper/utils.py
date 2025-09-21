@@ -366,6 +366,18 @@ def userspace64():
     return struct.calcsize('P') * 8 == 64
 
 
+def elfbinary64(path):
+    """To check if an ELF binary is 64bit or 32bit"""
+    with open(path, 'rb') as f:
+        f.seek(4)          # skip 0x7F 'E' 'L' 'F'
+        b = f.read(1)
+        if b == b'\x01':
+            return False
+        if b == b'\x02':
+            return True
+        raise ValueError('Not a valid ELF class')
+
+
 def hardlink(src, dest):
     """Hardlink a file when possible, copy when needed"""
     if exists(dest):

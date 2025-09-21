@@ -22,6 +22,7 @@ class WindowsARM64Tests(unittest.TestCase):
         delete_cached()
         cleanup()
         inputstreamhelper.system_os = lambda: 'Windows'
+        inputstreamhelper.widevine.widevine.system_os = lambda: 'Windows'
         inputstreamhelper.widevine.repo.system_os = lambda: 'Windows'
 
     def test_check_inputstream_mpd(self):

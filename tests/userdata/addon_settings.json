@@ -1,8 +1,11 @@
 {
     "inputstream.adaptive": {
-        "DECRYPTERPATH": "special://home/cdm"
+        "DECRYPTERPATH": "special://home/cdm",
+        "version": "21.5.15"
     },
-    "inputstream.rtmp": {},
+    "inputstream.rtmp": {
+        "version": "21.1.0"
+    },
     "script.module.inputstreamhelper": {
         "disabled": false,
         "last_modified": "88888",

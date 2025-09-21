@@ -16,10 +16,10 @@ class OutdatedException(Exception):
 
 def get_devices():
     """Get Chrome OS devices as json object"""
-    url = 'https://www.chromium.org/chromium-os/developer-information-for-chrome-os-devices'
+    url = 'https://www.chromium.org/chromium-os/developer-library/reference/development/developer-information-for-chrome-os-devices/'
     response = requests.get(url, timeout=10)
     response.raise_for_status()
-    html = response.text.split('<table>')[3].split('</table>')[0]
+    html = response.text.split('<table>')[-1].split('</table>')[0]
     html = '<table>' + html + '</table>'
     html = html.replace('&', '&#38;')
     html = html.replace('<white label>', 'white label')

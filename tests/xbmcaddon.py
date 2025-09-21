@@ -36,8 +36,6 @@ class Addon:
     def getSettingBool(self, key):
         """A working implementation for the xbmcaddon Addon class getSettingBool() method"""
         try:
-            print(self.settings.get(key, False))
-            print(bool(self.settings.get(key, False)))
             return bool(self.settings.get(key, False))
         except ValueError:
             return None

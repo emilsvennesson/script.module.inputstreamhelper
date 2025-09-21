@@ -99,9 +99,11 @@ CHROMEOS_RECOVERY_ARM64_BNAMES = [
     'asurada',
     'cherry',
     'corsola',
+    'geralt',
     'hana',
     'jacuzzi',
     'kukui',
+    'staryu',
     'strongbad',
     'trogdor',
 ]

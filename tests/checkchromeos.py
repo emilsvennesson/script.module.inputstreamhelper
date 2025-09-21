@@ -43,7 +43,7 @@ def get_arm_devices():
     devices = get_devices()
     arm_devices = []
     for device in devices:
-        if device.get('User ABI') == 'arm':
+        if device.get('User ABI').lower() in('arm', 'aarch64'):
             arm_devices.append(device)
     return arm_devices
 

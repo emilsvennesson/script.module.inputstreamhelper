@@ -270,11 +270,12 @@ class Helper:
         """Removes Widevine CDM"""
         if has_widevinecdm():
             widevinecdm = widevinecdm_path()
-            log(0, 'Removed Widevine CDM at {path}', path=widevinecdm)
-            delete(widevinecdm)
-            notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
-            set_setting('last_modified', '0.0')
-            return True
+            if widevinecdm:
+                log(0, 'Removed Widevine CDM at {path}', path=widevinecdm)
+                delete(widevinecdm)
+                notification(localize(30037), localize(30052))  # Success! Widevine successfully removed.
+                set_setting('last_modified', '0.0')
+                return True
         notification(localize(30004), localize(30053))  # Error. Widevine CDM not found.
         return False
 

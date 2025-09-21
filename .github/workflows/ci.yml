@@ -49,12 +49,18 @@ jobs:
       run: coverage run -m unittest tests/test_ishelper_android_arm.py
     - name: Run unit tests for Linux ARM
       run: coverage run -m unittest tests/test_ishelper_linux_arm.py
+    - name: Run unit tests for Linux ARM64
+      run: coverage run -m unittest tests/test_ishelper_linux_arm64.py
     - name: Run unit tests for Linux x64
       run: coverage run -m unittest tests/test_ishelper_linux_x64.py
     - name: Run unit tests for MacOS x64
       run: coverage run -m unittest tests/test_ishelper_macos_x64.py
+    - name: Run unit tests for MacOS arm64
+      run: coverage run -m unittest tests/test_ishelper_macos_arm64.py
     - name: Run unit tests for Windows x64
       run: coverage run -m unittest tests/test_ishelper_windows_x64.py
+    - name: Run unit tests for Windows arm64
+      run: coverage run -m unittest tests/test_ishelper_windows_arm64.py
     - name: Run unit tests for proxy
       run: coverage run -m unittest tests/test_proxy.py
     - name: Run addon using cli

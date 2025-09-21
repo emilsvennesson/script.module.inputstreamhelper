@@ -7,7 +7,7 @@ import json
 
 from .. import config
 from ..kodiutils import browsesingle, localize, log, ok_dialog, open_file, progress_dialog, yesno_dialog
-from ..utils import diskspace, http_download, http_get, parse_version, sizeof_fmt, system_os, update_temp_path, userspace64
+from ..utils import diskspace, elfbinary64, http_download, http_get, parse_version, sizeof_fmt, system_os, update_temp_path, userspace64
 from .arm_chromeos import ChromeOSImage
 from .arm_lacros import cdm_from_lacros, install_widevine_arm_lacros
 
@@ -138,11 +138,19 @@ def extract_widevine_chromeos(backup_path, image_path, image_version):
     progress = progress_dialog()
     progress.create(heading=localize(30043), message=localize(30044))  # Extracting Widevine CDM
 
-    extracted = ChromeOSImage(image_path, progress=progress).extract_file(
-        filename=config.WIDEVINE_CDM_FILENAME[system_os()],
-        extract_path=os.path.join(backup_path, image_version))
+    filename = config.WIDEVINE_CDM_FILENAME[system_os()]
+    extract_path = os.path.join(backup_path, image_version)
 
-    if not extracted:
+    extracted = ChromeOSImage(image_path, progress=progress).extract_file(
+        filename=filename,
+        extract_path=extract_path)
+
+    if extracted:
+        if not userspace64() == elfbinary64(os.path.join(extract_path, filename)):
+            log(4, 'Widevine CDM userspace mismatch. Please check Chrome OS Recovery image userspace')
+            progress.close()
+            return False
+    else:
         log(4, 'Extracting widevine from the zip failed!')
         progress.close()
         return False

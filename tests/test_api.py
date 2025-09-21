@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Copyright: (c) 2019, Dag Wieers (@dagwieers) <dag@wieers.com>
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 # pylint: disable=missing-docstring
@@ -16,24 +15,19 @@ xbmcvfs = __import__('xbmcvfs')
 
 class TestApi(unittest.TestCase):
 
-    @staticmethod
-    def test_settings():
+    def test_settings(self):
         default.run(['default.py'])
 
-    @staticmethod
-    def test_widevine_install():
+    def test_widevine_install(self):
         default.run(['default.py', 'widevine_install'])
 
-    @staticmethod
-    def test_widevine_remove():
+    def test_widevine_remove(self):
         default.run(['default.py', 'widevine_remove'])
 
-    @staticmethod
-    def test_about():
+    def test_about(self):
         default.run(['default.py', 'info'])
 
-    @staticmethod
-    def test_check_inputstream():
+    def test_check_inputstream(self):
         if os.path.exists('tests/cdm/widevine_config.json'):
             os.remove('tests/cdm/widevine_config.json')
         default.run(['default.py', 'check_inputstream', 'mpd', 'com.widevine.alpha'])

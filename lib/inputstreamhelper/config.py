@@ -26,6 +26,7 @@ WIDEVINE_CDM_FILENAME = {
 ARCH_MAP = {
     'aarch64': 'arm64',
     'aarch64_be': 'arm64',
+    'ARM64': 'arm64',
     'AMD64': 'x86_64',
     'armv7': 'arm',
     'armv8': 'arm',

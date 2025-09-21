@@ -141,7 +141,7 @@ class Helper:
             ok_dialog(localize(30004), localize(30007, arch=arch()))  # Widevine not available on this architecture
             return False
 
-        if arch() == 'arm64' and system_os() not in ['Android', 'Darwin'] and userspace64():
+        if arch() == 'arm64' and system_os() not in ['Android', 'Darwin', 'Windows'] and userspace64():
             is_version = parse_version(addon_version(self.inputstream_addon))
             try:
                 compat_version = parse_version(config.MINIMUM_INPUTSTREAM_VERSION_ARM64[self.inputstream_addon])
@@ -361,7 +361,13 @@ class Helper:
 
         if cdm_from_repo():  # check that widevine arch matches system arch
             wv_config = load_widevine_config()
-            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config['platforms'][0]['arch']:
+            if wv_config.get('accept_arch'):
+                wv_config_arch = wv_config.get('accept_arch')[0]
+            elif wv_config.get('platforms'):
+                wv_config_arch = wv_config.get('platforms')[0].get('arch')
+            else:
+                wv_config_arch = wv_config.get('arch')
+            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config_arch:
                 log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()

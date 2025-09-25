@@ -363,12 +363,12 @@ class Helper:
         if cdm_from_repo():  # check that widevine arch matches system arch
             wv_config = load_widevine_config()
             if wv_config.get('accept_arch'):
-                wv_config_arch = wv_config.get('accept_arch')[0]
+                wv_config_arch = wv_config.get('accept_arch')
             elif wv_config.get('platforms'):
                 wv_config_arch = wv_config.get('platforms')[0].get('arch')
             else:
                 wv_config_arch = wv_config.get('arch')
-            if config.WIDEVINE_ARCH_MAP_REPO[arch()] != wv_config_arch:
+            if config.WIDEVINE_ARCH_MAP_REPO[arch()] not in wv_config_arch:
                 log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()

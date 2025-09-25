@@ -47,18 +47,20 @@ jobs:
       run: coverage run -m unittest tests/test_api.py
     - name: Run unit tests for Android ARM
       run: coverage run -m unittest tests/test_ishelper_android_arm.py
+    - name: Run unit tests for Linux x64
+      run: coverage run -m unittest tests/test_ishelper_linux_x64.py
     - name: Run unit tests for Linux ARM
       run: coverage run -m unittest tests/test_ishelper_linux_arm.py
     - name: Run unit tests for Linux ARM64
       run: coverage run -m unittest tests/test_ishelper_linux_arm64.py
-    - name: Run unit tests for Linux x64
-      run: coverage run -m unittest tests/test_ishelper_linux_x64.py
     - name: Run unit tests for MacOS x64
       run: coverage run -m unittest tests/test_ishelper_macos_x64.py
     - name: Run unit tests for MacOS arm64
       run: coverage run -m unittest tests/test_ishelper_macos_arm64.py
     - name: Run unit tests for Windows x64
       run: coverage run -m unittest tests/test_ishelper_windows_x64.py
+    - name: Run unit tests for Windows x86
+      run: coverage run -m unittest tests/test_ishelper_windows_x86.py
     - name: Run unit tests for Windows arm64
       run: coverage run -m unittest tests/test_ishelper_windows_arm64.py
     - name: Run unit tests for proxy
@@ -66,10 +68,10 @@ jobs:
     - name: Run addon using cli
       run: coverage run -a default.py
     - name: Upload code coverage to CodeCov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v5.5.1
       continue-on-error: true
     - name: Analyze with SonarCloud
-      uses: SonarSource/sonarcloud-github-action@v1.4
+      uses: SonarSource/sonarcloud-github-action@v5.0.0
       with:
         args: >
           -Dsonar.organization=emilsvennesson

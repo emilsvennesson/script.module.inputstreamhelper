@@ -395,7 +395,8 @@ def hardlink(src, dest):
 def remove_tree(path):
     """Remove an entire directory tree"""
     from shutil import rmtree
-    rmtree(compat_path(path))
+    if exists(path):
+        rmtree(compat_path(path))
 
 
 def parse_version(vstring):

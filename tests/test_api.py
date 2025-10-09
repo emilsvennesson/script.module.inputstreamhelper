@@ -5,6 +5,8 @@
 
 import os
 import unittest
+
+import inputstreamhelper
 import default
 
 xbmc = __import__('xbmc')
@@ -25,6 +27,15 @@ class TestApi(unittest.TestCase):
         default.run(['default.py', 'widevine_remove'])
 
     def test_about(self):
+        default.run(['default.py', 'info'])
+
+    def test_about_chromeos(self):
+        inputstreamhelper.system_os = lambda: 'Linux'
+        inputstreamhelper.widevine.widevine.system_os = lambda: 'Linux'
+        inputstreamhelper.widevine.repo.system_os = lambda: 'Linux'
+        inputstreamhelper.arch = lambda: 'arm64'
+        inputstreamhelper.widevine.widevine.arch = lambda: 'arm64'
+        inputstreamhelper.widevine.repo.arch = lambda: 'arm64'
         default.run(['default.py', 'info'])
 
     def test_check_inputstream(self):

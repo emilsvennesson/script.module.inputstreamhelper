@@ -10,6 +10,7 @@
         "disabled": false,
         "last_modified": "88888",
         "last_check": "",
+        "backups": 4,
         "temp_path": "special://masterprofile/addon_data/script.module.inputstreamhelper",
         "update_frequency": "31",
         "version": "0.7.0"

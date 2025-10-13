@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Check Chrome OS recovery images availability"""
 
-from xml.etree import ElementTree as ET
 import requests
 from lib.inputstreamhelper.config import CHROMEOS_RECOVERY_ARM_BNAMES, CHROMEOS_RECOVERY_ARM64_BNAMES, CHROMEOS_RECOVERY_URL
 
@@ -14,37 +13,57 @@ class OutdatedException(Exception):
         super(OutdatedException, self).__init__(self.message)
 
 
-def get_devices():
-    """Get Chrome OS devices as json object"""
-    url = 'https://www.chromium.org/chromium-os/developer-library/reference/development/developer-information-for-chrome-os-devices/'
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    html = response.text.split('<table>')[-1].split('</table>')[0]
-    html = '<table>' + html + '</table>'
-    html = html.replace('&', '&#38;')
-    html = html.replace('<white label>', 'white label')
-    table = ET.XML(html.encode('utf-8'))
-    keys = [k.text.strip() for k in table[0]]
-    devices = []
-    for row in table[1:]:
-        device = {}
-        for num, value in enumerate(row):
-            device[keys[num]] = None
-            if value.text:
-                device[keys[num]] = value.text.strip()
-            elif value.find('a') is not None and value.find('a').text is not None:
-                device[keys[num]] = value.find('a').text.strip()
-        devices.append(device)
-    return devices
-
-
 def get_arm_devices():
     """Get Chrome OS ARM devices as json object"""
-    devices = get_devices()
+    serves = get_serves()
     arm_devices = []
-    for device in devices:
-        if device.get('User ABI').lower() in ('arm', 'aarch64'):
-            arm_devices.append(device)
+
+    for main, data in serves.items():
+        # Collect all candidate boards (top-level + submodels)
+        candidates = []
+
+        # Top-level board
+        if 'brandNameToFormattedDeviceMap' in data:
+            candidates.append((data.get('fsiMilestoneNumber', 0), data, main.split('-')[-1]))
+
+        # Submodels
+        for sub_data in (data.get('models') or {}).values():
+            if 'brandNameToFormattedDeviceMap' in sub_data:
+                candidates.append((sub_data.get('fsiMilestoneNumber', 0), sub_data, main))
+
+        if not candidates:
+            continue
+
+        # Pick the board with the highest milestone number
+        _, best, board = max(candidates, key=lambda x: x[0] or 0)
+
+        device_map = best.get('brandNameToFormattedDeviceMap', {})
+        push_recoveries = best.get('pushRecoveries', {})
+        max_version = int(max(push_recoveries.keys(), default=0))
+        first_available = best.get('fsiMilestoneNumber')
+        eol = best.get('isAue', False)
+
+        serving_stable = best.get('servingStable', {})
+        chrome_version = serving_stable.get('chromeVersion')
+        version = serving_stable.get('version')
+
+        # Build output entries for ARM devices
+        entry = {
+            board: {
+                'first': first_available,
+                'last': max_version,
+                'eol': eol,
+                'chrome': chrome_version,
+                'version': version,
+            }
+        }
+
+        # Append only if architecture is ARM
+        for info in device_map.values():
+            arch = info.get('architecture', '').lower()
+            if arch in {'arm_64', 'arm_32'} and entry not in arm_devices:
+                arm_devices.append(entry)
+
     return arm_devices
 
 
@@ -68,13 +87,11 @@ def get_recoveries():
 def get_compatibles():
     """Get compatible Chrome OS recovery items"""
     arm_devices = get_arm_devices()
-    serves = get_serves()
     recoveries = get_recoveries()
     compatibles = []
     for device in arm_devices:
-        board = device.get('Board name(s)').lower().replace('_', '-')
-        served_board = serves.get(board)
-        if served_board and not served_board.get('isAue'):
+        board = next(iter(device), None)
+        if board and not device[board].get('eol'):
             for recovery in recoveries:
                 r_board = recovery.get('file').split('_')[2]
                 if board == r_board:

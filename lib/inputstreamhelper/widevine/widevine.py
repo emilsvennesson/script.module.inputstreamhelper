@@ -126,6 +126,9 @@ def missing_widevine_libs():
     if system_os() != 'Linux':  # this should only be needed for linux
         return None
 
+    if arch() in {'arm', 'arm64'}: # ldd will fail with missing GLIBC_ABI_DT_RELR error and is useless
+        return None
+
     if cmd_exists('ldd'):
         widevinecdm = widevinecdm_path()
         if not os.access(widevinecdm, os.X_OK):

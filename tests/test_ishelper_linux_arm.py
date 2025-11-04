@@ -24,23 +24,8 @@ class LinuxARMTests(unittest.TestCase):
         inputstreamhelper.widevine.widevine.system_os = lambda: 'Linux'
         inputstreamhelper.widevine.repo.system_os = lambda: 'Linux'
 
-    def test_check_inputstream_mpd_lacros(self):
-        platform.machine = lambda: 'arm'
-
-        inputstreamhelper.userspace64 = lambda: False
-        inputstreamhelper.widevine.arm.userspace64 = lambda: False
-
-        is_helper = inputstreamhelper.Helper('mpd', drm='com.widevine.alpha')
-        is_helper.remove_widevine()
-        is_installed = is_helper.check_inputstream()
-        self.assertTrue(is_installed, True)
-
     def test_check_inputstream_mpd_chromeos(self):
         platform.machine = lambda: 'arm'
-
-        inputstreamhelper.cdm_from_lacros = lambda: False
-        inputstreamhelper.widevine.widevine.cdm_from_lacros = lambda: False
-        inputstreamhelper.widevine.arm.cdm_from_lacros = lambda: False
 
         inputstreamhelper.userspace64 = lambda: False
         inputstreamhelper.widevine.arm.userspace64 = lambda: False

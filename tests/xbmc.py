@@ -23,7 +23,7 @@ LOGNONE = 7
 
 INFO_LABELS = {
     'Container.FolderPath': 'plugin://' + ADDON_ID + '/',
-    'System.BuildVersion': '18.9',
+    'System.BuildVersion': '21.0',
     'System.OSVersionInfo': 'Linux (kernel: Linux 5.4.0-73-generic)',
 }
 
@@ -228,7 +228,7 @@ def executeJSONRPC(jsonrpccommand):
 
 def getCondVisibility(string):
     """A reimplementation of the xbmc getCondVisibility() function"""
-    if string in ('system.platform.android', 'system.platform.webos'):
+    if string in ('System.Platform.Android', 'System.Platform.WebOS'):
         return False
     if string.startswith('System.HasAddon'):
         return True

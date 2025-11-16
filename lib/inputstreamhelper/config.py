@@ -68,7 +68,7 @@ WIDEVINE_MINIMUM_KODI_VERSION = {
     'Windows': '18.0',
     'Linux': '18.0',
     'Darwin': '18.0',
-    'webOS': '22.0'
+    'webOS': '21.0'
 }
 
 WIDEVINE_VERSIONS_URL = 'https://dl.google.com/widevine-cdm/versions.txt'

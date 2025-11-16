@@ -267,9 +267,9 @@ def system_os():
         return getattr(system_os, 'cached')
 
     from xbmc import getCondVisibility
-    if getCondVisibility('system.platform.android'):
+    if getCondVisibility('System.Platform.Android'):
         sys_name = 'Android'
-    elif getCondVisibility('system.platform.webos'):
+    elif getCondVisibility('System.Platform.WebOS'):
         sys_name = 'webOS'
     else:
         from platform import system

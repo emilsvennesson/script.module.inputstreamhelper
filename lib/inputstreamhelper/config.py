@@ -71,10 +71,6 @@ WIDEVINE_MINIMUM_KODI_VERSION = {
     'webOS': '21.1'
 }
 
-WIDEVINE_VERSIONS_URL = 'https://dl.google.com/widevine-cdm/versions.txt'
-
-WIDEVINE_DOWNLOAD_URL = 'https://dl.google.com/widevine-cdm/{version}-{os}-{arch}.zip'
-
 WIDEVINE_LICENSE_FILE = 'LICENSE'
 
 WIDEVINE_MANIFEST_FILE = 'manifest.json'

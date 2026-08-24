@@ -70,8 +70,8 @@ jobs:
     - name: Upload code coverage to CodeCov
       uses: codecov/codecov-action@v5.5.1
       continue-on-error: true
-    - name: Analyze with SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v8.2.1
+    - name: Analyze with SonarCloud
+      uses: SonarSource/sonarcloud-github-action@v5.0.0
       with:
         args: >
           -Dsonar.organization=emilsvennesson
@@ -79,5 +79,6 @@ jobs:
           -Dsonar.sources=lib/
           -Dsonar.tests=tests/
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       continue-on-error: true

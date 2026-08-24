@@ -21,10 +21,10 @@ jobs:
         python-version: [ '3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
     - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -70,8 +70,8 @@ jobs:
     - name: Upload code coverage to CodeCov
       uses: codecov/codecov-action@v5.5.1
       continue-on-error: true
-    - name: Analyze with SonarCloud
-      uses: SonarSource/sonarcloud-github-action@v5.0.0
+    - name: Analyze with SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v8.2.1
       with:
         args: >
           -Dsonar.organization=emilsvennesson
@@ -79,6 +79,5 @@ jobs:
           -Dsonar.sources=lib/
           -Dsonar.tests=tests/
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       continue-on-error: true

@@ -361,7 +361,7 @@ class Helper:
                 wv_config_arch = wv_config.get('platforms')[0].get('arch')
             else:
                 wv_config_arch = wv_config.get('arch')
-            if config.WIDEVINE_ARCH_MAP_REPO[arch()] not in wv_config_arch:
+            if wv_config_arch and config.WIDEVINE_ARCH_MAP_REPO[arch()] not in wv_config_arch:
                 log(4, 'Widevine/system arch mismatch. Reinstall is required.')
                 ok_dialog(localize(30001), localize(30031))  # An update of Widevine is required
                 return self.install_widevine()
